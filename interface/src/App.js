@@ -1,5 +1,5 @@
-import React, { lazy, Suspense, useEffect } from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import React, { lazy, Suspense } from "react";
+import { Switch, Route } from "react-router-dom";
 
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
@@ -11,7 +11,7 @@ import Header from "./components/header/Header.component";
 import Footer from "./components/footer/Footer.component";
 
 import useStyles from "./App.styles";
-const Dashboard = lazy(() => import("./pages/dashboard_page/Dashboard.page"));
+const Dashboard = lazy(() => import("./pages/overview_page/Overview.page"));
 
 const theme = createMuiTheme({
   palette: {
@@ -20,6 +20,7 @@ const theme = createMuiTheme({
     error: { main: "#b71c1c" }
   }
 });
+
 
 function App() {
   const styleClasses = useStyles();

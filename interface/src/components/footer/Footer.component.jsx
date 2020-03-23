@@ -6,7 +6,7 @@ import Box from "@material-ui/core/Box";
 
 function Footer() {
   return (
-    <Box pt={4}>
+    <Box pt={4} style={{ marginTop: "128px" }}>
       <Typography variant="body2" color="textSecondary" align="center">
         <Link color="inherit" href="https://hub.docker.com/">
           TODO - LinkToDockerContainerDocumentation

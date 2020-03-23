@@ -1,5 +1,5 @@
 import React from "react";
-import { Link as RouterLink, withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import clsx from "clsx";
 
 import AppBar from "@material-ui/core/AppBar";
@@ -17,9 +17,9 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 
 import useStyles from "./Header.styles";
-import { mainListItems, secondaryListItems } from "./listitems";
+import { overviewItems, commandItems } from "./listitems";
 
-function Header({}) {
+function Header() {
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -80,9 +80,9 @@ function Header({}) {
           </IconButton>
         </div>
         <Divider />
-        <List>{mainListItems}</List>
+        <List>{overviewItems}</List>
         <Divider />
-        <List>{secondaryListItems}</List>
+        <List>{commandItems}</List>
       </Drawer>
     </React.Fragment>
   );
