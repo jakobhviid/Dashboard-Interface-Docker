@@ -9,9 +9,13 @@ import { ThemeProvider } from "@material-ui/styles";
 
 import Header from "./components/header/Header.component";
 import Footer from "./components/footer/Footer.component";
+import { OVERVIEW_URL, RESSOURCE_USAGE_URL } from "./util/navigationEndpoints";
 
 import useStyles from "./App.styles";
-const Dashboard = lazy(() => import("./pages/overview_page/Overview.page"));
+const Overview = lazy(() => import("./pages/overview_page/Overview.page"));
+const RessourceUsage = lazy(() =>
+  import("./pages/ressource_usage_page/RessourceUsage.page")
+);
 
 const theme = createMuiTheme({
   palette: {
@@ -20,7 +24,6 @@ const theme = createMuiTheme({
     error: { main: "#b71c1c" }
   }
 });
-
 
 function App() {
   const styleClasses = useStyles();
@@ -35,7 +38,8 @@ function App() {
             <main className={styleClasses.content}>
               <div className={styleClasses.appBarSpacer} />
               <Container maxWidth="lg" className={styleClasses.container}>
-                <Route exact path="/" component={Dashboard} />
+                <Route exact path={OVERVIEW_URL} component={Overview} />
+                <Route path={RESSOURCE_USAGE_URL} component={RessourceUsage} />
                 <Footer />
               </Container>
             </main>

@@ -6,32 +6,49 @@ import DashboardIcon from "@material-ui/icons/Dashboard";
 import BarChartIcon from "@material-ui/icons/BarChart";
 import BuildIcon from "@material-ui/icons/Build";
 import ListSubheader from "@material-ui/core/ListSubheader";
+import { Link as RouterLink } from "react-router-dom";
+
+import {
+  OVERVIEW_URL,
+  COMMANDS_URL,
+  RESSOURCE_USAGE_URL
+} from "../../util/navigationEndpoints";
+
+function ListItemLink({ icon, text, link }) {
+  const renderLink = React.useMemo(
+    () =>
+      React.forwardRef((linkProps, ref) => (
+        <RouterLink ref={ref} to={link} {...linkProps} />
+      )),
+    [link]
+  );
+
+  return (
+    <ListItem button component={renderLink}>
+      <ListItemIcon style={{ paddingLeft: "6px" }}>{icon}</ListItemIcon>
+      <ListItemText primary={text} />
+    </ListItem>
+  );
+}
 
 export const overviewItems = (
   <div>
-    <ListItem button>
-      <ListItemIcon style={{ paddingLeft: "6px" }}>
-        <DashboardIcon />
-      </ListItemIcon>
-      <ListItemText primary="Overview" />
-    </ListItem>
-    <ListItem button>
-      <ListItemIcon style={{ paddingLeft: "6px" }}>
-        <BarChartIcon />
-      </ListItemIcon>
-      <ListItemText primary="Container Stats" />
-    </ListItem>
+    <ListItemLink
+      icon={<DashboardIcon />}
+      text="Overview"
+      link={OVERVIEW_URL}
+    />
+    <ListItemLink
+      icon={<BarChartIcon />}
+      text="Container Stats"
+      link={RESSOURCE_USAGE_URL}
+    />
   </div>
 );
 
 export const commandItems = (
   <div>
     <ListSubheader inset>Commands</ListSubheader>
-    <ListItem button>
-      <ListItemIcon style={{ paddingLeft: "6px" }}>
-        <BuildIcon />
-      </ListItemIcon>
-      <ListItemText primary="Configure" />
-    </ListItem>
+    <ListItemLink icon={<BuildIcon />} text="Configure" link={COMMANDS_URL} />
   </div>
 );

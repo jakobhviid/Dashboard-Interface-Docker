@@ -10,17 +10,17 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 
-import useStyles from "./Overview.styles";
-import { GENERAL_SOCKET_ENDPOINT } from "../../util/socketEndpoints";
+import useStyles from "./RessourceUsage.styles";
+import { RESSOURCE_USAGE_ENDPOINT } from "../../util/socketEndpoints";
 
-function Overview() {
+function RessourceUsage() {
   const [serverContainers, setServerContainers] = React.useState(null);
 
   const socketEndpoint = "http://127.0.0.1:5000";
 
   React.useEffect(() => {
     const socket = socketIOClient(socketEndpoint);
-    socket.on(GENERAL_SOCKET_ENDPOINT, data => {
+    socket.on(RESSOURCE_USAGE_ENDPOINT, data => {
       const servername = data.servername;
       const containers = data.containers;
       setServerContainers({
@@ -45,9 +45,10 @@ function Overview() {
                 <TableRow>
                   <TableCell>Name</TableCell>
                   <TableCell align="right">Id</TableCell>
-                  <TableCell align="right">Image</TableCell>
-                  <TableCell align="right">State</TableCell>
-                  <TableCell align="right">Creation Time</TableCell>
+                  <TableCell align="right">CPU %</TableCell>
+                  <TableCell align="right">Memory %</TableCell>
+                  <TableCell align="right">Net I/O</TableCell>
+                  <TableCell align="right">Disk I/O</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -75,4 +76,4 @@ function Overview() {
   );
 }
 
-export default Overview;
+export default RessourceUsage;
