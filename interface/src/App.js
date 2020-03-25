@@ -19,8 +19,8 @@ const RessourceUsage = lazy(() =>
 
 const theme = createMuiTheme({
   palette: {
-    primary: { main: "#540796" },
-    secondary: { main: "#4caf50" },
+    primary: { main: "#37474f" },
+    secondary: { main: "#1976d2" },
     error: { main: "#b71c1c" }
   }
 });
@@ -40,7 +40,7 @@ function App() {
               <Container maxWidth="lg" className={styleClasses.container}>
                 <Route exact path={OVERVIEW_URL} component={Overview} />
                 <Route path={RESSOURCE_USAGE_URL} component={RessourceUsage} />
-                <Footer />
+                {/* <Footer /> */}
               </Container>
             </main>
           </Suspense>

@@ -9,18 +9,23 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import useStyles from "./Overview.styles";
-import { GENERAL_SOCKET_ENDPOINT } from "../../util/socketEndpoints";
+import {
+  GENERAL_SOCKET_ENDPOINT,
+  NEWEST_OVERVIEW_DATA_REQUEST
+} from "../../util/socketEvents";
 
 function Overview() {
   const [serverContainers, setServerContainers] = React.useState(null);
 
   const socketEndpoint = "http://127.0.0.1:5000";
+  const io = socketIOClient(socketEndpoint);
 
   React.useEffect(() => {
-    const socket = socketIOClient(socketEndpoint);
-    socket.on(GENERAL_SOCKET_ENDPOINT, data => {
+    io.emit(NEWEST_OVERVIEW_DATA_REQUEST);
+    io.on(GENERAL_SOCKET_ENDPOINT, data => {
       const servername = data.servername;
       const containers = data.containers;
       setServerContainers({
@@ -28,11 +33,19 @@ function Overview() {
         [servername]: [...containers]
       });
     });
+
+    return () => {
+      io.close();
+    };
   }, []);
 
   const styleClasses = useStyles();
 
-  return serverContainers == null ? null : (
+  return serverContainers == null ? (
+    <div style={{ textAlign: "center" }}>
+      <CircularProgress color="secondary" />
+    </div>
+  ) : (
     <React.Fragment>
       {Object.keys(serverContainers).map(servername => (
         <div style={{ marginBottom: "18px" }} key={servername}>

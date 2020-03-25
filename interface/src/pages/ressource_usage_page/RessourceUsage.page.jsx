@@ -9,18 +9,23 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import useStyles from "./RessourceUsage.styles";
-import { RESSOURCE_USAGE_ENDPOINT } from "../../util/socketEndpoints";
+import {
+  RESSOURCE_USAGE_ENDPOINT,
+  NEWEST_STATS_DATA_REQUEST
+} from "../../util/socketEvents";
 
 function RessourceUsage() {
   const [serverContainers, setServerContainers] = React.useState(null);
 
-  const socketEndpoint = "http://127.0.0.1:5000";
+  const io = socketIOClient("http://127.0.0.1:5000");
 
   React.useEffect(() => {
-    const socket = socketIOClient(socketEndpoint);
-    socket.on(RESSOURCE_USAGE_ENDPOINT, data => {
+    io.emit(NEWEST_STATS_DATA_REQUEST);
+    io.on(RESSOURCE_USAGE_ENDPOINT, data => {
+      console.log(data);
       const servername = data.servername;
       const containers = data.containers;
       setServerContainers({
@@ -28,11 +33,19 @@ function RessourceUsage() {
         [servername]: [...containers]
       });
     });
+
+    return () => {
+      io.close();
+    };
   }, []);
 
   const styleClasses = useStyles();
 
-  return serverContainers == null ? null : (
+  return serverContainers == null ? (
+    <div style={{ textAlign: "center" }}>
+      <CircularProgress color="secondary" />
+    </div>
+  ) : (
     <React.Fragment>
       {Object.keys(serverContainers).map(servername => (
         <div style={{ marginBottom: "18px" }} key={servername}>
@@ -58,13 +71,14 @@ function RessourceUsage() {
                       {container.name}
                     </TableCell>
                     <TableCell align="right">{container.id}</TableCell>
-                    <TableCell align="right">{container.image}</TableCell>
                     <TableCell align="right">
-                      {container.state.status}
+                      {container.cpu_percentage}
                     </TableCell>
                     <TableCell align="right">
-                      {container.creation_time}
+                      {container.memory_percent}
                     </TableCell>
+                    <TableCell align="right">{container.net}</TableCell>
+                    <TableCell align="right">{container.disk}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
