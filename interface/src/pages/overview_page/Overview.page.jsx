@@ -1,91 +1,93 @@
 import React from "react";
-import socketIOClient from "socket.io-client";
+import { connect } from "react-redux";
+import { createStructuredSelector } from "reselect";
 
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Switch from "@material-ui/core/Switch";
+import MaterialTable from "material-table";
 
-import useStyles from "./Overview.styles";
-import {
-  GENERAL_SOCKET_ENDPOINT,
-  NEWEST_OVERVIEW_DATA_REQUEST
-} from "../../util/socketEvents";
+import { startCollectingOverview } from "../../redux/overview/overview.effects";
+import { selectCollectedData } from "../../redux/overview/overview.selectors";
 
-function Overview() {
-  const [serverContainers, setServerContainers] = React.useState(null);
-
-  const socketEndpoint = "http://127.0.0.1:5000";
-  const io = socketIOClient(socketEndpoint);
+function Overview({ serverContainers, startCollectingData }) {
+  const [serverMode, setServerMode] = React.useState(true);
+  const [columns, setColumns] = React.useState({
+    perServerView: [
+      { title: "Name", field: "name" },
+      { title: "Id", field: "id" },
+      { title: "Image", field: "image" },
+      { title: "State", field: "state.status" },
+      { title: "Creation Time", field: "creation_time" }
+    ],
+    containerView: [
+      { title: "Name", field: "name" },
+      { title: "Id", field: "id" },
+      { title: "Image", field: "image" },
+      { title: "State", field: "state.status" },
+      { title: "Creation Time", field: "creation_time" },
+      { title: "Server", field: "servername" }
+    ]
+  });
 
   React.useEffect(() => {
-    io.emit(NEWEST_OVERVIEW_DATA_REQUEST);
-    io.on(GENERAL_SOCKET_ENDPOINT, data => {
-      const servername = data.servername;
-      const containers = data.containers;
-      setServerContainers({
-        ...serverContainers,
-        [servername]: [...containers]
-      });
-    });
+    startCollectingData();
+  }, [startCollectingData]);
 
-    return () => {
-      io.close();
-    };
-  }, []);
+  let containerView = null;
+  if (Object.keys(serverContainers).length !== 0) {
+    if (!serverMode) {
+      containerView = [];
+      for (const servername of Object.keys(serverContainers)) {
+        for (const container of serverContainers[servername]) {
+          containerView.push({ ...container, servername });
+        }
+      }
+    } else {
+      containerView = JSON.parse(JSON.stringify(serverContainers));
+    }
+  }
 
-  const styleClasses = useStyles();
-
-  return serverContainers == null ? (
+  return Object.keys(serverContainers).length === 0 ? (
     <div style={{ textAlign: "center" }}>
       <CircularProgress color="secondary" />
     </div>
   ) : (
     <React.Fragment>
-      {Object.keys(serverContainers).map(servername => (
-        <div style={{ marginBottom: "18px" }} key={servername}>
-          <Typography variant="h6" id="serverName">
-            {servername}
-          </Typography>
-          <TableContainer component={Paper}>
-            <Table className={styleClasses.table} aria-label="containers">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell align="right">Id</TableCell>
-                  <TableCell align="right">Image</TableCell>
-                  <TableCell align="right">State</TableCell>
-                  <TableCell align="right">Creation Time</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {serverContainers[servername].map(container => (
-                  <TableRow key={container.id}>
-                    <TableCell component="th" scope="row">
-                      {container.name}
-                    </TableCell>
-                    <TableCell align="right">{container.id}</TableCell>
-                    <TableCell align="right">{container.image}</TableCell>
-                    <TableCell align="right">
-                      {container.state.status}
-                    </TableCell>
-                    <TableCell align="right">
-                      {container.creation_time}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
-      ))}
+      <div style={{ textAlign: "right" }}>
+        <Switch
+          checked={serverMode}
+          onChange={() => setServerMode(!serverMode)}
+          name="Server Mode"
+          inputProps={{ "aria-label": "server mode checkbox" }}
+        />
+      </div>
+      {serverMode ? (
+        Object.keys(containerView).map(servername => (
+          <div style={{ marginBottom: "18px" }} key={servername}>
+            <MaterialTable
+              title={servername}
+              columns={columns.perServerView}
+              data={containerView[servername]}
+            />
+          </div>
+        ))
+      ) : (
+        <MaterialTable
+          title="All Containers"
+          columns={columns.containerView}
+          data={containerView}
+        />
+      )}
     </React.Fragment>
   );
 }
 
-export default Overview;
+const mapStateToProps = createStructuredSelector({
+  serverContainers: selectCollectedData
+});
+
+const mapDispatchToProps = dispatch => ({
+  startCollectingData: () => dispatch(startCollectingOverview())
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Overview);

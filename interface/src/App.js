@@ -8,7 +8,6 @@ import { createMuiTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "@material-ui/styles";
 
 import Header from "./components/header/Header.component";
-import Footer from "./components/footer/Footer.component";
 import { OVERVIEW_URL, RESSOURCE_USAGE_URL } from "./util/navigationEndpoints";
 
 import useStyles from "./App.styles";
@@ -37,7 +36,7 @@ function App() {
           <Suspense fallback={<LinearProgress color="secondary" />}>
             <main className={styleClasses.content}>
               <div className={styleClasses.appBarSpacer} />
-              <Container maxWidth="lg" className={styleClasses.container}>
+              <Container maxWidth="xl" className={styleClasses.container}>
                 <Route exact path={OVERVIEW_URL} component={Overview} />
                 <Route path={RESSOURCE_USAGE_URL} component={RessourceUsage} />
                 {/* <Footer /> */}

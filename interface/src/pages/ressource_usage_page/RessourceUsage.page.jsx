@@ -1,93 +1,95 @@
 import React from "react";
-import socketIOClient from "socket.io-client";
+import { connect } from "react-redux";
+import { createStructuredSelector } from "reselect";
 
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
+import MaterialTable from "material-table";
+import Switch from "@material-ui/core/Switch";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-import useStyles from "./RessourceUsage.styles";
-import {
-  RESSOURCE_USAGE_ENDPOINT,
-  NEWEST_STATS_DATA_REQUEST
-} from "../../util/socketEvents";
+import { startCollectingRessources } from "../../redux/ressource/ressource.effects";
+import { selectCollectedData } from "../../redux/ressource/ressource.selectors";
 
-function RessourceUsage() {
-  const [serverContainers, setServerContainers] = React.useState(null);
-
-  const io = socketIOClient("http://127.0.0.1:5000");
+function RessourceUsage({ serverContainers, startCollectingData }) {
+  const [serverMode, setServerMode] = React.useState(true);
+  const [columns, setColumns] = React.useState({
+    perServerView: [
+      { title: "Name", field: "name" },
+      { title: "Id", field: "id" },
+      { title: "CPU %", field: "cpu_percentage" },
+      { title: "Memory %", field: "memory_percentage" },
+      { title: "Net I / O", field: "net_i_o" },
+      { title: "Disk I / O", field: "disk_i_o" }
+    ],
+    containerView: [
+      { title: "Name", field: "name" },
+      { title: "Id", field: "id" },
+      { title: "CPU %", field: "cpu_percentage" },
+      { title: "Memory %", field: "memory_percentage" },
+      { title: "Net I / O", field: "net_i_o" },
+      { title: "Disk I / O", field: "disk_i_o" },
+      { title: "Server", field: "servername" }
+    ]
+  });
 
   React.useEffect(() => {
-    io.emit(NEWEST_STATS_DATA_REQUEST);
-    io.on(RESSOURCE_USAGE_ENDPOINT, data => {
-      console.log(data);
-      const servername = data.servername;
-      const containers = data.containers;
-      setServerContainers({
-        ...serverContainers,
-        [servername]: [...containers]
-      });
-    });
+    startCollectingData();
+  }, [startCollectingData]);
 
-    return () => {
-      io.close();
-    };
-  }, []);
+  let containerView = null;
+  if (Object.keys(serverContainers).length !== 0) {
+    if (!serverMode) {
+      containerView = [];
+      for (const servername of Object.keys(serverContainers)) {
+        for (const container of serverContainers[servername]) {
+          containerView.push({ ...container, servername });
+        }
+      }
+    } else {
+      containerView = JSON.parse(JSON.stringify(serverContainers));
+    }
+  }
 
-  const styleClasses = useStyles();
-
-  return serverContainers == null ? (
+  return Object.keys(serverContainers).length === 0 ? (
     <div style={{ textAlign: "center" }}>
       <CircularProgress color="secondary" />
     </div>
   ) : (
     <React.Fragment>
-      {Object.keys(serverContainers).map(servername => (
-        <div style={{ marginBottom: "18px" }} key={servername}>
-          <Typography variant="h6" id="serverName">
-            {servername}
-          </Typography>
-          <TableContainer component={Paper}>
-            <Table className={styleClasses.table} aria-label="containers">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell align="right">Id</TableCell>
-                  <TableCell align="right">CPU %</TableCell>
-                  <TableCell align="right">Memory %</TableCell>
-                  <TableCell align="right">Net I/O</TableCell>
-                  <TableCell align="right">Disk I/O</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {serverContainers[servername].map(container => (
-                  <TableRow key={container.id}>
-                    <TableCell component="th" scope="row">
-                      {container.name}
-                    </TableCell>
-                    <TableCell align="right">{container.id}</TableCell>
-                    <TableCell align="right">
-                      {container.cpu_percentage}
-                    </TableCell>
-                    <TableCell align="right">
-                      {container.memory_percent}
-                    </TableCell>
-                    <TableCell align="right">{container.net}</TableCell>
-                    <TableCell align="right">{container.disk}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </div>
-      ))}
+      <div style={{ textAlign: "right" }}>
+        <Switch
+          checked={serverMode}
+          onChange={() => setServerMode(!serverMode)}
+          name="Server Mode"
+          inputProps={{ "aria-label": "server mode checkbox" }}
+        />
+      </div>
+      {serverMode ? (
+        Object.keys(containerView).map(servername => (
+          <div style={{ marginBottom: "18px" }} key={servername}>
+            <MaterialTable
+              title={servername}
+              columns={columns.perServerView}
+              data={containerView[servername]}
+            />
+          </div>
+        ))
+      ) : (
+        <MaterialTable
+          title="All Containers"
+          columns={columns.containerView}
+          data={containerView}
+        />
+      )}
     </React.Fragment>
   );
 }
 
-export default RessourceUsage;
+const mapStateToProps = createStructuredSelector({
+  serverContainers: selectCollectedData
+});
+
+const mapDispatchToProps = dispatch => ({
+  startCollectingData: () => dispatch(startCollectingRessources())
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(RessourceUsage);
