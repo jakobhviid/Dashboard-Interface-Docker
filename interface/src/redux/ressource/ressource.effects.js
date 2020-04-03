@@ -9,7 +9,7 @@ import {
 
 export const startCollectingRessources = () => {
   return dispatch => {
-    const ioClient = socketIOClient("http://127.0.0.1:5000");
+    const ioClient = socketIOClient("http://127.0.0.1:5001");
     ioClient.emit(NEWEST_STATS_DATA_REQUEST);
     ioClient.on(RESSOURCE_USAGE_ENDPOINT, data => {
       for (const container of data.containers) {

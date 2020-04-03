@@ -4,30 +4,74 @@ import { createStructuredSelector } from "reselect";
 
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Switch from "@material-ui/core/Switch";
-import MaterialTable from "material-table";
+import ContainerTable from "../../components/container_table/ContainerTable.component";
 
 import { startCollectingOverview } from "../../redux/overview/overview.effects";
 import { selectCollectedData } from "../../redux/overview/overview.selectors";
 
+const columns = {
+  perServerView: [
+    { title: "Name", alignment: "left", field: "name" },
+    { title: "Id", alignment: "left", field: "id" },
+    { title: "Image", alignment: "left", field: "image" },
+    {
+      title: "State",
+      alignment: "left",
+      field: "state.status"
+    },
+    {
+      title: "Creation Time",
+      alignment: "left",
+      field: "creation_time"
+    }
+  ],
+  containerView: [
+    { title: "Name", alignment: "left", field: "name" },
+    { title: "Id", alignment: "left", field: "id" },
+    { title: "Image", alignment: "left", field: "image" },
+    {
+      title: "State",
+      alignment: "left",
+      field: "state.status"
+    },
+    {
+      title: "Creation Time",
+      alignment: "left",
+      field: "creation_time"
+    },
+    {
+      title: "Server",
+      alignment: "left",
+      field: "servername"
+    }
+  ]
+};
+
 function Overview({ serverContainers, startCollectingData }) {
   const [serverMode, setServerMode] = React.useState(true);
-  const [columns, setColumns] = React.useState({
-    perServerView: [
-      { title: "Name", field: "name" },
-      { title: "Id", field: "id" },
-      { title: "Image", field: "image" },
-      { title: "State", field: "state.status" },
-      { title: "Creation Time", field: "creation_time" }
-    ],
-    containerView: [
-      { title: "Name", field: "name" },
-      { title: "Id", field: "id" },
-      { title: "Image", field: "image" },
-      { title: "State", field: "state.status" },
-      { title: "Creation Time", field: "creation_time" },
-      { title: "Server", field: "servername" }
-    ]
-  });
+
+  const actions = [
+    {
+      label: "Rename",
+      onClick: selectedContainer =>
+        console.log("Renaming", selectedContainer.name)
+    },
+    {
+      label: "Start/Stop",
+      onClick: selectedContainer =>
+        console.log("Starting/Stopping", selectedContainer.name)
+    },
+    {
+      label: "Restart",
+      onClick: selectedContainer =>
+        console.log("Restarting", selectedContainer.name)
+    },
+    {
+      label: "Remove",
+      onClick: selectedContainer =>
+        console.log("Removing", selectedContainer.name)
+    }
+  ];
 
   React.useEffect(() => {
     startCollectingData();
@@ -62,20 +106,26 @@ function Overview({ serverContainers, startCollectingData }) {
         />
       </div>
       {serverMode ? (
-        Object.keys(containerView).map(servername => (
-          <div style={{ marginBottom: "18px" }} key={servername}>
-            <MaterialTable
-              title={servername}
-              columns={columns.perServerView}
-              data={containerView[servername]}
-            />
-          </div>
-        ))
+        Object.keys(containerView).map(servername => {
+          return (
+            <div style={{ marginBottom: "18px" }} key={servername}>
+              <ContainerTable
+                title={servername}
+                columns={columns.perServerView}
+                data={containerView[servername]}
+                dense="small"
+                actions={actions}
+              />
+            </div>
+          );
+        })
       ) : (
-        <MaterialTable
+        <ContainerTable
           title="All Containers"
           columns={columns.containerView}
           data={containerView}
+          dense="small"
+          actions={actions}
         />
       )}
     </React.Fragment>

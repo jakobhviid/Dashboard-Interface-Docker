@@ -8,7 +8,7 @@ import {
 
 export const startCollectingOverview = () => {
   return dispatch => {
-    const ioClient = socketIOClient("http://127.0.0.1:5000");
+    const ioClient = socketIOClient("http://127.0.0.1:5001");
     ioClient.emit(NEWEST_OVERVIEW_DATA_REQUEST);
     ioClient.on(GENERAL_SOCKET_ENDPOINT, data => {
       const containers = data.containers;

@@ -6,5 +6,10 @@ export default makeStyles(theme => ({
   },
   paper: {
     marginBottom: "16px"
+  },
+  menuPaper: {
+    border: "1px solid #d3d4d5"
   }
 }));
+
+

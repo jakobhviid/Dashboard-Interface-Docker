@@ -10,7 +10,7 @@ const { GENEREL_INFO_TOPIC, STATS_TOPIC } = require("./topics");
 
 const { Kafka } = require("kafkajs");
 
-const kafkaUrls = ["kafka2.cfei.dk:9093"];
+const kafkaUrls = ["kafka2.cfei.dk:9092", "kafka3.cfei.dk:9092"];
 
 const kafka = new Kafka({
   brokers: kafkaUrls
@@ -51,15 +51,20 @@ const run = async () => {
 
 io.on("connection", socket => {
   socket.on(NEWEST_OVERVIEW_DATA_REQUEST, () => {
-    io.emit(GENERAL_SOCKET_ENDPOINT, latest_general_info_message);
+    if (latest_general_info_message !== null) {
+      io.emit(GENERAL_SOCKET_ENDPOINT, latest_general_info_message);
+    }
   });
   socket.on(NEWEST_STATS_DATA_REQUEST, () => {
-    io.emit(RESSOURCE_USAGE_ENDPOINT, latest_stats_info_message);
+    if (latest_stats_info_message !== null) {
+      io.emit(RESSOURCE_USAGE_ENDPOINT, latest_stats_info_message);
+    }
   });
 });
 
-server.listen(5000, () => {
-  console.log("Server listening on port 5000");
+const port = 5001;
+server.listen(port, () => {
+  console.log("Server listening on port " + port);
 });
 
 run().catch(console.error);
