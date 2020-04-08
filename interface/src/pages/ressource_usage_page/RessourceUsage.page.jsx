@@ -8,7 +8,9 @@ import ContainerTable from "../../components/container_table/ContainerTable.comp
 import {
   startCollectingRessources,
   stopCollectingRessources,
+  reconfigureContainer,
 } from "../../redux/container_data/containerData.effects";
+import ReconfigureContainerDialog from "../../components/dialogs/reconfigure_dialog/ReconfigureContainerDialog.component";
 
 const columns = {
   perServerView: [
@@ -18,7 +20,6 @@ const columns = {
     { title: "Memory %", field: "memory_percentage" },
     { title: "Net I / O", field: "net_i_o" },
     { title: "Disk I / O", field: "disk_i_o" },
-    { title: "Last Update", field: "last_update" },
   ],
   containerView: [
     { title: "Name", field: "name" },
@@ -33,6 +34,10 @@ const columns = {
 
 function RessourceUsage() {
   const [serverMode, setServerMode] = React.useState(true);
+  const [selectedContainer, setSelectedContainer] = React.useState(null);
+  const [reconfigureDialogOpen, setReconfigureDialogOpen] = React.useState(
+    false
+  );
   const dispatch = useDispatch();
   const serverContainers = useSelector(
     (store) => store.containerData.statsData
@@ -41,10 +46,16 @@ function RessourceUsage() {
   const actions = [
     {
       label: "Update Configuration",
-      onClick: (selectedContainer) =>
-        console.log("Restarting", selectedContainer.name),
+      onClick: (selectedContainer) => {
+        setSelectedContainer(selectedContainer);
+        setReconfigureDialogOpen(true);
+      },
     },
   ];
+
+  const handleReconfigure = (values) => {
+    dispatch(reconfigureContainer(selectedContainer, values));
+  };
 
   React.useEffect(() => {
     dispatch(startCollectingRessources());
@@ -58,7 +69,7 @@ function RessourceUsage() {
     if (!serverMode) {
       containerView = [];
       for (const servername of Object.keys(serverContainers)) {
-        for (const container of serverContainers[servername]) {
+        for (const container of serverContainers[servername].containers) {
           containerView.push({ ...container, servername });
         }
       }
@@ -87,7 +98,7 @@ function RessourceUsage() {
             <ContainerTable
               title={servername}
               columns={columns.perServerView}
-              data={containerView[servername]}
+              data={containerView[servername].containers}
               dense="small"
               actions={actions}
             />
@@ -102,6 +113,14 @@ function RessourceUsage() {
           actions={actions}
         />
       )}
+      <ReconfigureContainerDialog
+        open={reconfigureDialogOpen}
+        handleClose={() => setReconfigureDialogOpen(false)}
+        handleConfirmation={handleReconfigure}
+        dialogTitle="Reconfiguring Container"
+        dialogText="How should the container be configured?"
+        label="Container Name"
+      />
     </React.Fragment>
   );
 }

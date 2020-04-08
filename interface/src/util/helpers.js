@@ -11,3 +11,13 @@ export function calculateAppropiateByteType(bytes) {
   else if (num_digits <= gigabyte_size.toString().length + 1)
     return (bytes / gigabyte_size).toFixed(1).toString() + "GB";
 }
+
+export function findServerNameOfContainer(serverContainers, container) {
+  for (const server of Object.keys(serverContainers)) {
+    for (const serverContainer of serverContainers[server].containers) {
+      if (serverContainer.id === container.id) {
+        return server;
+      }
+    }
+  }
+}

@@ -8,7 +8,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
-function FormDialog({
+function RenameDialog({
   open,
   handleClose,
   handleConfirmation,
@@ -61,4 +61,4 @@ function FormDialog({
   );
 }
 
-export default FormDialog;
+export default RenameDialog;

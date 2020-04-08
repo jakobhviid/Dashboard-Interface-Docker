@@ -17,7 +17,7 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 
 import useStyles from "./Header.styles";
-import { overviewItems, commandItems } from "./listitems";
+import { overviewItems } from "./listitems";
 
 function Header() {
   const [open, setOpen] = React.useState(true);

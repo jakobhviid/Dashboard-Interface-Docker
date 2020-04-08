@@ -18,7 +18,7 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case overviewActionTypes.COLLECTION_SUCCESS_OVERVIEW:
       for (const container of action.payload.containers) {
-        // TODO - Make this an attribute on the server
+        // TODO - Conditinally add actionURL to each container from action.payload.serverActionURL which should come from the server
         container["actionURL"] = "http://127.0.0.1:5000";
         container["update_time"] = new Date();
 
@@ -34,8 +34,10 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
             : "Exited " + moment(containerFinishTime).fromNow();
       }
       return produce(state, (nextState) => {
-        nextState.overviewData[action.payload.servername] =
-          action.payload.containers;
+        nextState.overviewData[action.payload.servername] = {
+          actionURL: "http://127.0.0.1:5000",
+          containers: action.payload.containers,
+        };
       });
 
     case ressourceActionTypes.COLLECTION_SUCCESS_RESSOURCE:
@@ -46,8 +48,10 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
       }
 
       return produce(state, (nextState) => {
-        nextState.statsData[action.payload.servername] =
-          action.payload.containers;
+        nextState.statsData[action.payload.servername] = {
+          actionURL: "http://127.0.0.1:5000",
+          containers: action.payload.containers,
+        };
       });
 
     case containerActionTypes.RENAME_CONTAINER_SUCCESS:
@@ -69,7 +73,7 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
 
         updatedContainer.state.status =
           updatedContainer.state.status === "exited" ? "running" : "exited";
-          
+
         updatedContainer.state.stringRepresentation =
           updatedContainer.state.status === "exited"
             ? "Exited a few seconds ago"

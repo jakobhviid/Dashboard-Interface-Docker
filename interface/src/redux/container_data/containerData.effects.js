@@ -129,6 +129,29 @@ export const removeContainer = (server, container) => {
   };
 };
 
+export const reconfigureContainer = (container, configureParams) => {
+  return (dispatch) => {
+    const postData = {
+      container_id: container.id,
+      ...configureParams,
+    };
+    actionRequest(
+      container.actionURL + "/update-container-configuration",
+      postData,
+      dispatch
+    );
+  };
+};
+
+export const runContainer = (serverActionURL, runParams) => {
+  return (dispatch) => {
+    const postData = {
+      ...runParams,
+    };
+    actionRequest(serverActionURL + "/run-container", postData, dispatch);
+  };
+};
+
 export const startCollectingOverview = () => {
   return (dispatch, getState) => {
     const ioClient = getState().containerData.ioClient;

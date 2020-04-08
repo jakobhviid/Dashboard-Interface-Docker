@@ -21,6 +21,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import { get } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import AddIcon from "@material-ui/icons/Add";
 import FilterListIcon from "@material-ui/icons/FilterList";
 
 import {
@@ -99,7 +100,7 @@ function ContainerTableHeader({ columns, orderBy, order, onRequestSort }) {
   );
 }
 
-function TableToolbar({ title }) {
+function TableToolbar({ title, onAdd }) {
   const classes = useToolbarStyles();
   return (
     <Toolbar className={classes.root}>
@@ -126,9 +127,16 @@ function TableToolbar({ title }) {
       </div>
       <Tooltip title="Filter list">
         <IconButton aria-label="filter list">
-          <FilterListIcon />
+          <FilterListIcon color="primary" />
         </IconButton>
       </Tooltip>
+      {onAdd ? (
+        <Tooltip title="Add New Container">
+          <IconButton aria-label="filter list" onClick={onAdd}>
+            <AddIcon color="primary" aria-label="add" />
+          </IconButton>
+        </Tooltip>
+      ) : null}
     </Toolbar>
   );
 }
@@ -152,7 +160,7 @@ const StyledMenu = withStyles({
   />
 ));
 
-function ContainerTable({ columns, title, data, dense, actions }) {
+function ContainerTable({ columns, title, data, dense, actions, onAdd }) {
   const classes = useTableStyles();
   const [page, setPage] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -187,7 +195,7 @@ function ContainerTable({ columns, title, data, dense, actions }) {
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <TableToolbar title={title} />
+        <TableToolbar title={title} onAdd={onAdd} />
         <TableContainer>
           <Table
             className={classes.table}
