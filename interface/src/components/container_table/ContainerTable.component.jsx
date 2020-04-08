@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
+import moment from "moment";
 
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -15,11 +15,10 @@ import Paper from "@material-ui/core/Paper";
 import Tooltip from "@material-ui/core/Tooltip";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
-import InputBase from '@material-ui/core/InputBase';
+import InputBase from "@material-ui/core/InputBase";
 import { withStyles } from "@material-ui/core/styles";
-import SearchIcon from '@material-ui/icons/Search';
+import SearchIcon from "@material-ui/icons/Search";
 import { get } from "lodash";
-
 import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import FilterListIcon from "@material-ui/icons/FilterList";
@@ -27,7 +26,7 @@ import FilterListIcon from "@material-ui/icons/FilterList";
 import {
   useTableStyles,
   useToolbarStyles,
-  useHeaderStyles
+  useHeaderStyles,
 } from "./ContainerTable.styles";
 
 // Return -1 if element b should be on the left of element a
@@ -60,20 +59,20 @@ function stableSort(array, comparator) {
     return a[1] - b[1];
   });
 
-  return arrayWithIndex.map(el => el[0]);
+  return arrayWithIndex.map((el) => el[0]);
 }
 
 function ContainerTableHeader({ columns, orderBy, order, onRequestSort }) {
   const classes = useHeaderStyles();
 
-  const createSortHandler = property => event => {
+  const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
 
   return (
     <TableHead>
       <TableRow>
-        {columns.map(column => (
+        {columns.map((column) => (
           <TableCell
             key={column.title}
             align={column.alignment}
@@ -120,7 +119,7 @@ function TableToolbar({ title }) {
           placeholder="Search…"
           classes={{
             root: classes.inputRoot,
-            input: classes.inputInput
+            input: classes.inputInput,
           }}
           inputProps={{ "aria-label": "search" }}
         />
@@ -135,19 +134,19 @@ function TableToolbar({ title }) {
 }
 const StyledMenu = withStyles({
   paper: {
-    border: "1px solid #d3d4d5"
-  }
-})(props => (
+    border: "1px solid #d3d4d5",
+  },
+})((props) => (
   <Menu
     elevation={0}
     getContentAnchorEl={null}
     anchorOrigin={{
       vertical: "bottom",
-      horizontal: "left"
+      horizontal: "left",
     }}
     transformOrigin={{
       vertical: "top",
-      horizontal: "center"
+      horizontal: "center",
     }}
     {...props}
   />
@@ -160,6 +159,7 @@ function ContainerTable({ columns, title, data, dense, actions }) {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState(columns[0].field);
   const [selectedContainer, setSelectedContainer] = React.useState(null);
+  const [lastUpdatedTooltips, setlastUpdatedTooltips] = React.useState({});
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -174,12 +174,12 @@ function ContainerTable({ columns, title, data, dense, actions }) {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = event => {
+  const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const handleActionClick = action => {
+  const handleActionClick = (action) => {
     setAnchorEl(null);
     action.onClick(selectedContainer);
   };
@@ -206,26 +206,51 @@ function ContainerTable({ columns, title, data, dense, actions }) {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   return (
-                    <TableRow hover key={index}>
-                      {columns.map(column => (
-                        <TableCell align={column.alignment} key={column.title}>
-                          {get(row, column.field)}
-                        </TableCell>
-                      ))}
-                      <TableCell align="center">
-                        <IconButton
-                          aria-label="container actions"
-                          aria-controls="actions"
-                          aria-haspopup="true"
-                          onClick={event => {
-                            setAnchorEl(event.currentTarget);
-                            setSelectedContainer(row);
-                          }}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
+                    <Tooltip
+                      key={index}
+                      title={
+                        lastUpdatedTooltips[row.id]
+                          ? lastUpdatedTooltips[row.id]
+                          : ""
+                      }
+                      placement="right"
+                      onOpen={() =>
+                        setlastUpdatedTooltips({
+                          ...lastUpdatedTooltips,
+                          [row.id]: moment(row.update_time).fromNow(),
+                        })
+                      }
+                      arrow
+                      enterDelay={500}
+                    >
+                      <TableRow hover>
+                        {columns.map((column) => (
+                          <TableCell
+                            align={column.alignment}
+                            key={column.title}
+                          >
+                            {get(row, column.field)}
+                          </TableCell>
+                        ))}
+                        {row.actionURL ? (
+                          <TableCell align="center">
+                            <IconButton
+                              aria-label="container actions"
+                              aria-controls="actions"
+                              aria-haspopup="true"
+                              onClick={(event) => {
+                                setAnchorEl(event.currentTarget);
+                                setSelectedContainer(row);
+                              }}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          </TableCell>
+                        ) : (
+                          <TableCell align="right"></TableCell>
+                        )}
+                      </TableRow>
+                    </Tooltip>
                   );
                 })}
             </TableBody>
@@ -249,7 +274,7 @@ function ContainerTable({ columns, title, data, dense, actions }) {
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
       >
-        {actions.map(action => (
+        {actions.map((action) => (
           <MenuItem
             key={action.label}
             onClick={() => handleActionClick(action)}

@@ -70,7 +70,7 @@ function Header() {
           paper: clsx(
             styleClasses.drawerPaper,
             !open && styleClasses.drawerPaperClose
-          )
+          ),
         }}
         open={open}
       >
@@ -81,8 +81,8 @@ function Header() {
         </div>
         <Divider />
         <List>{overviewItems}</List>
-        <Divider />
-        <List>{commandItems}</List>
+        {/* <Divider />
+        <List>{commandItems}</List> */}
       </Drawer>
     </React.Fragment>
   );

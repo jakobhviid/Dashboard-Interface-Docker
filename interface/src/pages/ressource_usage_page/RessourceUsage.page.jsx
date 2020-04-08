@@ -1,13 +1,14 @@
 import React from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
 
 import Switch from "@material-ui/core/Switch";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import ContainerTable from "../../components/container_table/ContainerTable.component";
 
-import { startCollectingRessources } from "../../redux/ressource/ressource.effects";
-import { selectCollectedData } from "../../redux/ressource/ressource.selectors";
+import {
+  startCollectingRessources,
+  stopCollectingRessources,
+} from "../../redux/container_data/containerData.effects";
 
 const columns = {
   perServerView: [
@@ -16,7 +17,8 @@ const columns = {
     { title: "CPU %", field: "cpu_percentage" },
     { title: "Memory %", field: "memory_percentage" },
     { title: "Net I / O", field: "net_i_o" },
-    { title: "Disk I / O", field: "disk_i_o" }
+    { title: "Disk I / O", field: "disk_i_o" },
+    { title: "Last Update", field: "last_update" },
   ],
   containerView: [
     { title: "Name", field: "name" },
@@ -25,24 +27,31 @@ const columns = {
     { title: "Memory %", field: "memory_percentage" },
     { title: "Net I / O", field: "net_i_o" },
     { title: "Disk I / O", field: "disk_i_o" },
-    { title: "Server", field: "servername" }
-  ]
+    { title: "Server", field: "servername" },
+  ],
 };
 
-function RessourceUsage({ serverContainers, startCollectingData }) {
+function RessourceUsage() {
   const [serverMode, setServerMode] = React.useState(true);
+  const dispatch = useDispatch();
+  const serverContainers = useSelector(
+    (store) => store.containerData.statsData
+  );
 
   const actions = [
     {
       label: "Update Configuration",
-      onClick: selectedContainer =>
-        console.log("Restarting", selectedContainer.name)
-    }
+      onClick: (selectedContainer) =>
+        console.log("Restarting", selectedContainer.name),
+    },
   ];
 
   React.useEffect(() => {
-    startCollectingData();
-  }, [startCollectingData]);
+    dispatch(startCollectingRessources());
+    return () => {
+      dispatch(stopCollectingRessources());
+    };
+  }, [dispatch]);
 
   let containerView = null;
   if (Object.keys(serverContainers).length !== 0) {
@@ -73,7 +82,7 @@ function RessourceUsage({ serverContainers, startCollectingData }) {
         />
       </div>
       {serverMode ? (
-        Object.keys(containerView).map(servername => (
+        Object.keys(containerView).map((servername) => (
           <div style={{ marginBottom: "18px" }} key={servername}>
             <ContainerTable
               title={servername}
@@ -97,12 +106,4 @@ function RessourceUsage({ serverContainers, startCollectingData }) {
   );
 }
 
-const mapStateToProps = createStructuredSelector({
-  serverContainers: selectCollectedData
-});
-
-const mapDispatchToProps = dispatch => ({
-  startCollectingData: () => dispatch(startCollectingRessources())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(RessourceUsage);
+export default RessourceUsage;

@@ -1,81 +1,124 @@
 import React from "react";
-import { connect } from "react-redux";
-import { createStructuredSelector } from "reselect";
+import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Switch from "@material-ui/core/Switch";
 import ContainerTable from "../../components/container_table/ContainerTable.component";
 
-import { startCollectingOverview } from "../../redux/overview/overview.effects";
-import { selectCollectedData } from "../../redux/overview/overview.selectors";
+import {
+  startCollectingOverview,
+  renameContainer,
+  startOrStopContainer,
+  restartContainer,
+  stopCollectingOverview,
+  removeContainer,
+} from "../../redux/container_data/containerData.effects";
+import RenameContainerDialog from "../../components/dialogs/RenameContainerDialog.component";
 
-const columns = {
-  perServerView: [
-    { title: "Name", alignment: "left", field: "name" },
-    { title: "Id", alignment: "left", field: "id" },
-    { title: "Image", alignment: "left", field: "image" },
-    {
-      title: "State",
-      alignment: "left",
-      field: "state.status"
-    },
-    {
-      title: "Creation Time",
-      alignment: "left",
-      field: "creation_time"
-    }
-  ],
-  containerView: [
-    { title: "Name", alignment: "left", field: "name" },
-    { title: "Id", alignment: "left", field: "id" },
-    { title: "Image", alignment: "left", field: "image" },
-    {
-      title: "State",
-      alignment: "left",
-      field: "state.status"
-    },
-    {
-      title: "Creation Time",
-      alignment: "left",
-      field: "creation_time"
-    },
-    {
-      title: "Server",
-      alignment: "left",
-      field: "servername"
-    }
-  ]
-};
+const columnsServerView = [
+  { title: "Name", alignment: "left", field: "name" },
+  { title: "Id", alignment: "left", field: "id" },
+  { title: "Image", alignment: "left", field: "image" },
+  {
+    title: "State",
+    alignment: "left",
+    field: "state.stringRepresentation",
+  },
+  {
+    title: "Creation Time",
+    alignment: "left",
+    field: "creation_time",
+  },
+];
 
-function Overview({ serverContainers, startCollectingData }) {
+const columnsContainerView = [
+  ...columnsServerView,
+  {
+    title: "Server",
+    alignment: "left",
+    field: "servername",
+  },
+];
+
+function findServerNameOfContainer(serverContainers, container) {
+  for (const server of Object.keys(serverContainers)) {
+    for (const serverContainer of serverContainers[server]) {
+      if (serverContainer.id === container.id) {
+        return server;
+      }
+    }
+  }
+}
+
+function Overview() {
   const [serverMode, setServerMode] = React.useState(true);
+  const [selectedContainer, setSelectedContainer] = React.useState(null);
+  const dispatch = useDispatch();
+  const serverContainers = useSelector(
+    (store) => store.containerData.overviewData
+  );
+
+  const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
+
+  const handleRename = (newName) => {
+    const serverName = findServerNameOfContainer(
+      serverContainers,
+      selectedContainer
+    );
+    dispatch(renameContainer(serverName, selectedContainer, newName));
+  };
 
   const actions = [
     {
       label: "Rename",
-      onClick: selectedContainer =>
-        console.log("Renaming", selectedContainer.name)
+      onClick: (selectedContainer) => {
+        setSelectedContainer(selectedContainer);
+        setRenameDialogOpen(true);
+      },
     },
     {
       label: "Start/Stop",
-      onClick: selectedContainer =>
-        console.log("Starting/Stopping", selectedContainer.name)
+      onClick: (selectedContainer) => {
+        const serverName = findServerNameOfContainer(
+          serverContainers,
+          selectedContainer
+        );
+        dispatch(startOrStopContainer(serverName, selectedContainer));
+      },
     },
     {
       label: "Restart",
-      onClick: selectedContainer =>
-        console.log("Restarting", selectedContainer.name)
+      onClick: (selectedContainer) => {
+        dispatch(
+          restartContainer(
+            findServerNameOfContainer(serverContainers, selectedContainer),
+            selectedContainer
+          )
+        );
+      },
     },
     {
       label: "Remove",
-      onClick: selectedContainer =>
-        console.log("Removing", selectedContainer.name)
-    }
+      onClick: (selectedContainer) => {
+        console.log("Removing", selectedContainer.name);
+        dispatch(
+          removeContainer(
+            findServerNameOfContainer(serverContainers, selectedContainer),
+            selectedContainer
+          )
+        );
+      },
+    },
   ];
 
   React.useEffect(() => {
-    startCollectingData();
-  }, [startCollectingData]);
+    dispatch(startCollectingOverview());
+
+    return () => {
+      dispatch(stopCollectingOverview());
+    };
+  }, [dispatch]);
 
   let containerView = null;
   if (Object.keys(serverContainers).length !== 0) {
@@ -83,7 +126,11 @@ function Overview({ serverContainers, startCollectingData }) {
       containerView = [];
       for (const servername of Object.keys(serverContainers)) {
         for (const container of serverContainers[servername]) {
-          containerView.push({ ...container, servername });
+          // JSON parse and stringify to create mutable object
+          containerView.push({
+            ...JSON.parse(JSON.stringify(container)),
+            servername,
+          });
         }
       }
     } else {
@@ -106,12 +153,12 @@ function Overview({ serverContainers, startCollectingData }) {
         />
       </div>
       {serverMode ? (
-        Object.keys(containerView).map(servername => {
+        Object.keys(containerView).map((servername) => {
           return (
             <div style={{ marginBottom: "18px" }} key={servername}>
               <ContainerTable
                 title={servername}
-                columns={columns.perServerView}
+                columns={columnsServerView}
                 data={containerView[servername]}
                 dense="small"
                 actions={actions}
@@ -122,22 +169,22 @@ function Overview({ serverContainers, startCollectingData }) {
       ) : (
         <ContainerTable
           title="All Containers"
-          columns={columns.containerView}
+          columns={columnsContainerView}
           data={containerView}
           dense="small"
           actions={actions}
         />
       )}
+      <RenameContainerDialog
+        open={renameDialogOpen}
+        handleClose={() => setRenameDialogOpen(false)}
+        handleConfirmation={handleRename}
+        dialogText="What should the container be renamed to?"
+        dialogTitle="Renaming Container"
+        label="Container Name"
+      />
     </React.Fragment>
   );
 }
 
-const mapStateToProps = createStructuredSelector({
-  serverContainers: selectCollectedData
-});
-
-const mapDispatchToProps = dispatch => ({
-  startCollectingData: () => dispatch(startCollectingOverview())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Overview);
+export default Overview;

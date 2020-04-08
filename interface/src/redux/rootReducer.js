@@ -1,11 +1,11 @@
 import { combineReducers } from "redux";
 
-import overviewReducer from "./overview/overview.reducer";
-import ressourceReducer from "./ressource/ressource.reducer";
+import containerReducer from "./container_data/containerData.reducer";
+import notificationsReducer from "./notifier/notifier.reducer";
 
 const rootReducer = combineReducers({
-  overview: overviewReducer,
-  ressourceUsage: ressourceReducer
+  containerData: containerReducer,
+  notifications: notificationsReducer,
 });
 
 export default rootReducer;
