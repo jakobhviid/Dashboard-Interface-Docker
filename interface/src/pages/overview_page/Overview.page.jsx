@@ -57,7 +57,6 @@ function Overview() {
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
   const dispatch = useDispatch();
   const overviewData = useSelector((store) => store.containerData.overviewData);
-
   const classes = useStyles();
 
   const handleRename = (newName) => {
@@ -135,7 +134,6 @@ function Overview() {
       }
     } else {
       containerView = JSON.parse(JSON.stringify(overviewData));
-      console.log(containerView);
     }
   }
 
@@ -149,8 +147,9 @@ function Overview() {
     if (values["restart_policy"]["name"] !== "{}") {
       const restartPolicyObject = { Name: values["restart_policy"]["name"] };
       if (values["restart_policy"]["maximumRetryCount"] !== "")
-        restartPolicyObject["MaximumRetryCount"] =
-          values["restart_policy"]["maximumRetryCount"];
+        restartPolicyObject["MaximumRetryCount"] = parseInt(
+          values["restart_policy"]["maximumRetryCount"]
+        );
       objectToSend["restart_policy"] = restartPolicyObject;
     }
 

@@ -9,6 +9,15 @@ function RestartPolicySection({
   restartRetryCountOnChange,
   headerInvisible,
 }) {
+  function handleKeyPress(event) {
+    // Test for comma and punctuation and for 'e' which for some reason goes through as a number?
+    // Comma numpad, multiply, divide, minus, plus signs and a lot of other edge cases which html forms doesn't take proper care of
+    const keysToCheck = [188, 190, 69, 110, 187, 106, 109, 107, 221, 189];
+    const key = event.keyCode;
+    if (keysToCheck.includes(key)) {
+      event.preventDefault();
+    }
+  }
   return (
     <React.Fragment>
       {headerInvisible ? null : (
@@ -30,8 +39,8 @@ function RestartPolicySection({
           helperText="When to restart container if it exits"
         >
           <option value={"{}"}>None</option>
-          <option value={"on-failure"}>Restart On Failure Exit Code</option>
-          <option value={"always"}>Restart Always On exist</option>
+          <option value={"on-failure"}>Restart On Failure Exit</option>
+          <option value={"always"}>Restart Always On exit</option>
         </TextField>
       </Grid>
       <Grid item xs={4}>
@@ -44,6 +53,7 @@ function RestartPolicySection({
           SelectProps={{
             native: true,
           }}
+          onKeyDown={handleKeyPress}
           helperText="Number of times to restart the container on failure"
         ></TextField>
       </Grid>

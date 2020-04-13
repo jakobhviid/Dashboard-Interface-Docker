@@ -4,7 +4,7 @@ const {
   GENERAL_SOCKET_ENDPOINT,
   RESSOURCE_USAGE_ENDPOINT,
   NEWEST_OVERVIEW_DATA_REQUEST,
-  NEWEST_STATS_DATA_REQUEST
+  NEWEST_STATS_DATA_REQUEST,
 } = require("../../interface/src/util/socketEvents");
 const { GENEREL_INFO_TOPIC, STATS_TOPIC } = require("./topics");
 
@@ -13,7 +13,7 @@ const { Kafka } = require("kafkajs");
 const kafkaUrls = ["kafka2.cfei.dk:9092", "kafka3.cfei.dk:9092"];
 
 const kafka = new Kafka({
-  brokers: kafkaUrls
+  brokers: kafkaUrls,
 });
 
 const consumer = kafka.consumer({ groupId: "info-group" });
@@ -45,11 +45,11 @@ const run = async () => {
           break;
       }
       latestOffSet = message.offset;
-    }
+    },
   });
 };
 
-io.on("connection", socket => {
+io.on("connection", (socket) => {
   socket.on(NEWEST_OVERVIEW_DATA_REQUEST, () => {
     if (latest_general_info_message !== null) {
       io.emit(GENERAL_SOCKET_ENDPOINT, latest_general_info_message);

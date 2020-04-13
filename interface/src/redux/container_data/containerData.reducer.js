@@ -12,14 +12,16 @@ const INITIAL_STATE = {
   ioClient: socketIOClient("http://127.0.0.1:5001"),
   overviewData: {},
   statsData: {},
+  loadingContainers: [],
 };
 
 const overviewReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case overviewActionTypes.COLLECTION_SUCCESS_OVERVIEW:
       for (const container of action.payload.containers) {
-        // TODO - Conditinally add actionURL to each container from action.payload.serverActionURL which should come from the server
-        container["actionURL"] = "http://127.0.0.1:5000";
+        if (action.payload.actionURL) {
+          container["actionURL"] = action.payload.actionURL;
+        }
         container["update_time"] = new Date();
 
         // Visual representation of "Up 3 hours and exited 5 hours ago etc."
@@ -35,23 +37,31 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
       }
       return produce(state, (nextState) => {
         nextState.overviewData[action.payload.servername] = {
-          actionURL: "http://127.0.0.1:5000",
           containers: action.payload.containers,
         };
+        if (action.payload.actionURL) {
+          nextState.overviewData[action.payload.servername]["actionURL"] =
+            action.payload.actionURL;
+        }
       });
 
     case ressourceActionTypes.COLLECTION_SUCCESS_RESSOURCE:
-      // TODO - Make this an attribute on the server
       for (const container of action.payload.containers) {
-        container["actionURL"] = "http://127.0.0.1:5000";
+        if (action.payload.actionURL) {
+          container["actionURL"] = action.payload.actionURL;
+        }
+
         container["update_time"] = new Date();
       }
 
       return produce(state, (nextState) => {
         nextState.statsData[action.payload.servername] = {
-          actionURL: "http://127.0.0.1:5000",
           containers: action.payload.containers,
         };
+        if (action.payload.actionURL) {
+          nextState.statsData[action.payload.servername]["actionURL"] =
+            action.payload.actionURL;
+        }
       });
 
     case containerActionTypes.RENAME_CONTAINER_SUCCESS:
@@ -59,9 +69,13 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
         const server = action.payload.server;
         const updatedContainer = action.payload.updatedContainer;
 
-        for (const [index, container] of state.overviewData[server].entries()) {
+        for (const [index, container] of state.overviewData[server][
+          "containers"
+        ].entries()) {
           if (container.id === updatedContainer.id) {
-            nextState.overviewData[server][index] = updatedContainer;
+            nextState.overviewData[server]["containers"][
+              index
+            ] = updatedContainer;
           }
         }
       });
@@ -79,9 +93,13 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
             ? "Exited a few seconds ago"
             : "Up a few seconds";
 
-        for (const [index, container] of state.overviewData[server].entries()) {
+        for (const [index, container] of state.overviewData[server][
+          "containers"
+        ].entries()) {
           if (container.id === updatedContainer.id) {
-            nextState.overviewData[server][index] = updatedContainer;
+            nextState.overviewData[server]["containers"][
+              index
+            ] = updatedContainer;
           }
         }
       });
@@ -91,7 +109,9 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
         const server = action.payload.server;
         const updatedContainer = action.payload.updatedContainer;
 
-        for (const [index, container] of state.overviewData[server].entries()) {
+        for (const [index, container] of state.overviewData[server][
+          "containers"
+        ].entries()) {
           if (container.id === updatedContainer.id) {
             nextState.overviewData[server][index] = updatedContainer;
           }
@@ -103,14 +123,39 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
         const server = action.payload.server;
         const removedContainer = action.payload.removedContainer;
         let indexOfContainer = null;
-        for (const [index, container] of state.overviewData[server].entries()) {
+        for (const [index, container] of state.overviewData[server][
+          "containers"
+        ].entries()) {
           if (container.id === removedContainer.id) {
             indexOfContainer = index;
           }
         }
         if (indexOfContainer !== null) {
-          nextState.overviewData[server].splice(indexOfContainer, 1);
+          nextState.overviewData[server]["containers"].splice(
+            indexOfContainer,
+            1
+          );
         }
+      });
+
+    case containerActionTypes.CONTAINER_LOAD_START:
+      return produce(state, (nextState) => {
+        nextState.loadingContainers.push(action.payload);
+      });
+
+    case containerActionTypes.CONTAINER_LOAD_SUCCESS:
+      return produce(state, (nextState) => {
+        nextState.loadingContainers = nextState.loadingContainers.filter(
+          (containerId) => containerId !== action.payload
+        );
+      });
+
+    // TODO - handle this
+    case containerActionTypes.CONTAINER_LOAD_FAIL:
+      return produce(state, (nextState) => {
+        nextState.loadingContainers = nextState.loadingContainers.filter(
+          (containerId) => containerId !== action.payload
+        );
       });
     default:
       return state;

@@ -23,6 +23,16 @@ function MemorySection({
     { value: "gb", representation: "Gigabytes" },
   ];
 
+  function handleKeyPress(event) {
+    // Test for comma and punctuation and for 'e' which for some reason goes through as a number?
+    // Comma numpad, multiply, divide, minus, plus signs and a lot of other edge cases which html forms doesn't take proper care of
+    const keysToCheck = [188, 190, 69, 110, 187, 106, 109, 107, 221, 189];
+    const key = event.keyCode;
+    if (keysToCheck.includes(key)) {
+      event.preventDefault();
+    }
+  }
+
   return (
     <React.Fragment>
       <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>
@@ -31,8 +41,9 @@ function MemorySection({
       <Grid item xs={8}>
         <TextField
           variant="outlined"
-          label="memory limit"
+          label="Memory limit"
           type="number"
+          onKeyDown={handleKeyPress}
           fullWidth
           InputProps={{ inputProps: { step: 1000 } }}
           value={memLimit.value}
@@ -65,6 +76,7 @@ function MemorySection({
           label="Memory Swap Limit"
           type="number"
           fullWidth
+          onKeyDown={handleKeyPress}
           InputProps={{ inputProps: { step: 1000 } }}
           value={memswapLimit.value}
           onChange={memswapLimitOnChange}
@@ -96,6 +108,7 @@ function MemorySection({
           label="Kernel Memory Limit"
           type="number"
           fullWidth
+          onKeyDown={handleKeyPress}
           InputProps={{ inputProps: { step: 1000 } }}
           value={kernelMemoryLimit.value}
           onChange={kernelMemoryLimitOnChange}
@@ -124,9 +137,10 @@ function MemorySection({
       <Grid item xs={8}>
         <TextField
           variant="outlined"
-          label="memory reservation"
+          label="Memory reservation"
           type="number"
           fullWidth
+          onKeyDown={handleKeyPress}
           InputProps={{ inputProps: { step: 1000 } }}
           value={memReservation.value}
           onChange={memReservationOnChange}

@@ -14,6 +14,21 @@ export const ressourceCollectionSuccess = (data) => ({
   payload: data,
 });
 
+export const containerLoadStart = (containerId) => ({
+  type: containerActionTypes.CONTAINER_LOAD_START,
+  payload: containerId,
+});
+
+export const containerLoadSuccess = (containerId) => ({
+  type: containerActionTypes.CONTAINER_LOAD_SUCCESS,
+  payload: containerId,
+});
+
+export const containerLoadFail = (containerId) => ({
+  type: containerActionTypes.CONTAINER_LOAD_FAIL,
+  payload: containerId,
+});
+
 export const renameContainerSuccess = (updatedContainer, server) => ({
   type: containerActionTypes.RENAME_CONTAINER_SUCCESS,
   payload: { updatedContainer, server },

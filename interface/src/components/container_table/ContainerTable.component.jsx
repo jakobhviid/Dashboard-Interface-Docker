@@ -18,11 +18,15 @@ import MenuItem from "@material-ui/core/MenuItem";
 import InputBase from "@material-ui/core/InputBase";
 import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
-import { get } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AddIcon from "@material-ui/icons/Add";
 import FilterListIcon from "@material-ui/icons/FilterList";
+import CircularProgress from "@material-ui/core/CircularProgress";
+
+import { useSelector } from "react-redux";
+
+import { get } from "lodash";
 
 import {
   useTableStyles,
@@ -100,7 +104,7 @@ function ContainerTableHeader({ columns, orderBy, order, onRequestSort }) {
   );
 }
 
-function TableToolbar({ title, onAdd }) {
+function TableToolbar({ title, onAdd, onSearchChange, searchValue }) {
   const classes = useToolbarStyles();
   return (
     <Toolbar className={classes.root}>
@@ -122,6 +126,8 @@ function TableToolbar({ title, onAdd }) {
             root: classes.inputRoot,
             input: classes.inputInput,
           }}
+          value={searchValue}
+          onChange={onSearchChange}
           inputProps={{ "aria-label": "search" }}
         />
       </div>
@@ -168,7 +174,10 @@ function ContainerTable({ columns, title, data, dense, actions, onAdd }) {
   const [orderBy, setOrderBy] = React.useState(columns[0].field);
   const [selectedContainer, setSelectedContainer] = React.useState(null);
   const [lastUpdatedTooltips, setlastUpdatedTooltips] = React.useState({});
-
+  const [searchValue, setSearchValue] = React.useState("");
+  const loadingContainers = useSelector(
+    (store) => store.containerData.loadingContainers
+  );
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
@@ -192,10 +201,35 @@ function ContainerTable({ columns, title, data, dense, actions, onAdd }) {
     action.onClick(selectedContainer);
   };
 
+  const handleOnSearchChange = (event) => {
+    setSearchValue(event.target.value);
+  };
+
+  function searchSort() {
+    const searchedData = [];
+    data.filter((row) => {
+      // Check all the key value pairs inside each row in the data
+      for (const column of columns) {
+        const value = get(row, column.field).toString();
+        if (value.includes(searchValue)) {
+          searchedData.push(row);
+          // If one of the values inside the row includes the searchvalue break out in order to not add the same row twice if more values includes the searchValue
+          break;
+        }
+      }
+    });
+    return searchedData;
+  }
+  searchSort();
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <TableToolbar title={title} onAdd={onAdd} />
+        <TableToolbar
+          title={title}
+          onAdd={onAdd}
+          onSearchChange={handleOnSearchChange}
+          searchValue={searchValue}
+        />
         <TableContainer>
           <Table
             className={classes.table}
@@ -210,7 +244,7 @@ function ContainerTable({ columns, title, data, dense, actions, onAdd }) {
               onRequestSort={handleRequestSort}
             />
             <TableBody>
-              {stableSort(data, getComparator(order, orderBy))
+              {stableSort(searchSort(), getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   return (
@@ -242,17 +276,23 @@ function ContainerTable({ columns, title, data, dense, actions, onAdd }) {
                         ))}
                         {row.actionURL ? (
                           <TableCell align="center">
-                            <IconButton
-                              aria-label="container actions"
-                              aria-controls="actions"
-                              aria-haspopup="true"
-                              onClick={(event) => {
-                                setAnchorEl(event.currentTarget);
-                                setSelectedContainer(row);
-                              }}
-                            >
-                              <MoreVertIcon />
-                            </IconButton>
+                            {loadingContainers.includes(row.id) ? (
+                              <div style={{ padding: "12px" }}>
+                                <CircularProgress size={20} thickness={4} />
+                              </div>
+                            ) : (
+                              <IconButton
+                                aria-label="container actions"
+                                aria-controls="actions"
+                                aria-haspopup="true"
+                                onClick={(event) => {
+                                  setAnchorEl(event.currentTarget);
+                                  setSelectedContainer(row);
+                                }}
+                              >
+                                <MoreVertIcon />
+                              </IconButton>
+                            )}
                           </TableCell>
                         ) : (
                           <TableCell align="right"></TableCell>

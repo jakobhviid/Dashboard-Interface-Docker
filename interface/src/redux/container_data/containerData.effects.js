@@ -14,9 +14,13 @@ import {
   startOrStopContainerSuccess,
   restartContainerSuccess,
   removeContainerSuccess,
+  containerLoadStart,
+  containerLoadFail,
+  containerLoadSuccess,
 } from "./containerData.actions";
 
-async function actionRequest(url, postData, dispatch) {
+async function actionRequest(url, postData, dispatch, containerId) {
+  dispatch(containerLoadStart(containerId));
   const params = {
     headers: {
       "content-type": "application/json; charset=UTF-8",
@@ -38,6 +42,7 @@ async function actionRequest(url, postData, dispatch) {
         },
       })
     );
+    dispatch(containerLoadSuccess(containerId));
   } else {
     dispatch(
       enqueueSnackbar({
@@ -49,6 +54,7 @@ async function actionRequest(url, postData, dispatch) {
         },
       })
     );
+    dispatch(containerLoadFail(containerId));
     throw "Error";
   }
 }
@@ -63,7 +69,8 @@ export const renameContainer = (server, container, newName) => {
     actionRequest(
       container.actionURL + "/rename-container",
       postData,
-      dispatch
+      dispatch,
+      container.id
     ).then(() => {
       container.name = newName;
       dispatch(renameContainerSuccess(container, server));
@@ -80,7 +87,8 @@ export const startOrStopContainer = (server, container) => {
       actionRequest(
         container.actionURL + "/stop-container",
         postData,
-        dispatch
+        dispatch,
+        container.id
       ).then(() => {
         dispatch(startOrStopContainerSuccess(container, server));
       });
@@ -88,7 +96,8 @@ export const startOrStopContainer = (server, container) => {
       actionRequest(
         container.actionURL + "/start-container",
         postData,
-        dispatch
+        dispatch,
+        container.id
       ).then(() => {
         dispatch(startOrStopContainerSuccess(container, server));
       });
@@ -105,7 +114,8 @@ export const restartContainer = (server, container) => {
     actionRequest(
       container.actionURL + "/restart-container",
       postData,
-      dispatch
+      dispatch,
+      container.id
     ).then(() => {
       container.state.stringRepresentation = "Restarted";
       dispatch(restartContainerSuccess(container, server));
@@ -122,7 +132,8 @@ export const removeContainer = (server, container) => {
     actionRequest(
       container.actionURL + "/remove-container",
       postData,
-      dispatch
+      dispatch,
+      container.id
     ).then(() => {
       dispatch(removeContainerSuccess(container, server));
     });
@@ -138,7 +149,8 @@ export const reconfigureContainer = (container, configureParams) => {
     actionRequest(
       container.actionURL + "/update-container-configuration",
       postData,
-      dispatch
+      dispatch,
+      container.id
     );
   };
 };

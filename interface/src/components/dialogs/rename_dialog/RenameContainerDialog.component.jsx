@@ -22,12 +22,18 @@ function RenameDialog({
     setTextFieldValue("");
   }, [open]);
 
+  const onConfirm = () => {
+    handleClose();
+    handleConfirmation(textFieldValue);
+  };
+
   return (
     <div>
       <Dialog
         open={open}
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
+        onKeyPress={(event) => (event.key === "Enter" ? onConfirm() : null)}
       >
         <DialogTitle id="form-dialog-title">{dialogTitle}</DialogTitle>
         <DialogContent>
@@ -46,13 +52,7 @@ function RenameDialog({
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button
-            onClick={() => {
-              handleClose();
-              handleConfirmation(textFieldValue);
-            }}
-            color="primary"
-          >
+          <Button onClick={onConfirm} color="primary">
             Confirm
           </Button>
         </DialogActions>

@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  interface:
+    image: omvk97/docker_dashboard_interface
+    container_name: interface
+    ports:
+      - 3000:3000

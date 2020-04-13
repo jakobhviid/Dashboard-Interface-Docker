@@ -32,63 +32,40 @@ function ReconfigureDialog({
     cpuset_mems: "",
   });
 
-  React.useEffect(() => {
-    setValues({
-      blkio_weight: "",
-      mem_limit: { value: "", byteVariant: "mb" },
-      mem_reservation: { value: "", byteVariant: "mb" },
-      memswap_limit: { value: "", byteVariant: "mb" },
-      kernel_memory: { value: "", byteVariant: "mb" },
-      restart_policy: { name: "{}", maximumRetryCount: "" },
-      cpu_shares: "",
-      cpu_period: "",
-      cpu_quota: "",
-      cpuset_cpus: "",
-      cpuset_mems: "",
-    });
-  }, [open]);
-
   function setblkio(event) {
-    if (RegExp("[0-9]").test(event.target.value[-1])) {
-      console.log("WHAT THE FUCK", event.target.value[-1]);
-
+    if (event.target.value <= 1000)
       setValues({ ...values, blkio_weight: event.target.value });
-    }
   }
 
   function setMemLimit(event) {
-    if (RegExp("[0-9]").test(event.target.value))
-      setValues({
-        ...values,
-        mem_limit: { ...values.mem_limit, value: event.target.value },
-      });
+    setValues({
+      ...values,
+      mem_limit: { ...values.mem_limit, value: event.target.value },
+    });
   }
 
   function setMemReservation(event) {
-    if (RegExp("[0-9]").test(event.target.value))
-      setValues({
-        ...values,
-        mem_reservation: {
-          ...values.mem_reservation,
-          value: event.target.value,
-        },
-      });
+    setValues({
+      ...values,
+      mem_reservation: {
+        ...values.mem_reservation,
+        value: event.target.value,
+      },
+    });
   }
 
   function setMemSwapLimit(event) {
-    if (RegExp("[0-9]").test(event.target.value))
-      setValues({
-        ...values,
-        memswap_limit: { ...values.memswap_limit, value: event.target.value },
-      });
+    setValues({
+      ...values,
+      memswap_limit: { ...values.memswap_limit, value: event.target.value },
+    });
   }
 
   function setKernelMemoryLimit(event) {
-    if (RegExp("[0-9]").test(event.target.value))
-      setValues({
-        ...values,
-        kernel_memory: { ...values.kernel_memory, value: event.target.value },
-      });
+    setValues({
+      ...values,
+      kernel_memory: { ...values.kernel_memory, value: event.target.value },
+    });
   }
 
   function setRestartPolicy(event) {
@@ -99,14 +76,13 @@ function ReconfigureDialog({
   }
 
   function setRestartRetryCount(event) {
-    if (RegExp("[0-9]").test(event.target.value))
-      setValues({
-        ...values,
-        restart_policy: {
-          ...values.restart_policy,
-          maximumRetryCount: event.target.value,
-        },
-      });
+    setValues({
+      ...values,
+      restart_policy: {
+        ...values.restart_policy,
+        maximumRetryCount: event.target.value,
+      },
+    });
   }
 
   function sendValues() {
@@ -143,6 +119,7 @@ function ReconfigureDialog({
       open={open}
       onClose={handleClose}
       aria-labelledby="form-dialog-title"
+      onKeyPress={(event) => (event.key === "Enter" ? sendValues() : null)}
     >
       <DialogTitle id="form-dialog-title">{dialogTitle}</DialogTitle>
       <DialogContent>

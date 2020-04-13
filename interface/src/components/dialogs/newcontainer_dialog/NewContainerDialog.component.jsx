@@ -38,6 +38,9 @@ function NewContainerDialog({
         open={open}
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
+        onKeyPress={(event) =>
+          event.key === "Enter" ? handleConfirmation(values) : null
+        }
       >
         <DialogTitle id="form-dialog-title">{dialogTitle}</DialogTitle>
         <DialogContent>
@@ -89,11 +92,12 @@ function NewContainerDialog({
                   label="Image"
                   type="text"
                   fullWidth
+                  autoFocus
                   value={values.image}
                   onChange={(event) =>
                     setValues({ ...values, image: event.target.value })
                   }
-                  helperText="Image to Run (example: Ubuntu:18.04)"
+                  helperText="Image to Run (example: ubuntu:18.04)"
                 />
               </Grid>
               <Grid item xs={12}>
