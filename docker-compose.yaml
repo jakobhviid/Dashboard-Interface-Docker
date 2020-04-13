@@ -6,3 +6,5 @@ services:
     container_name: interface
     ports:
       - 3000:3000
+    environment: 
+      UI_PORT: 3000

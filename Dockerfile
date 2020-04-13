@@ -26,11 +26,13 @@ COPY ./kafka_consumer_server ${CONSUMER_HOME}
 COPY ./interface ${INTERFACE_HOME}
 
 # 1. + 2. Go into consumer directory and npm continoues integration install packages from package-lock.json fast and reliably. It will not install packages declared under "devDependencies in package.json"
-# 3. Building the files ready for deployment and deleting all unnecessary files TODO look into multi stage builds instead
+# 3. Building the files ready for deployment
 RUN cd ${CONSUMER_HOME} && npm ci --only=production
 RUN cd ${INTERFACE_HOME} && npm ci --only=production && \
-    npm run build && rm -rf node_modules/ package-lock.json package.json public/ src/
+    npm run build
+
+# TODO - CLEAN UP UNNECESSARY FILES, look into multistage builds
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-CMD [ "/usr/bin/supervisord" ]
+CMD [ "docker-entrypoint.sh" ]
