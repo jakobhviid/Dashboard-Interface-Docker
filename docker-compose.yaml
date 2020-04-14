@@ -8,3 +8,4 @@ services:
       - 3000:3000
     environment: 
       UI_PORT: 3000
+      KAFKA_URLS: kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092

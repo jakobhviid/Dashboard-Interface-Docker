@@ -18,22 +18,30 @@ const INITIAL_STATE = {
 const overviewReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case overviewActionTypes.COLLECTION_SUCCESS_OVERVIEW:
+      console.log(action.payload.containers);
+
       for (const container of action.payload.containers) {
         if (action.payload.actionURL) {
           container["actionURL"] = action.payload.actionURL;
         }
-        container["update_time"] = new Date();
-
         // Visual representation of "Up 3 hours and exited 5 hours ago etc."
         const containerStatus = container.state.status;
         const containerStartTime = container.state.startTime;
         const timeSinceStart = moment(containerStartTime).fromNow();
         const containerFinishTime = container.state.finishTime;
-        container.state.stringRepresentation =
-          containerStatus === "running"
-            ? "Up " +
-              timeSinceStart.substring(0, timeSinceStart.lastIndexOf(" "))
-            : "Exited " + moment(containerFinishTime).fromNow();
+        if (containerStatus === "running") {
+          let stringRepresentation =
+            "Up " +
+            timeSinceStart.substring(0, timeSinceStart.lastIndexOf(" "));
+          if (container.state.health) {
+            stringRepresentation =
+              stringRepresentation + " (" + container.state.health.status + ")";
+          }
+          container.state.stringRepresentation = stringRepresentation;
+        } else {
+          container.state.stringRepresentation =
+            "Exited " + moment(containerFinishTime).fromNow();
+        }
       }
       return produce(state, (nextState) => {
         nextState.overviewData[action.payload.servername] = {
@@ -50,8 +58,6 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
         if (action.payload.actionURL) {
           container["actionURL"] = action.payload.actionURL;
         }
-
-        container["update_time"] = new Date();
       }
 
       return produce(state, (nextState) => {

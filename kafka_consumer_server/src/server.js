@@ -6,11 +6,16 @@ const {
   NEWEST_OVERVIEW_DATA_REQUEST,
   NEWEST_STATS_DATA_REQUEST,
 } = require("../../interface/src/util/socketEvents");
-const { GENEREL_INFO_TOPIC, STATS_TOPIC } = require("./topics");
+const { GENERAL_INFO_TOPIC, STATS_TOPIC } = require("./topics");
 
 const { Kafka } = require("kafkajs");
 
-const kafkaUrls = ["kafka2.cfei.dk:9092", "kafka3.cfei.dk:9092"];
+// const kafkaUrls = process.env.KAFKA_URLS.split(",");
+const kafkaUrls = [
+  "kafka1.cfei.dk:9092",
+  "kafka2.cfei.dk:9092",
+  "kafka3.cfei.dk:9092",
+];
 
 const kafka = new Kafka({
   brokers: kafkaUrls,
@@ -18,30 +23,42 @@ const kafka = new Kafka({
 
 const consumer = kafka.consumer({ groupId: "info-group" });
 
-let latest_general_info_message = null;
-let latest_stats_info_message = null;
+let latest_general_info_message = {};
+let latest_stats_info_message = {};
 
 const run = async () => {
   await consumer.connect();
-  await consumer.subscribe({ topic: GENEREL_INFO_TOPIC });
+  await consumer.subscribe({ topic: GENERAL_INFO_TOPIC });
   await consumer.subscribe({ topic: STATS_TOPIC });
 
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
-      // console.log(JSON.parse(JSON.parse(message.value.toString())));
       switch (topic) {
-        case GENEREL_INFO_TOPIC:
-          latest_general_info_message = JSON.parse(
+        case GENERAL_INFO_TOPIC:
+          const generalInfoMessageParsed = JSON.parse(
             JSON.parse(message.value.toString())
           );
+          for (const container of generalInfoMessageParsed.containers) {
+            container["update_time"] = new Date();
+          }
 
-          io.emit(GENERAL_SOCKET_ENDPOINT, latest_general_info_message);
+          latest_general_info_message[
+            generalInfoMessageParsed.servername
+          ] = generalInfoMessageParsed;
+
+          io.emit(GENERAL_SOCKET_ENDPOINT, generalInfoMessageParsed);
           break;
         case STATS_TOPIC:
-          latest_stats_info_message = JSON.parse(
+          const statsMessageParsed = JSON.parse(
             JSON.parse(message.value.toString())
           );
-          io.emit(RESSOURCE_USAGE_ENDPOINT, latest_stats_info_message);
+          for (const container of statsMessageParsed.containers) {
+            container["update_time"] = new Date();
+          }
+          latest_stats_info_message[
+            statsMessageParsed.servername
+          ] = statsMessageParsed;
+          io.emit(RESSOURCE_USAGE_ENDPOINT, statsMessageParsed);
           break;
       }
       latestOffSet = message.offset;
@@ -51,13 +68,19 @@ const run = async () => {
 
 io.on("connection", (socket) => {
   socket.on(NEWEST_OVERVIEW_DATA_REQUEST, () => {
-    if (latest_general_info_message !== null) {
-      io.emit(GENERAL_SOCKET_ENDPOINT, latest_general_info_message);
+    for (const latestServerInfo of Object.keys(latest_general_info_message)) {
+      io.emit(
+        GENERAL_SOCKET_ENDPOINT,
+        latest_general_info_message[latestServerInfo]
+      );
     }
   });
   socket.on(NEWEST_STATS_DATA_REQUEST, () => {
-    if (latest_stats_info_message !== null) {
-      io.emit(RESSOURCE_USAGE_ENDPOINT, latest_stats_info_message);
+    for (const lastestServerInfo of Object.keys(latest_stats_info_message)) {
+      io.emit(
+        RESSOURCE_USAGE_ENDPOINT,
+        latest_stats_info_message[lastestServerInfo]
+      );
     }
   });
 });

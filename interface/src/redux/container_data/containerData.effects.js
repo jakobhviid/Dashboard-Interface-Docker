@@ -19,6 +19,8 @@ import {
   containerLoadSuccess,
 } from "./containerData.actions";
 
+const FETCH_TIMEOUT = 15000; // 15 seconds
+
 async function actionRequest(url, postData, dispatch, containerId) {
   dispatch(containerLoadStart(containerId));
   const params = {
@@ -28,9 +30,39 @@ async function actionRequest(url, postData, dispatch, containerId) {
     body: JSON.stringify(postData),
     method: "POST",
   };
-  let response = await fetch(url, params);
+  let response;
+  try {
+    let didTimeOut = false;
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        didTimeOut = true;
+        reject(new Error("Request timed out"));
+      }, FETCH_TIMEOUT);
+      fetch(url, params).then((res) => {
+        clearTimeout(timeout);
+        if (!didTimeOut) {
+          response = res;
+          resolve(response);
+        }
+      });
+    });
+  } catch (error) {
+    dispatch(
+      enqueueSnackbar({
+        message: "Container " + containerId + " - " + error.message,
+        options: {
+          key: new Date().getTime() + Math.random(),
+          variant: "error",
+          persist: false,
+        },
+      })
+    );
+    dispatch(containerLoadFail(containerId));
+    return;
+  }
   const statusCode = response.status;
   response = await response.json();
+
   if (statusCode === 200) {
     dispatch(
       enqueueSnackbar({
