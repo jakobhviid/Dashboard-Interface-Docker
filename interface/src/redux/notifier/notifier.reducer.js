@@ -4,11 +4,11 @@ import {
   REMOVE_SNACKBAR,
 } from "./notifier.types";
 
-const defaultState = {
+const INITIAL_STATE = {
   activeNotifications: [],
 };
 
-export default (state = defaultState, action) => {
+export default (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case ENQUEUE_SNACKBAR:
       return {

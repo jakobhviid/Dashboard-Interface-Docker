@@ -1,6 +1,7 @@
 import React from "react";
 import { withRouter } from "react-router-dom";
 import clsx from "clsx";
+import { useSelector } from "react-redux";
 
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -18,9 +19,27 @@ import NotificationsIcon from "@material-ui/icons/Notifications";
 
 import useStyles from "./Header.styles";
 import { overviewItems } from "./listitems";
+import NotificationMenu from "./NotificationMenu.component";
 
 function Header() {
   const [open, setOpen] = React.useState(true);
+  const [
+    notificationMenuAnchorEl,
+    setNotificationMenuAnchorEl,
+  ] = React.useState(null);
+  const monitorEvents = useSelector(
+    (store) => store.monitoringEvents.activeWarnings
+  );
+  const headerTitle = useSelector((store) => store.ui.headerTitle);
+
+  const handleNotificationClick = (event) => {
+    setNotificationMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleNotificationMenuClose = () => {
+    setNotificationMenuAnchorEl(null);
+  };
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -55,10 +74,10 @@ function Header() {
             noWrap
             className={styleClasses.title}
           >
-            Dashboard
+            {headerTitle}
           </Typography>
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
+          <IconButton color="inherit" onClick={handleNotificationClick}>
+            <Badge badgeContent={monitorEvents.length} color="error">
               <NotificationsIcon />
             </Badge>
           </IconButton>
@@ -84,6 +103,11 @@ function Header() {
         {/* <Divider />
         <List>{commandItems}</List> */}
       </Drawer>
+
+      <NotificationMenu
+        anchorEl={notificationMenuAnchorEl}
+        handleClose={handleNotificationMenuClose}
+      />
     </React.Fragment>
   );
 }

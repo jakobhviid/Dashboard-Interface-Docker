@@ -1,3 +1,5 @@
+import moment from "moment";
+
 import { enqueueSnackbar } from "../notifier/notifier.actions";
 
 import {
@@ -18,6 +20,10 @@ import {
   containerLoadFail,
   containerLoadSuccess,
 } from "./containerData.actions";
+import {
+  checkContainerOverviewData,
+  checkContainerStats,
+} from "../monitoring_events/monitoringEvents.actions";
 
 const FETCH_TIMEOUT = 15000; // 15 seconds
 
@@ -202,21 +208,14 @@ export const startCollectingOverview = () => {
 
     ioClient.on(GENERAL_SOCKET_ENDPOINT, (data) => {
       const containers = data.containers;
+
+      dispatch(checkContainerOverviewData(containers, data.servername));
+
       for (const container of containers) {
         const creationTimeDate = new Date(container["creation_time"]);
-        const options = {
-          weekday: "short",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        };
-        container["creation_time"] = creationTimeDate.toLocaleTimeString(
-          "en-us",
-          options
-        );
+        container["creation_time"] = moment(creationTimeDate)
+          .locale("da")
+          .format("ll");
       }
       dispatch(collectionSuccessOverview(data));
     });
@@ -236,6 +235,7 @@ export const startCollectingRessources = () => {
   return (dispatch, getState) => {
     const ioClient = getState().containerData.ioClient;
     ioClient.on(RESSOURCE_USAGE_ENDPOINT, (data) => {
+      dispatch(checkContainerStats(data.containers, data.servername));
       for (const container of data.containers) {
         const net_i_o =
           calculateAppropiateByteType(container.net_input_bytes) +

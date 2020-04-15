@@ -5,11 +5,8 @@ import Switch from "@material-ui/core/Switch";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import ContainerTable from "../../components/container_table/ContainerTable.component";
 
-import {
-  startCollectingRessources,
-  stopCollectingRessources,
-  reconfigureContainer,
-} from "../../redux/container_data/containerData.effects";
+import { reconfigureContainer } from "../../redux/container_data/containerData.effects";
+import { changeHeaderTitle } from "../../redux/ui/ui.actions";
 import ReconfigureContainerDialog from "../../components/dialogs/reconfigure_dialog/ReconfigureContainerDialog.component";
 
 const columns = {
@@ -43,6 +40,10 @@ function RessourceUsage() {
     (store) => store.containerData.statsData
   );
 
+  React.useEffect(() => {
+    dispatch(changeHeaderTitle("Container Ressource Usage"));
+  }, []);
+
   const actions = [
     {
       label: "Update Configuration",
@@ -56,13 +57,6 @@ function RessourceUsage() {
   const handleReconfigure = (values) => {
     dispatch(reconfigureContainer(selectedContainer, values));
   };
-
-  React.useEffect(() => {
-    dispatch(startCollectingRessources());
-    return () => {
-      dispatch(stopCollectingRessources());
-    };
-  }, [dispatch]);
 
   let containerView = null;
   if (Object.keys(serverContainers).length !== 0) {

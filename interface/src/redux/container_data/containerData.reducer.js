@@ -18,8 +18,6 @@ const INITIAL_STATE = {
 const overviewReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case overviewActionTypes.COLLECTION_SUCCESS_OVERVIEW:
-      console.log(action.payload.containers);
-
       for (const container of action.payload.containers) {
         if (action.payload.actionURL) {
           container["actionURL"] = action.payload.actionURL;

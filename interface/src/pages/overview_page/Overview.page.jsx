@@ -8,14 +8,14 @@ import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 
 import {
-  startCollectingOverview,
   renameContainer,
   startOrStopContainer,
   restartContainer,
-  stopCollectingOverview,
   removeContainer,
   runContainer,
 } from "../../redux/container_data/containerData.effects";
+import { changeHeaderTitle } from "../../redux/ui/ui.actions";
+
 import RenameContainerDialog from "../../components/dialogs/rename_dialog/RenameContainerDialog.component";
 import { findServerNameOfContainer } from "../../util/helpers";
 import NewContainerDialog from "../../components/dialogs/newcontainer_dialog/NewContainerDialog.component";
@@ -58,6 +58,10 @@ function Overview() {
   const dispatch = useDispatch();
   const overviewData = useSelector((store) => store.containerData.overviewData);
   const classes = useStyles();
+
+  React.useEffect(() => {
+    dispatch(changeHeaderTitle("Container Overview"));
+  }, []);
 
   const handleRename = (newName) => {
     const serverName = findServerNameOfContainer(
@@ -109,14 +113,6 @@ function Overview() {
       },
     },
   ];
-
-  React.useEffect(() => {
-    dispatch(startCollectingOverview());
-
-    return () => {
-      dispatch(stopCollectingOverview());
-    };
-  }, [dispatch]);
 
   let containerView = null;
 
@@ -239,8 +235,14 @@ function Overview() {
         handleClose={() => setCreateContainerDialogOpen(false)}
         handleConfirmation={createNewContainer}
         dialogTitle="Run a new Container"
-        // TODO - find all servers currently active, their name and actionURL and insert as list here
-        servers={[{ name: "OliversMBPStation", url: "http://127.0.0.1:5000" }]}
+        servers={Object.keys(overviewData).map((servername) => {
+          if (overviewData[servername].actionURL) {
+            return {
+              name: servername,
+              url: overviewData[servername].actionURL,
+            };
+          }
+        })}
       />
     </React.Fragment>
   );
