@@ -1,10 +1,16 @@
 import types from "./monitoringEvents.types";
 
-const WarningTypes = {
+const monitorReason = {
   UNHEALTHY: "Unhealthy Container",
   HEALTHCHECK_FAIL: "Container Failed Healthcheck",
   HIGH_CPU_USAGE: "High CPU Usage",
   HIGH_MEMORY_USAGE: "High Memory Usage",
+};
+
+export const eventType = {
+  ERROR: "ERROR",
+  WARNING: "WARNING",
+  INFO: "INFORMATION",
 };
 
 function healthMonitor(containers, server) {
@@ -20,7 +26,8 @@ function healthMonitor(containers, server) {
         id: container.id,
         name: container.name,
         warningTime: new Date(),
-        type: WarningTypes.UNHEALTHY,
+        reason: monitorReason.UNHEALTHY,
+        type: eventType.ERROR,
         server,
       });
     }
@@ -30,7 +37,8 @@ function healthMonitor(containers, server) {
         id: container.id,
         name: container.name,
         warningTime: new Date(),
-        type: WarningTypes.HEALTHCHECK_FAIL,
+        reason: monitorReason.HEALTHCHECK_FAIL,
+        type: eventType.ERROR,
         server,
         extraInfo:
           "Container has a fail streak of " +
@@ -64,7 +72,8 @@ export const checkContainerStats = (containers, server) => {
         id: container.id,
         name: container.name,
         warningTime: new Date(),
-        type: WarningTypes.HIGH_CPU_USAGE,
+        reason: monitorReason.HIGH_CPU_USAGE,
+        type: eventType.WARNING,
         server,
         extraInfo: "Container Used " + container.cpu_percentage + "% CPU",
       });
@@ -74,7 +83,8 @@ export const checkContainerStats = (containers, server) => {
         id: container.id,
         name: container.name,
         warningTime: new Date(),
-        type: WarningTypes.HIGH_MEMORY_USAGE,
+        reason: monitorReason.HIGH_MEMORY_USAGE,
+        type: eventType.WARNING,
         server,
         extraInfo: "Container Used " + container.memory_percentage + "% Memory",
       });

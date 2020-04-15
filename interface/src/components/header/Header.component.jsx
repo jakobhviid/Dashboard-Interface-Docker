@@ -19,7 +19,7 @@ import NotificationsIcon from "@material-ui/icons/Notifications";
 
 import useStyles from "./Header.styles";
 import { overviewItems } from "./listitems";
-import NotificationMenu from "./NotificationMenu.component";
+import NotificationMenu from "./notification_menu/NotificationMenu.component";
 
 function Header() {
   const [open, setOpen] = React.useState(true);
