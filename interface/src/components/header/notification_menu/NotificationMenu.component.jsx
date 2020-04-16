@@ -7,6 +7,7 @@ import Menu from "@material-ui/core/Menu";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import { withStyles } from "@material-ui/core/styles";
 import Divider from "@material-ui/core/Divider";
+import Collapse from "@material-ui/core/Collapse";
 
 import WarningIcon from "@material-ui/icons/Warning";
 import ClearAllIcon from "@material-ui/icons/ClearAll";
@@ -60,6 +61,7 @@ function NotificationMenu({ anchorEl, handleClose }) {
           maxHeight: 500,
         },
       }}
+      TransitionComponent={Collapse}
     >
       {monitorEvents
         .slice(0)
@@ -125,8 +127,8 @@ function NotificationMenu({ anchorEl, handleClose }) {
             style={{ margin: "auto" }}
             startIcon={<ClearAllIcon />}
             onClick={() => {
-              dispatch(clearAllWarnings());
               handleClose();
+              dispatch(clearAllWarnings());
             }}
           >
             Clear All Notifications
