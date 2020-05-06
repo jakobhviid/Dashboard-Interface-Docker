@@ -1,12 +1,14 @@
 import produce from "immer";
 import moment from "moment";
 import socketIOClient from "socket.io-client";
+import { Action } from "redux";
 
 import {
   overviewActionTypes,
   ressourceActionTypes,
   containerActionTypes,
 } from "./containerData.types";
+import { ContainerDataTypes } from "../../types/redux/containerData.types";
 
 const INITIAL_STATE = {
   ioClient: socketIOClient("http://127.0.0.1:5001"),
