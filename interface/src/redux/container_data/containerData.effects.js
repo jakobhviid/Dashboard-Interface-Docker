@@ -100,7 +100,7 @@ async function actionRequest(url, postData, dispatch, containerId) {
 export const renameContainer = (server, container, newName) => {
   return (dispatch) => {
     const postData = {
-      container_id: container.id,
+      containerId: container.id,
       name: newName,
     };
 
@@ -119,7 +119,7 @@ export const renameContainer = (server, container, newName) => {
 export const startOrStopContainer = (server, container) => {
   return (dispatch) => {
     const postData = {
-      container_id: container.id,
+      containerId: container.id,
     };
     if (container.state.status.toLowerCase() === "running") {
       actionRequest(
@@ -146,7 +146,7 @@ export const startOrStopContainer = (server, container) => {
 export const restartContainer = (server, container) => {
   return (dispatch) => {
     const postData = {
-      container_id: container.id,
+      containerId: container.id,
     };
 
     actionRequest(
@@ -164,7 +164,7 @@ export const restartContainer = (server, container) => {
 export const removeContainer = (server, container) => {
   return (dispatch) => {
     const postData = {
-      container_id: container.id,
+      containerId: container.id,
     };
 
     actionRequest(
@@ -181,7 +181,7 @@ export const removeContainer = (server, container) => {
 export const reconfigureContainer = (container, configureParams) => {
   return (dispatch) => {
     const postData = {
-      container_id: container.id,
+      containerId: container.id,
       ...configureParams,
     };
     actionRequest(
@@ -212,8 +212,8 @@ export const startCollectingOverview = () => {
       dispatch(checkContainerOverviewData(containers, data.servername));
 
       for (const container of containers) {
-        const creationTimeDate = new Date(container["creation_time"]);
-        container["creation_time"] = moment(creationTimeDate)
+        const creationTimeDate = new Date(container["creationTime"]);
+        container["creationTime"] = moment(creationTimeDate)
           .locale("da")
           .format("ll");
       }
@@ -237,16 +237,16 @@ export const startCollectingRessources = () => {
     ioClient.on(RESSOURCE_USAGE_ENDPOINT, (data) => {
       dispatch(checkContainerStats(data.containers, data.servername));
       for (const container of data.containers) {
-        const net_i_o =
-          calculateAppropiateByteType(container.net_input_bytes) +
+        const netIO =
+          calculateAppropiateByteType(container.netInputBytes) +
           " / " +
-          calculateAppropiateByteType(container.net_output_bytes);
-        const disk_i_o =
-          calculateAppropiateByteType(container.disk_input_bytes) +
+          calculateAppropiateByteType(container.netOutputBytes);
+        const diskIO =
+          calculateAppropiateByteType(container.diskInputBytes) +
           " / " +
-          calculateAppropiateByteType(container.disk_output_bytes);
-        container["net_i_o"] = net_i_o;
-        container["disk_i_o"] = disk_i_o;
+          calculateAppropiateByteType(container.diskOutputBytes);
+        container["netIO"] = netIO;
+        container["diskIO"] = diskIO;
       }
       dispatch(ressourceCollectionSuccess(data));
     });

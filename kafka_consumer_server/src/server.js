@@ -33,35 +33,36 @@ const run = async () => {
 
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
-      switch (topic) {
-        case GENERAL_INFO_TOPIC:
-          const generalInfoMessageParsed = JSON.parse(
-            JSON.parse(message.value.toString())
-          );
-          for (const container of generalInfoMessageParsed.containers) {
-            container["update_time"] = new Date();
-          }
+      try {
+        switch (topic) {
+          case GENERAL_INFO_TOPIC:
+            const generalInfoMessageParsed = JSON.parse(message.value.toString());
+            for (const container of generalInfoMessageParsed.containers) {
+              container["updateTime"] = new Date();
+            }
 
-          latest_general_info_message[
-            generalInfoMessageParsed.servername
-          ] = generalInfoMessageParsed;
+            latest_general_info_message[
+              generalInfoMessageParsed.servername
+            ] = generalInfoMessageParsed;
 
-          io.emit(GENERAL_SOCKET_ENDPOINT, generalInfoMessageParsed);
-          break;
-        case STATS_TOPIC:
-          const statsMessageParsed = JSON.parse(
-            JSON.parse(message.value.toString())
-          );
-          for (const container of statsMessageParsed.containers) {
-            container["update_time"] = new Date();
-          }
-          latest_stats_info_message[
-            statsMessageParsed.servername
-          ] = statsMessageParsed;
-          io.emit(RESSOURCE_USAGE_ENDPOINT, statsMessageParsed);
-          break;
+            io.emit(GENERAL_SOCKET_ENDPOINT, generalInfoMessageParsed);
+            break;
+          case STATS_TOPIC:
+            const statsMessageParsed = JSON.parse(message.value.toString());
+            for (const container of statsMessageParsed.containers) {
+              container["updateTime"] = new Date();
+            }
+            latest_stats_info_message[
+              statsMessageParsed.servername
+            ] = statsMessageParsed;
+            io.emit(RESSOURCE_USAGE_ENDPOINT, statsMessageParsed);
+            break;
+        }
+        latestOffSet = message.offset;
+      } catch (error) {
+        console.log(error);
+        
       }
-      latestOffSet = message.offset;
     },
   });
 };

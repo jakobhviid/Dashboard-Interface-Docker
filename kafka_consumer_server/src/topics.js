@@ -1,5 +1,5 @@
-const GENERAL_INFO_TOPIC = "0913c91b-ec2b-4b69-ad8c-d9c8d25f1464-general_info";
-const STATS_TOPIC = "0913c91b-ec2b-4b69-ad8c-d9c8d25f1464-stats_info";
+const GENERAL_INFO_TOPIC = "f0e1e946-50d0-4a2b-b1a5-f21b92e09ac1-general_info";
+const STATS_TOPIC = "33a325ce-b0c0-43a7-a846-4f46acdb367e-stats_info";
 
 module.exports = {
   GENERAL_INFO_TOPIC,

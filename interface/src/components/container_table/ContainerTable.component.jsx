@@ -274,7 +274,7 @@ function ContainerTable({ columns, title, data, dense, actions, onAdd }) {
                             {get(row, column.field)}
                           </TableCell>
                         ))}
-                        {row.actionURL ? (
+                        {row.commandRequestTopic ? (
                           <TableCell align="center">
                             {loadingContainers.includes(row.id) ? (
                               <div style={{ padding: "12px" }}>

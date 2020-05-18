@@ -18,6 +18,7 @@ function ReconfigureDialog({
   handleConfirmation,
   dialogTitle,
 }) {
+  // TODO: change this when commando server has changed
   const [values, setValues] = React.useState({
     blkio_weight: "",
     mem_limit: { value: "", byteVariant: "mb" },

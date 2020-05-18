@@ -1,14 +1,11 @@
 import produce from "immer";
-import moment from "moment";
 import socketIOClient from "socket.io-client";
-import { Action } from "redux";
 
 import {
   overviewActionTypes,
   ressourceActionTypes,
   containerActionTypes,
 } from "./containerData.types";
-import { ContainerDataTypes } from "../../types/redux/containerData.types";
 
 const INITIAL_STATE = {
   ioClient: socketIOClient("http://127.0.0.1:5001"),
@@ -17,56 +14,53 @@ const INITIAL_STATE = {
   loadingContainers: [],
 };
 
+const addCommandTopicToContainers = (containers, payload) => {
+  for (const container of containers) {
+    if (payload.commandRequestTopic && payload.commandResponseTopic) {
+      container["commandRequestTopic"] = payload.commandRequestTopic;
+      container["commandResponseTopic"] = payload.commandResponseTopic;
+    }
+  }
+};
+
 const overviewReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
     case overviewActionTypes.COLLECTION_SUCCESS_OVERVIEW:
-      for (const container of action.payload.containers) {
-        if (action.payload.actionURL) {
-          container["actionURL"] = action.payload.actionURL;
-        }
-        // Visual representation of "Up 3 hours and exited 5 hours ago etc."
-        const containerStatus = container.state.status;
-        const containerStartTime = container.state.startTime;
-        const timeSinceStart = moment(containerStartTime).fromNow();
-        const containerFinishTime = container.state.finishTime;
-        if (containerStatus === "running") {
-          let stringRepresentation =
-            "Up " +
-            timeSinceStart.substring(0, timeSinceStart.lastIndexOf(" "));
-          if (container.state.health) {
-            stringRepresentation =
-              stringRepresentation + " (" + container.state.health.status + ")";
-          }
-          container.state.stringRepresentation = stringRepresentation;
-        } else {
-          container.state.stringRepresentation =
-            "Exited " + moment(containerFinishTime).fromNow();
-        }
-      }
+      addCommandTopicToContainers(action.payload.containers, action.payload);
       return produce(state, (nextState) => {
         nextState.overviewData[action.payload.servername] = {
           containers: action.payload.containers,
         };
-        if (action.payload.actionURL) {
-          nextState.overviewData[action.payload.servername]["actionURL"] =
-            action.payload.actionURL;
+        if (
+          action.payload.commandRequestTopic &&
+          action.payload.commandResponseTopic
+        ) {
+          nextState.overviewData[action.payload.servername][
+            "commandRequestTopic"
+          ] = action.payload.commandRequestTopic;
+          nextState.overviewData[action.payload.servername][
+            "commandResponseTopic"
+          ] = action.payload.commandResponseTopic;
         }
       });
 
     case ressourceActionTypes.COLLECTION_SUCCESS_RESSOURCE:
-      for (const container of action.payload.containers) {
-        if (action.payload.actionURL) {
-          container["actionURL"] = action.payload.actionURL;
-        }
-      }
+      addCommandTopicToContainers(action.payload.containers, action.payload);
 
       return produce(state, (nextState) => {
         nextState.statsData[action.payload.servername] = {
           containers: action.payload.containers,
         };
-        if (action.payload.actionURL) {
-          nextState.statsData[action.payload.servername]["actionURL"] =
-            action.payload.actionURL;
+        if (
+          action.payload.commandRequestTopic &&
+          action.payload.commandResponseTopic
+        ) {
+          nextState.statsData[action.payload.servername][
+            "commandRequestTopic"
+          ] = action.payload.commandRequestTopic;
+          nextState.statsData[action.payload.servername][
+            "commandResponseTopic"
+          ] = action.payload.commandResponseTopic;
         }
       });
 
@@ -91,11 +85,13 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
         const server = action.payload.server;
         const updatedContainer = action.payload.updatedContainer;
 
-        updatedContainer.state.status =
-          updatedContainer.state.status === "exited" ? "running" : "exited";
+        updatedContainer.state = updatedContainer.state.includes(
+          "exited"
+        )
+          ? "running"
+          : "exited";
 
-        updatedContainer.state.stringRepresentation =
-          updatedContainer.state.status === "exited"
+        updatedContainer.statis = updatedContainer.state.includes("exited")
             ? "Exited a few seconds ago"
             : "Up a few seconds";
 

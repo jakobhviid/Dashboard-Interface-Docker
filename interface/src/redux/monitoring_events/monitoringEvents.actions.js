@@ -17,11 +17,8 @@ function healthMonitor(containers, server) {
   const containersWithWarnings = [];
 
   for (const container of containers) {
-    // If container has health, and then if it's unhealthy (healthy for testing purposes)
-    if (
-      container.state.health &&
-      container.state.health.status === "unhealthy"
-    ) {
+    // If container has health, and then if it's unhealthy
+    if (container.status.includes("unhealthy")) {
       containersWithWarnings.push({
         id: container.id,
         name: container.name,
@@ -29,20 +26,6 @@ function healthMonitor(containers, server) {
         reason: monitorReason.UNHEALTHY,
         type: eventType.ERROR,
         server,
-      });
-    }
-
-    if (container.state.health && container.state.health.failingStreak !== 0) {
-      containersWithWarnings.push({
-        id: container.id,
-        name: container.name,
-        warningTime: new Date(),
-        reason: monitorReason.HEALTHCHECK_FAIL,
-        type: eventType.ERROR,
-        server,
-        extraInfo:
-          "Container has a fail streak of " +
-          container.state.health.failingStreak,
       });
     }
   }
@@ -67,7 +50,7 @@ export const checkContainerOverviewData = (containers, server) => {
 export const checkContainerStats = (containers, server) => {
   const containersWithHighUsage = [];
   for (const container of containers) {
-    if (container.cpu_percentage > 50) {
+    if (container.cpuPercentage > 75) {
       containersWithHighUsage.push({
         id: container.id,
         name: container.name,
@@ -86,7 +69,7 @@ export const checkContainerStats = (containers, server) => {
         reason: monitorReason.HIGH_MEMORY_USAGE,
         type: eventType.WARNING,
         server,
-        extraInfo: "Container Used " + container.memory_percentage + "% Memory",
+        extraInfo: "Container Used " + container.memoryPercentage + "% Memory",
       });
     }
   }

@@ -27,14 +27,14 @@ const columnsServerView = [
   { title: "Id", alignment: "left", field: "id" },
   { title: "Image", alignment: "left", field: "image" },
   {
-    title: "State",
+    title: "Status",
     alignment: "left",
-    field: "state.stringRepresentation",
+    field: "status",
   },
   {
     title: "Creation Time",
     alignment: "left",
-    field: "creation_time",
+    field: "creationTime",
   },
 ];
 
@@ -103,7 +103,6 @@ function Overview() {
     {
       label: "Remove",
       onClick: (selectedContainer) => {
-        console.log("Removing", selectedContainer.name);
         dispatch(
           removeContainer(
             findServerNameOfContainer(overviewData, selectedContainer),
@@ -133,6 +132,7 @@ function Overview() {
     }
   }
 
+  // TODO: Replace after commando server has been changed
   function createNewContainer(values) {
     const objectToSend = {};
 
@@ -236,10 +236,10 @@ function Overview() {
         handleConfirmation={createNewContainer}
         dialogTitle="Run a new Container"
         servers={Object.keys(overviewData).map((servername) => {
-          if (overviewData[servername].actionURL) {
+          if (overviewData[servername].commandRequestTopic) {
             return {
               name: servername,
-              url: overviewData[servername].actionURL,
+              url: overviewData[servername].commandRequestTopic, // TODO: change when commando server has changed
             };
           }
         })}

@@ -1,50 +1,36 @@
-export enum ContainerStatus {
-  Running = "running",
-  Exited = "exited",
-}
-
-export enum ContainerHealthStatus {
-  Healthy = "healthy",
-  Unhealthy = "unhealthy",
-}
-
 export interface IOverviewContainer {
   id: string;
   name: string;
   image: string[];
-  state: {
-    status: ContainerStatus;
-    startTime: Date;
-    finishTime: Date;
-    health?: {
-      status: ContainerHealthStatus;
-      failingStreak: number;
-    };
-  };
+  state: string;
+  status: string;
+  creationTime: Date;
 }
 
 export interface IAPIOverviewData {
   servername: string;
-  actionURL: string;
   containers: IOverviewContainer[];
+  commandRequestTopic?: string;
+  commandResponseTopic?: string;
 }
 
 export interface IStatsContainer {
   id: string;
   name: string;
-  cpu_usage: number;
-  num_of_cpu: number;
-  system_cpu_usage: number;
-  cpu_percentage: number;
-  memory_percentage: number;
-  net_input_bytes: number;
-  net_output_bytes: number;
-  disk_input_bytes: number;
-  disk_output_bytes: number;
+  cpuUsage: number;
+  numOfCpu: number;
+  systemCpuUsage: number;
+  cpuPercentage: number;
+  memoryPercentage: number;
+  netInputBytes: number;
+  netOutputBytes: number;
+  diskInputBytes: number;
+  diskOutputBytes: number;
 }
 
 export interface IAPIStatsData {
   servername: string;
-  actionURL: string;
   containers: IStatsContainer[];
+  commandRequestTopic?: string;
+  commandResponseTopic?: string;
 }

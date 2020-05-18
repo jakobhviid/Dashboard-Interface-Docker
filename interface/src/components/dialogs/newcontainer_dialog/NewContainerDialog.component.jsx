@@ -21,6 +21,7 @@ function NewContainerDialog({
   dialogTitle,
   servers,
 }) {
+    // TODO: change this when commando server has changed
   const [values, setValues] = React.useState({
     image: "",
     name: "",
