@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { Switch, Route } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import IconButton from "@material-ui/core/IconButton";
 import ClearIcon from "@material-ui/icons/Clear";
@@ -24,11 +24,11 @@ import {
   stopCollectingOverview,
   stopCollectingRessources,
 } from "./redux/container_data/containerData.effects";
+import { useTypedSelector } from "./types/redux/reducerStates.types";
+
 
 const Overview = lazy(() => import("./pages/overview_page/Overview.page"));
-const RessourceUsage = lazy(() =>
-  import("./pages/ressource_usage_page/RessourceUsage.page")
-);
+const RessourceUsage = lazy(() => import("./pages/ressource_usage_page/RessourceUsage.page"));
 
 const theme = createMuiTheme({
   palette: {
@@ -41,10 +41,13 @@ const theme = createMuiTheme({
 function App() {
   const dispatch = useDispatch();
   const styleClasses = useStyles();
+  const socketConnection = useTypedSelector(store => store.containerData.socketConnection)
 
   React.useEffect(() => {
-    dispatch(startCollectingOverview());
-    dispatch(startCollectingRessources());
+    socketConnection.start().then(() => {
+      dispatch(startCollectingOverview());
+      dispatch(startCollectingRessources());
+    });
 
     return () => {
       dispatch(stopCollectingOverview());
@@ -63,10 +66,7 @@ function App() {
       preventDuplicate
       hideIconVariant
       action={(key) => (
-        <IconButton
-          aria-label="close notification"
-          onClick={() => dispatch(closeSnackbar(key))}
-        >
+        <IconButton aria-label="close notification" onClick={() => dispatch(closeSnackbar(key))}>
           <ClearIcon />
         </IconButton>
       )}
@@ -82,10 +82,7 @@ function App() {
                 <div className={styleClasses.appBarSpacer} />
                 <Container maxWidth="xl" className={styleClasses.container}>
                   <Route exact path={OVERVIEW_URL} component={Overview} />
-                  <Route
-                    path={RESSOURCE_USAGE_URL}
-                    component={RessourceUsage}
-                  />
+                  <Route path={RESSOURCE_USAGE_URL} component={RessourceUsage} />
                   {/* <Footer /> */}
                 </Container>
               </main>

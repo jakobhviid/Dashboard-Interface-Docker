@@ -4,7 +4,8 @@ export interface IOverviewContainer {
   image: string[];
   state: string;
   status: string;
-  creationTime: Date;
+  creationTime: Date | string;
+  updateTime: Date | string;
 }
 
 export interface IAPIOverviewData {
@@ -26,6 +27,9 @@ export interface IStatsContainer {
   netOutputBytes: number;
   diskInputBytes: number;
   diskOutputBytes: number;
+  updateTime: Date | string;
+  netIO?: string;
+  diskIO?: string;
 }
 
 export interface IAPIStatsData {

@@ -1,4 +1,5 @@
 import types from "./monitoringEvents.types";
+import { IOverviewContainer, IStatsContainer } from "../../types/api_response/container.types";
 
 const monitorReason = {
   UNHEALTHY: "Unhealthy Container",
@@ -13,7 +14,7 @@ export const eventType = {
   INFO: "INFORMATION",
 };
 
-function healthMonitor(containers, server) {
+function healthMonitor(containers: IOverviewContainer[], server: string) {
   const containersWithWarnings = [];
 
   for (const container of containers) {
@@ -29,10 +30,11 @@ function healthMonitor(containers, server) {
       });
     }
   }
+  
   return containersWithWarnings;
 }
 
-export const checkContainerOverviewData = (containers, server) => {
+export const checkContainerOverviewData = (containers: IOverviewContainer[], server:string) => {
   const containersWithWarnings = healthMonitor(containers, server);
 
   if (containersWithWarnings.length > 0) {
@@ -47,7 +49,7 @@ export const checkContainerOverviewData = (containers, server) => {
   }
 };
 
-export const checkContainerStats = (containers, server) => {
+export const checkContainerStats = (containers: IStatsContainer[], server:string) => {
   const containersWithHighUsage = [];
   for (const container of containers) {
     if (container.cpuPercentage > 75) {
@@ -58,10 +60,10 @@ export const checkContainerStats = (containers, server) => {
         reason: monitorReason.HIGH_CPU_USAGE,
         type: eventType.WARNING,
         server,
-        extraInfo: "Container Used " + container.cpu_percentage + "% CPU",
+        extraInfo: "Container Used " + container.cpuPercentage + "% CPU",
       });
     }
-    if (container.memory_percentage > 50) {
+    if (container.memoryPercentage > 50) {
       containersWithHighUsage.push({
         id: container.id,
         name: container.name,

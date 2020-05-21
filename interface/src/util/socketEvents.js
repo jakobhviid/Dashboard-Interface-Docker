@@ -1,11 +1,11 @@
-const GENERAL_SOCKET_ENDPOINT = "general";
-const RESSOURCE_USAGE_ENDPOINT = "ressource_usage";
-const NEWEST_OVERVIEW_DATA_REQUEST = "newest_overview_data";
-const NEWEST_STATS_DATA_REQUEST = "newest_stats_data";
+const OVERVIEWDATA_FUNCTION = "SendOverviewData";
+const STATSDATA_FUNCTION = "SendStatsData";
+const NEWEST_OVERVIEW_DATA_REQUEST = "ReceiveNewestOverviewData";
+const NEWEST_STATS_DATA_REQUEST = "ReceiveNewestStatsData";
 
 module.exports = {
-  GENERAL_SOCKET_ENDPOINT,
-  RESSOURCE_USAGE_ENDPOINT,
+  OVERVIEWDATA_FUNCTION,
+  STATSDATA_FUNCTION,
   NEWEST_OVERVIEW_DATA_REQUEST,
   NEWEST_STATS_DATA_REQUEST,
 };
