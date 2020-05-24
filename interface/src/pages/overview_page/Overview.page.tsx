@@ -1,5 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { HubConnection } from "@microsoft/signalr";
 
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Switch from "@material-ui/core/Switch";
@@ -8,19 +9,21 @@ import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
 
 import {
-  renameContainer,
-  startOrStopContainer,
-  restartContainer,
-  removeContainer,
-  runContainer,
-} from "../../redux/container_data/containerData.effects";
-import { changeHeaderTitle } from "../../redux/ui/ui.actions";
+  RENAME_CONTAINER_REQUEST,
+  STOP_CONTAINER_REQUEST,
+  START_CONTAINER_REQUEST,
+  RESTART_CONTAINER_REQUEST,
+  REMOVE_CONTAINER_REQUEST,
+  CREATE_NEW_CONTAINER_REQUEST,
+} from "../../util/socketEvents";
 
+import { changeHeaderTitle } from "../../redux/ui/ui.actions";
+import { containerLoadStart } from "../../redux/container_data/containerData.actions";
 import RenameContainerDialog from "../../components/dialogs/rename_dialog/RenameContainerDialog.component";
-import { findServerNameOfContainer } from "../../util/helpers";
 import NewContainerDialog from "../../components/dialogs/newcontainer_dialog/NewContainerDialog.component";
 
 import useStyles from "./Overview.styles";
+import { IRootState } from "../../types/redux/reducerStates.types";
 
 const columnsServerView = [
   { title: "Name", alignment: "left", field: "name" },
@@ -47,73 +50,74 @@ const columnsContainerView = [
   },
 ];
 
+interface IContainerState {
+  id: string;
+  name: string;
+  image: string[];
+  state: string;
+  status: string;
+  creationTime: Date | string;
+  updateTime: Date | string;
+  commandRequestTopic?: string;
+  commandResponseTopic?: string;
+}
+
 function Overview() {
   const [serverMode, setServerMode] = React.useState(true);
-  const [selectedContainer, setSelectedContainer] = React.useState(null);
-  const [
-    createContainerDialogOpen,
-    setCreateContainerDialogOpen,
-  ] = React.useState(false);
+  const [selectedContainer, setSelectedContainer] = React.useState<IContainerState | null>(null);
+  const [createContainerDialogOpen, setCreateContainerDialogOpen] = React.useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
   const dispatch = useDispatch();
-  const overviewData = useSelector((store) => store.containerData.overviewData);
+  const overviewData = useSelector((store: IRootState) => store.containerData.overviewData);
+  const socketConnection: HubConnection = useSelector((store: IRootState) => store.containerData.socketConnection);
   const classes = useStyles();
 
   React.useEffect(() => {
     dispatch(changeHeaderTitle("Container Overview"));
   }, []);
 
-  const handleRename = (newName) => {
-    const serverName = findServerNameOfContainer(
-      overviewData,
-      selectedContainer
-    );
-    dispatch(renameContainer(serverName, selectedContainer, newName));
+  const handleRename = (newName: string) => {
+    if (selectedContainer != null) {
+      dispatch(containerLoadStart(selectedContainer.id));
+      socketConnection.invoke(RENAME_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, newName);
+    }
   };
 
   const actions = [
     {
       label: "Rename",
-      onClick: (selectedContainer) => {
+      onClick: (selectedContainer: IContainerState) => {
         setSelectedContainer(selectedContainer);
         setRenameDialogOpen(true);
       },
     },
     {
       label: "Start/Stop",
-      onClick: (selectedContainer) => {
-        const serverName = findServerNameOfContainer(
-          overviewData,
-          selectedContainer
-        );
-        dispatch(startOrStopContainer(serverName, selectedContainer));
+      onClick: (selectedContainer: IContainerState) => {
+        if (selectedContainer.commandRequestTopic != null)
+          if (selectedContainer.state.includes("running")) {
+            dispatch(containerLoadStart(selectedContainer.id));
+            socketConnection.invoke(STOP_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
+          } else socketConnection.invoke(START_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
       },
     },
     {
       label: "Restart",
-      onClick: (selectedContainer) => {
-        dispatch(
-          restartContainer(
-            findServerNameOfContainer(overviewData, selectedContainer),
-            selectedContainer
-          )
-        );
+      onClick: (selectedContainer: IContainerState) => {
+        dispatch(containerLoadStart(selectedContainer.id));
+        socketConnection.invoke(RESTART_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
       },
     },
     {
       label: "Remove",
-      onClick: (selectedContainer) => {
-        dispatch(
-          removeContainer(
-            findServerNameOfContainer(overviewData, selectedContainer),
-            selectedContainer
-          )
-        );
+      onClick: (selectedContainer: IContainerState) => {
+        dispatch(containerLoadStart(selectedContainer.id));
+        socketConnection.invoke(REMOVE_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, true); //TODO: Ask user if they want to remove volumes aswell
       },
     },
   ];
 
-  let containerView = null;
+  let containerView: any = null;
 
   if (Object.keys(overviewData).length !== 0) {
     if (!serverMode) {
@@ -132,24 +136,22 @@ function Overview() {
     }
   }
 
-  // TODO: Replace after commando server has been changed
-  function createNewContainer(values) {
-    const objectToSend = {};
+  // TODO: Replace after command server has been changed
+  function createNewContainer(values: any) {
+    const objectToSend: any = {};
 
     if (values["image"] !== "") objectToSend["image"] = values["image"];
     if (values["name"] !== "") objectToSend["name"] = values["name"];
     if (values["command"] !== "") objectToSend["command"] = values["command"];
 
     if (values["restart_policy"]["name"] !== "{}") {
-      const restartPolicyObject = { Name: values["restart_policy"]["name"] };
+      const restartPolicyObject: any = { Name: values["restart_policy"]["name"] };
       if (values["restart_policy"]["maximumRetryCount"] !== "")
-        restartPolicyObject["MaximumRetryCount"] = parseInt(
-          values["restart_policy"]["maximumRetryCount"]
-        );
+        restartPolicyObject["MaximumRetryCount"] = parseInt(values["restart_policy"]["maximumRetryCount"]);
       objectToSend["restart_policy"] = restartPolicyObject;
     }
 
-    const ports = {};
+    const ports: any = {};
     for (const port of values["ports"]) {
       ports[port.portContainer + "/tcp"] = port.portHost;
     }
@@ -159,16 +161,15 @@ function Overview() {
     for (const environment of values["environment"]) {
       environmentVariables.push(environment.key + "=" + environment.value);
     }
-    if (environmentVariables.length !== 0)
-      objectToSend["environment"] = environmentVariables;
+    if (environmentVariables.length !== 0) objectToSend["environment"] = environmentVariables;
 
-    const volumes = {};
+    const volumes: any = {};
     for (const volume of values["volumes"]) {
       volumes[volume.hostPath] = { bind: volume.bind, mode: volume.mode };
     }
     if (Object.keys(volumes).length !== 0) objectToSend["volumes"] = volumes;
 
-    dispatch(runContainer(values.server, objectToSend));
+    socketConnection.invoke(CREATE_NEW_CONTAINER_REQUEST, values.server); // TODO: Give parameters once server supports it
   }
 
   return Object.keys(overviewData).length === 0 ? (

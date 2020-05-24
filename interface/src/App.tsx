@@ -23,6 +23,8 @@ import {
   startCollectingRessources,
   stopCollectingOverview,
   stopCollectingRessources,
+  startListeningForCommandResponses,
+  stopListeningForCommandResponses
 } from "./redux/container_data/containerData.effects";
 import { useTypedSelector } from "./types/redux/reducerStates.types";
 
@@ -47,11 +49,13 @@ function App() {
     socketConnection.start().then(() => {
       dispatch(startCollectingOverview());
       dispatch(startCollectingRessources());
+      dispatch(startListeningForCommandResponses());
     });
 
     return () => {
       dispatch(stopCollectingOverview());
       dispatch(stopCollectingRessources());
+      dispatch(stopListeningForCommandResponses());
     };
   }, [dispatch]);
 

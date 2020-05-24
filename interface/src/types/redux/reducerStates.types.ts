@@ -4,9 +4,9 @@ import { Action } from "redux";
 
 export interface IContainerDataState {
   socketConnection: HubConnection
-  overviewData: {},
-  statsData: {},
-  loadingContainers: [],
+  overviewData: any,
+  statsData: any,
+  loadingContainers: any,
 }
 
 export const useTypedSelector: TypedUseSelectorHook<IRootState> = useSelector

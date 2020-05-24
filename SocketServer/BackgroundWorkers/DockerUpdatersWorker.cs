@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
@@ -27,31 +26,32 @@ namespace SocketServer.BackgroundWorkers
         {
             var consumerConfig = new ConsumerConfig
             {
-                GroupId = "socket-server-dashboard-interface",
+                GroupId = "socket-server-consumer" + Guid.NewGuid(), // NOTE: If the socket server restarts it will never join the same group. This is to ensure it always reads the latest data
                 BootstrapServers = KafkaHelpers.BootstrapServers,
-                AutoOffsetReset = AutoOffsetReset.Earliest,
+                AutoOffsetReset = AutoOffsetReset.Latest,
             };
 
             using(var c = new ConsumerBuilder<Ignore, string>(consumerConfig).Build())
             {
+                
                 c.Subscribe(new List<string> { KafkaHelpers.OverviewTopic, KafkaHelpers.StatsTopic });
-                Console.WriteLine($"Listening for updates");
 
+                _logger.LogInformation("Listening for updates");
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     // consumer does not have an async method. So it is wrapped in a task, so that the rest of the application doesn't hang here
                     var consumeResult = await Task.Factory.StartNew(() => c.Consume(stoppingToken));
-                    _logger.LogInformation("I found a message! " + consumeResult.Message.Value);
                     switch (consumeResult.Topic)
                     {
                         case KafkaHelpers.OverviewTopic:
                             await _updatersHub.Clients.All.SendOverviewData(consumeResult.Message.Value);
+                            KafkaHelpers.LatestOverviewInfo = consumeResult.Message.Value;
                             break;
                         case KafkaHelpers.StatsTopic:
                             await _updatersHub.Clients.All.SendStatsData(consumeResult.Message.Value);
+                            KafkaHelpers.LatestStatsInfo = consumeResult.Message.Value;
                             break;
                     }
-                    await Task.Delay(1999, stoppingToken);
                     // TODO: Save the data in a database
                 }
                 c.Close();

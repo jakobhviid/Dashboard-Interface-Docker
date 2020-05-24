@@ -15,13 +15,18 @@ namespace SocketServer
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            // adding Database
-            var connectionString = Environment.GetEnvironmentVariable("DI_MSSQL_CONNECTION_STRING");
-            services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
-            services.AddScoped<IContainerUpdateRepo, ContainerUpdateRepo>();
+            // adding Database TODO:
+            // var connectionString = Environment.GetEnvironmentVariable("DI_MSSQL_CONNECTION_STRING");
+            // if (connectionString == null) {
+            //     Console.WriteLine("Connection String not provided!");
+            //     System.Environment.Exit(1);
+            // }
+            // services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+            // services.AddScoped<IContainerUpdateRepo, ContainerUpdateRepo>();
 
             services.AddSignalR();
             services.AddHostedService<DockerUpdatersWorker>();
+            services.AddHostedService<CommandServerResponseWorker>();
             services.AddCors();
         }
 
@@ -31,7 +36,7 @@ namespace SocketServer
             {
                 app.UseDeveloperExceptionPage();
             }
-            UpdateDatabase(app);
+            // UpdateDatabase(app); TODO:
             app.UseRouting();
 
             app.UseCors(x => x.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader().AllowCredentials());

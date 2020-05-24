@@ -55,7 +55,7 @@ function RessourceUsage() {
   ];
 
   const handleReconfigure = (values) => {
-    dispatch(reconfigureContainer(selectedContainer, values));
+    // dispatch(reconfigureContainer(selectedContainer, values)); TODO:
   };
 
   let containerView = null;

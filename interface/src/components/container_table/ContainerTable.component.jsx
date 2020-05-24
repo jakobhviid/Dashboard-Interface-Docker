@@ -104,7 +104,7 @@ function ContainerTableHeader({ columns, orderBy, order, onRequestSort }) {
   );
 }
 
-function TableToolbar({ title, onAdd, onSearchChange, searchValue }) {
+function TableToolbar({ title, onSearchChange, searchValue }) {
   const classes = useToolbarStyles();
   return (
     <Toolbar className={classes.root}>
@@ -136,13 +136,6 @@ function TableToolbar({ title, onAdd, onSearchChange, searchValue }) {
           <FilterListIcon color="primary" />
         </IconButton>
       </Tooltip>
-      {onAdd ? (
-        <Tooltip title="Add New Container">
-          <IconButton aria-label="filter list" onClick={onAdd}>
-            <AddIcon color="primary" aria-label="add" />
-          </IconButton>
-        </Tooltip>
-      ) : null}
     </Toolbar>
   );
 }
@@ -166,7 +159,7 @@ const StyledMenu = withStyles({
   />
 ));
 
-function ContainerTable({ columns, title, data, dense, actions, onAdd }) {
+function ContainerTable({ columns, title, data, dense, actions }) {
   const classes = useTableStyles();
   const [page, setPage] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -226,7 +219,6 @@ function ContainerTable({ columns, title, data, dense, actions, onAdd }) {
       <Paper className={classes.paper}>
         <TableToolbar
           title={title}
-          onAdd={onAdd}
           onSearchChange={handleOnSearchChange}
           searchValue={searchValue}
         />
@@ -259,7 +251,7 @@ function ContainerTable({ columns, title, data, dense, actions, onAdd }) {
                       onOpen={() =>
                         setlastUpdatedTooltips({
                           ...lastUpdatedTooltips,
-                          [row.id]: moment(row.update_time).fromNow(),
+                          [row.id]: moment(row.updateTime).fromNow(),
                         })
                       }
                       arrow
