@@ -60,5 +60,19 @@ namespace SocketServer.Hubs.DockerUpdatersHub
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new UpdateConfigContainerParameters { ContainerId = containerId, }); // TODO:
         }
+        public async void RefetchOverviewData(string serverRequestTopic)
+        {
+            await KafkaHelpers.SendMessageAsync(serverRequestTopic, new ContainerRequest
+            {
+                Action = ContainerActionType.REFETCH_OVERVIEW
+            });
+        }
+        public async void RefetchStatsData(string serverRequestTopic)
+        {
+            await KafkaHelpers.SendMessageAsync(serverRequestTopic, new ContainerRequest
+            {
+                Action = ContainerActionType.REFETCH_STATS
+            });
+        }
     }
 }

@@ -14,12 +14,12 @@ export const ressourceCollectionSuccess = (data:any) => ({
   payload: data,
 });
 
-export const containerLoadStart = (containerId:string) => ({
+export const containerLoadStart = (containerIds:string[]) => ({
   type: containerActionTypes.CONTAINER_LOAD_START,
-  payload: containerId,
+  payload: containerIds,
 });
 
-export const containerLoadFinished = (containerId:string) => ({
+export const containerLoadFinished = (containerIds:string[]) => ({
   type: containerActionTypes.CONTAINER_LOAD_FINISHED,
-  payload: containerId,
+  payload: containerIds,
 });

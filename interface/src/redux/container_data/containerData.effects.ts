@@ -79,7 +79,7 @@ export const stopCollectingRessources = () => {
 interface ICommandResponse {
   responseStatusCode: number;
   message: string;
-  containerId: string
+  containerIds: string[]
 }
 
 export const startListeningForCommandResponses = () => {
@@ -99,7 +99,7 @@ export const startListeningForCommandResponses = () => {
           },
         })
       );
-      dispatch(containerLoadFinished(parsedResponse.containerId))
+      dispatch(containerLoadFinished(parsedResponse.containerIds))
     });
   };
 };

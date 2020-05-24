@@ -20,7 +20,7 @@ import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import IconButton from "@material-ui/core/IconButton";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import AddIcon from "@material-ui/icons/Add";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
@@ -104,7 +104,7 @@ function ContainerTableHeader({ columns, orderBy, order, onRequestSort }) {
   );
 }
 
-function TableToolbar({ title, onSearchChange, searchValue }) {
+function TableToolbar({ title, onSearchChange, searchValue, onRefetch }) {
   const classes = useToolbarStyles();
   return (
     <Toolbar className={classes.root}>
@@ -131,11 +131,16 @@ function TableToolbar({ title, onSearchChange, searchValue }) {
           inputProps={{ "aria-label": "search" }}
         />
       </div>
-      <Tooltip title="Filter list">
+      <Tooltip title="Refetch data">
+        <IconButton color="primary" onClick={onRefetch}>
+          <RefreshIcon />
+        </IconButton>
+      </Tooltip>
+      {/* <Tooltip title="Filter list">
         <IconButton aria-label="filter list">
           <FilterListIcon color="primary" />
         </IconButton>
-      </Tooltip>
+      </Tooltip> */}
     </Toolbar>
   );
 }
@@ -159,7 +164,7 @@ const StyledMenu = withStyles({
   />
 ));
 
-function ContainerTable({ columns, title, data, dense, actions }) {
+function ContainerTable({ columns, title, data, dense, actions, onRefetch }) {
   const classes = useTableStyles();
   const [page, setPage] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -221,6 +226,7 @@ function ContainerTable({ columns, title, data, dense, actions }) {
           title={title}
           onSearchChange={handleOnSearchChange}
           searchValue={searchValue}
+          onRefetch={onRefetch}
         />
         <TableContainer>
           <Table
@@ -273,22 +279,22 @@ function ContainerTable({ columns, title, data, dense, actions }) {
                                 <CircularProgress size={20} thickness={4} />
                               </div>
                             ) : (
-                              <IconButton
-                                aria-label="container actions"
-                                aria-controls="actions"
-                                aria-haspopup="true"
-                                onClick={(event) => {
-                                  setAnchorEl(event.currentTarget);
-                                  setSelectedContainer(row);
-                                }}
-                              >
-                                <MoreVertIcon />
-                              </IconButton>
-                            )}
+                                <IconButton
+                                  aria-label="container actions"
+                                  aria-controls="actions"
+                                  aria-haspopup="true"
+                                  onClick={(event) => {
+                                    setAnchorEl(event.currentTarget);
+                                    setSelectedContainer(row);
+                                  }}
+                                >
+                                  <MoreVertIcon />
+                                </IconButton>
+                              )}
                           </TableCell>
                         ) : (
-                          <TableCell align="right"></TableCell>
-                        )}
+                            <TableCell align="right"></TableCell>
+                          )}
                       </TableRow>
                     </Tooltip>
                   );

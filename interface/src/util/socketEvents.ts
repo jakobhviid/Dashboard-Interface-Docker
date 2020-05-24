@@ -10,4 +10,5 @@ export const RESTART_CONTAINER_REQUEST = "RestartContainer";
 export const REMOVE_CONTAINER_REQUEST = "RemoveContainer";
 export const CREATE_NEW_CONTAINER_REQUEST = "CreateNewContainer";
 export const UPDATE_CONFIGURATION_CONTAINER_REQUEST = "UpdateContainerConfiguration";
-
+export const REFETCH_OVERVIEW_DATA = "RefetchOverviewData";
+export const REFETCH_STATS_DATA = "RefetchStatsData";

@@ -48,12 +48,14 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
 
     case containerActionTypes.CONTAINER_LOAD_START:
       return produce(state, (nextState) => {
-        nextState.loadingContainers.push(action.payload);
+        action.payload.forEach(containerId => {
+          nextState.loadingContainers.push(containerId);
+        });
       });
 
     case containerActionTypes.CONTAINER_LOAD_FINISHED:
       return produce(state, (nextState) => {
-        nextState.loadingContainers = nextState.loadingContainers.filter((containerId) => containerId !== action.payload);
+        nextState.loadingContainers = nextState.loadingContainers.filter((containerId) => !action.payload.includes(containerId));
       });
 
     default:

@@ -7,6 +7,7 @@ import Switch from "@material-ui/core/Switch";
 import ContainerTable from "../../components/container_table/ContainerTable.component";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
+import Select from "@material-ui/core/Select";
 
 import {
   RENAME_CONTAINER_REQUEST,
@@ -15,6 +16,7 @@ import {
   RESTART_CONTAINER_REQUEST,
   REMOVE_CONTAINER_REQUEST,
   CREATE_NEW_CONTAINER_REQUEST,
+  REFETCH_OVERVIEW_DATA,
 } from "../../util/socketEvents";
 
 import { changeHeaderTitle } from "../../redux/ui/ui.actions";
@@ -78,7 +80,7 @@ function Overview() {
 
   const handleRename = (newName: string) => {
     if (selectedContainer != null) {
-      dispatch(containerLoadStart(selectedContainer.id));
+      dispatch(containerLoadStart([selectedContainer.id]));
       socketConnection.invoke(RENAME_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, newName);
     }
   };
@@ -96,7 +98,7 @@ function Overview() {
       onClick: (selectedContainer: IContainerState) => {
         if (selectedContainer.commandRequestTopic != null)
           if (selectedContainer.state.includes("running")) {
-            dispatch(containerLoadStart(selectedContainer.id));
+            dispatch(containerLoadStart([selectedContainer.id]));
             socketConnection.invoke(STOP_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
           } else socketConnection.invoke(START_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
       },
@@ -104,30 +106,47 @@ function Overview() {
     {
       label: "Restart",
       onClick: (selectedContainer: IContainerState) => {
-        dispatch(containerLoadStart(selectedContainer.id));
+        dispatch(containerLoadStart([selectedContainer.id]));
         socketConnection.invoke(RESTART_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
       },
     },
     {
       label: "Remove",
       onClick: (selectedContainer: IContainerState) => {
-        dispatch(containerLoadStart(selectedContainer.id));
+        dispatch(containerLoadStart([selectedContainer.id]));
         socketConnection.invoke(REMOVE_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, true); //TODO: Ask user if they want to remove volumes aswell
       },
     },
   ];
+
+  const refetchContainers = (servers: string[]) => {
+    if (!serverMode) {
+      for (const servername of Object.keys(overviewData)) {
+        dispatch(containerLoadStart(overviewData[servername].containers.map((container) => container.id)));
+        if (overviewData[servername].commandRequestTopic)
+          socketConnection.invoke(REFETCH_OVERVIEW_DATA, overviewData[servername].commandRequestTopic);
+      }
+    } else {
+      servers.forEach((servername) => {
+        const containerIds = overviewData[servername].containers.map((container) => container.id);
+        dispatch(containerLoadStart(containerIds));
+        if (overviewData[servername].commandRequestTopic)
+          socketConnection.invoke(REFETCH_OVERVIEW_DATA, overviewData[servername].commandRequestTopic);
+      });
+    }
+  };
 
   let containerView: any = null;
 
   if (Object.keys(overviewData).length !== 0) {
     if (!serverMode) {
       containerView = [];
-      for (const servername of Object.keys(overviewData)) {
-        for (const container of overviewData[servername].containers) {
+      for (const server of Object.keys(overviewData)) {
+        for (const container of overviewData[server].containers) {
           // JSON parse and stringify to create mutable object
           containerView.push({
             ...JSON.parse(JSON.stringify(container)),
-            servername,
+            server,
           });
         }
       }
@@ -136,7 +155,6 @@ function Overview() {
     }
   }
 
-  // TODO: Replace after command server has been changed
   function createNewContainer(values: any) {
     const objectToSend: any = {};
 
@@ -196,6 +214,7 @@ function Overview() {
                 data={containerView[servername].containers}
                 dense="small"
                 actions={actions}
+                onRefetch={() => refetchContainers([servername])}
               />
             </div>
           );
@@ -207,6 +226,7 @@ function Overview() {
           data={containerView}
           dense="small"
           actions={actions}
+          onRefetch={refetchContainers}
         />
       )}
 
@@ -240,7 +260,7 @@ function Overview() {
           if (overviewData[servername].commandRequestTopic) {
             return {
               name: servername,
-              url: overviewData[servername].commandRequestTopic, // TODO: change when commando server has changed
+              url: overviewData[servername].commandRequestTopic,
             };
           }
         })}
