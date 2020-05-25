@@ -7,8 +7,7 @@ namespace SocketServer.Data.Models
     {
         public Guid Id { get; set; }
         public string Servername { get; set; }
-        public ICollection<ContainerUptime> ContainerUpTimes { get; set; }
-        public ICollection<ContainerRessourceUsage> ContainerRessourceUsages { get; set; }
+        public ICollection<Container> Container { get; set; }
         // TODO: Set CreationTime and UpdatedTime
     }
 }
