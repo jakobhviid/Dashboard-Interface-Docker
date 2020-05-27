@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace SocketServer.ContainerRequests
+namespace SocketServer.ContainerModels.ContainerRequest
 {
     public class UpdateConfigContainerParameters
     {

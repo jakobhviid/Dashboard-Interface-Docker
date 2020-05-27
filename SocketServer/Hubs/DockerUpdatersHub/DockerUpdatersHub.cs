@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using SocketServer.ContainerRequests;
+using SocketServer.ContainerModels.ContainerRequest;
 using SocketServer.Helpers;
 
 namespace SocketServer.Hubs.DockerUpdatersHub
