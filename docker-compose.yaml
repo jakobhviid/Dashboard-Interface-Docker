@@ -2,10 +2,10 @@ version: "3"
 
 services:
   interface:
-    image: omvk97/docker_dashboard_interface
+    image: omvk97/docker-dashboard-interface
     container_name: interface
     ports:
       - 3000:3000
     environment: 
       UI_PORT: 3000
-      KAFKA_URLS: kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092
+      KAFKA_URL: kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092

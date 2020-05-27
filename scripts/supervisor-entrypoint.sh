@@ -1,4 +1,4 @@
 #!/bin/bash
 
-supervisorctl start consumer
+supervisorctl start socketserver
 supervisorctl start ui
