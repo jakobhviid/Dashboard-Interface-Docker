@@ -4,7 +4,7 @@ import { overviewActionTypes, ressourceActionTypes, containerActionTypes } from 
 const signalR = require("@microsoft/signalr");
 
 const INITIAL_STATE = {
-  socketConnection: new signalR.HubConnectionBuilder().withUrl("http://localhost:5000/updates").build(),
+  socketConnection: new signalR.HubConnectionBuilder().withUrl("http://127.0.0.1:5000/updates").build(),
   overviewData: {},
   statsData: {},
   loadingContainers: [],
