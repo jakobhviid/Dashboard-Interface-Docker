@@ -1,11 +1,18 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using System;
+using System.ComponentModel.DataAnnotations;
+
 namespace SocketServer.Data.Models
 {
     public class RessourceUsageRecord
     {
-        public int Id { get; set; }
+        [Key]
+        public int RessourceUsageRecordId { get; set; }
+        [Required]
         public DateTime TimeOfRecordInsertion { get; set; }
-        public int CPUPercentageUse { get; set; }
+        [Required]
+        public double CPUPercentageUse { get; set; }
+        [Required]
         public int MemoryPercentageUse { get; set; }
         public ulong DiskInputBytes { get; set; }
         public ulong DiskOutputBytes { get; set; }
@@ -13,7 +20,8 @@ namespace SocketServer.Data.Models
         public ulong NetOutputBytes { get; set; }
         
         // Navigation properties
-        public Guid ContainerId { get; set; }
-        public Container Container { get; set; }
+        public Guid DatabaseContainerId { get; set; }
+        [ForeignKey("DatabaseContainerId")]
+        public DatabaseContainer DatabaseContainer { get; set; }
     }
 }

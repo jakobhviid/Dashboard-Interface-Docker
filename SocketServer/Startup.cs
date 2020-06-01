@@ -18,6 +18,7 @@ namespace SocketServer
             var connectionString = Environment.GetEnvironmentVariable("DASHBOARD_MSSQL_CONNECTION_STRING");
             if (connectionString == null) System.Environment.Exit(1);
             services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+            
             services.AddScoped<IContainerUpdateRepo, ContainerUpdateRepo>();
 
             services.AddSignalR();

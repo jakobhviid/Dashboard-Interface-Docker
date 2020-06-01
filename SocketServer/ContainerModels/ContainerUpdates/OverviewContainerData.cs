@@ -1,9 +1,10 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 
 namespace SocketServer.ContainerModels.ContainerUpdates
 {
-    public struct OverviewContainerData
+    public struct OverviewContainerData : IEquatable<OverviewContainerData>
     {
         [JsonProperty(Required = Required.Always)]
         public string Id { get; set; }
@@ -20,10 +21,23 @@ namespace SocketServer.ContainerModels.ContainerUpdates
         [JsonProperty(Required = Required.Always)]
         public string Status { get; set; }
 
+        [JsonProperty(Required = Required.AllowNull)]
+        public string Health { get; set; }
+
         [JsonProperty(Required = Required.Always)]
         public DateTime CreationTime { get; set; }
 
         [JsonProperty(Required = Required.Always)]
         public DateTime UpdateTime { get; set; }
+
+        public bool Equals([AllowNull] OverviewContainerData other)
+        {
+            return (
+                this.Image.Equals(other.Image) &&
+                this.State.Equals(other.State) &&
+                this.Status.Equals(other.Status) &&
+                this.Health.Equals(other.Health)
+            );
+        }
     }
 }

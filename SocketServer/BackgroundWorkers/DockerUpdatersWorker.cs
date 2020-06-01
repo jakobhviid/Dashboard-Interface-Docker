@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Confluent.Kafka;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -22,15 +23,15 @@ namespace SocketServer.BackgroundWorkers
         private readonly ILogger<DockerUpdatersWorker> _logger;
         private readonly IHubContext<DockerUpdatersHub, IDockerUpdaters> _updatersHub;
         // A dictionary of timers for every server who has sent information to the interface
-        // NOTE: I'm not sure if this can cause problems as it is not stateless. If the container goes down, the timers will be wiped
+        // NOTE: I'm not sure if this can cause problems as it is not stateless. If this server goes down, the timers will be wiped
         private Dictionary<string, System.Timers.Timer> overviewUpdateTimers = new Dictionary<string, System.Timers.Timer>();
-        private readonly IContainerUpdateRepo _repo;
+        private IServiceProvider _services;
 
-        public DockerUpdatersWorker(ILogger<DockerUpdatersWorker> logger, IHubContext<DockerUpdatersHub, IDockerUpdaters> updatersHub, IContainerUpdateRepo repo)
+        public DockerUpdatersWorker(IServiceProvider services, ILogger<DockerUpdatersWorker> logger, IHubContext<DockerUpdatersHub, IDockerUpdaters> updatersHub)
         {
             _logger = logger;
             _updatersHub = updatersHub;
-            _repo = repo;
+            _services = services;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -56,37 +57,51 @@ namespace SocketServer.BackgroundWorkers
                     {
                         case KafkaHelpers.OverviewTopic:
                             await _updatersHub.Clients.All.SendOverviewData(consumeResult.Message.Value);
-                            KafkaHelpers.LatestOverviewInfo = consumeResult.Message.Value;
+                            // NOTE: The method checks on LatestOverviewInfo, so it's important this is called before LatestOverviewInfo is set after the record has been saved
                             await SaveStatusRecordInDb(consumeResult.Message.Value);
+                            KafkaHelpers.LatestOverviewInfo = consumeResult.Message.Value;
                             break;
                         case KafkaHelpers.StatsTopic:
                             await _updatersHub.Clients.All.SendStatsData(consumeResult.Message.Value);
-                            KafkaHelpers.LatestStatsInfo = consumeResult.Message.Value;
+                            // NOTE: The method checks on LatestOverviewInfo, so it's important this is called before LatestOverviewInfo is set after the record has been saved
                             await SaveRessourceUsageRecordInDb(consumeResult.Message.Value);
+                            KafkaHelpers.LatestStatsInfo = consumeResult.Message.Value;
                             break;
                     }
                 }
                 c.Close();
             }
         }
-
+        /*
+        Starts a timer for a server which will save a record to the database if 15 minutes is exceeded.
+        */
         private void SetOverviewTimer(string servername)
         {
-            // The updater will at minimum send new data every 15 minutes
+            // The updater container will at minimum send new data every 15 minutes
             var timer = new System.Timers.Timer(TimeSpan.FromMinutes(15).TotalMilliseconds);
             timer.AutoReset = true;
             timer.Enabled = true;
             timer.Elapsed += async(Object source, ElapsedEventArgs e) =>
             {
-                _logger.LogError("Overview has not sent data in 15 minutes. Notifying interface");
-                var updaterContainer = await _repo.GetUpdaterContainerForServer(servername);
-                await _repo.AddStatusRecord(updaterContainer, new StatusRecord
+                try
                 {
-                    TimeOfRecordInsertion = DateTime.Now,
-                        Status = ContainerStatus.Down,
-                        Health = ContainerHealth.UnHealthy
-                });
-                // TODO: notify clients about this
+                    _logger.LogError("Overview has not sent data in 15 minutes. Notifying interface");
+                    // TODO: notify relevant clients about this
+                    using(var scope = _services.CreateScope())
+                    {
+                        var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
+                        await repo.AddStatusRecordToUpdaterContainer(servername, new StatusRecord
+                        {
+                            TimeOfRecordInsertion = DateTime.Now,
+                                Status = ContainerStatus.Down,
+                                Health = ContainerHealth.UnHealthy
+                        });
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    // TODO: Server doesn't exist handling
+                }
             };
             overviewUpdateTimers.Add(servername, timer);
         }
@@ -95,22 +110,29 @@ namespace SocketServer.BackgroundWorkers
         {
             try
             {
-                var overviewData = JsonConvert.DeserializeObject<OverViewData>(message);
+                var newOverviewData = JsonConvert.DeserializeObject<OverViewData>(message);
 
-                SetOverviewTimer(overviewData.Servername); // Sets a timer which will trigger if the updater does not send data in 15 min
+                var lastOverviewData = JsonConvert.DeserializeObject<OverViewData>(KafkaHelpers.LatestOverviewInfo);
 
-                // If it has exceeded. Then set the updater to be unhealthy and down and don't record anything else return from the function
+                var containerIndex = 0;
+                foreach (var newContainerState in newOverviewData.Containers)
+                {
+                    var lastContainerState = lastOverviewData.Containers[containerIndex];
+                    if (!newContainerState.Equals(lastContainerState))
+                    { // If the container is different
+                        using(var scope = _services.CreateScope())
+                        {
+                            var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
+                            await repo.AddStatusRecord(newOverviewData.Servername, newContainerState);
+                        }
+                    }
+                    // TODO: If the change is worrisome (unhealthy, or down) send a notice to the dashboard interface
+                    containerIndex++;
+                }
 
-                // For every container information which have been sent
-
-                // Check if the container information has changed since last insertion in the DB
-
-                // If it has changed, then insert a new record into the DB
-
-                // If the change is worrisome (unhealthy, or down) send a notice to the dashboard interface
-
+                SetOverviewTimer(newOverviewData.Servername);
             }
-            catch (Newtonsoft.Json.JsonException ex)
+            catch (Newtonsoft.Json.JsonException)
             {
                 _logger.LogError("Invalid data");
             }
@@ -122,7 +144,28 @@ namespace SocketServer.BackgroundWorkers
 
         private async Task SaveRessourceUsageRecordInDb(string message)
         {
+            try
+            {
+                var newStatsData = JsonConvert.DeserializeObject<StatsData>(message);
 
+                var lastStatsData = JsonConvert.DeserializeObject<StatsData>(KafkaHelpers.LatestStatsInfo);
+
+                var containerIndex = 0;
+                foreach (var newContainerState in newStatsData.Containers)
+                {
+                    using(var scope = _services.CreateScope())
+                    {
+                        var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
+                        await repo.AddRessourceUsageRecord(newStatsData.Servername, newContainerState);
+                    }
+                    // TODO: If the ressource usage is worrisome send a notice to the dashboard interface for the relevant users
+                    containerIndex++;
+                }
+            }
+            catch (Newtonsoft.Json.JsonException)
+            {
+                _logger.LogError("Invalid data");
+            }
         }
     }
 }

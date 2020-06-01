@@ -6,6 +6,7 @@ services:
     container_name: interface
     ports:
       - 3000:3000
-    environment: 
+    environment:
       UI_PORT: 3000
-      KAFKA_URLS: kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092
+      DASHBOARD_MSSQL_CONNECTION_STRING: Server=localhost;Database=master;User Id=sa;Password=Database_password1;
+      KAFKA_URL: kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092

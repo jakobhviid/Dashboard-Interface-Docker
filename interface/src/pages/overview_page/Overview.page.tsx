@@ -7,7 +7,6 @@ import Switch from "@material-ui/core/Switch";
 import ContainerTable from "../../components/container_table/ContainerTable.component";
 import Fab from "@material-ui/core/Fab";
 import AddIcon from "@material-ui/icons/Add";
-import Select from "@material-ui/core/Select";
 
 import {
   RENAME_CONTAINER_REQUEST,
