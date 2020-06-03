@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,24 @@ namespace SocketServer.Data.Repositories
             _context = context;
         }
 
+        public async Task CreateServer(string servername, List<OverviewContainerData> containers)
+        {
+            bool serverExists = await ServerExists(servername);
+            if (serverExists) throw new ArgumentException("Server already exists");
+
+            var updaterContainer = containers.Select(c => c.Image.Equals("docker-dashboard-server"));
+            _context.Servers.Add(new Server {
+                Servername = servername,
+
+            })
+
+        }
+
+        public async Task<bool> ServerExists(string servername)
+        {
+            return await _context.Servers.AnyAsync(s => s.Servername.Equals(servername));
+        }
+
         public async Task AddRessourceUsageRecord(string servername, StatsContainerData containerData)
         {
             var server = await _context.Servers.Where(s => s.Servername.Equals(servername))
@@ -23,6 +42,9 @@ namespace SocketServer.Data.Repositories
                 .Include(s => s.Containers)
                 .ThenInclude(c => c.RessourceUsageRecords)
                 .SingleOrDefaultAsync();
+
+            if (server == null)throw new ArgumentException("Server does not exist");
+
             var ressourceUsageRecord = new RessourceUsageRecord
             {
                 TimeOfRecordInsertion = DateTime.Now,
@@ -54,6 +76,8 @@ namespace SocketServer.Data.Repositories
                 .Include(s => s.Containers)
                 .ThenInclude(c => c.StatusRecords)
                 .SingleOrDefaultAsync();
+
+            if (server == null)throw new ArgumentException("Server does not exist");
 
             var statusRecord = new StatusRecord
             {
@@ -92,7 +116,7 @@ namespace SocketServer.Data.Repositories
             var server = await _context.Servers.Where(s => s.Servername.Equals(servername))
                 .Include(s => s.UpdaterContainer).ThenInclude(c => c.StatusRecords).SingleOrDefaultAsync();
 
-            if (server == null)throw new ArgumentException("Server doesn't exist");
+            if (server == null)throw new ArgumentException("Server does not exist");
 
             if (server.UpdaterContainer == null)throw new NullReferenceException("Server does not have an updater container");
 

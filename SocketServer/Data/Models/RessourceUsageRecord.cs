@@ -6,7 +6,6 @@ namespace SocketServer.Data.Models
 {
     public class RessourceUsageRecord
     {
-        [Key]
         public int RessourceUsageRecordId { get; set; }
         [Required]
         public DateTime TimeOfRecordInsertion { get; set; }
@@ -21,7 +20,6 @@ namespace SocketServer.Data.Models
         
         // Navigation properties
         public Guid DatabaseContainerId { get; set; }
-        [ForeignKey("DatabaseContainerId")]
         public DatabaseContainer DatabaseContainer { get; set; }
     }
 }

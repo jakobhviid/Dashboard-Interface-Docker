@@ -7,7 +7,6 @@ namespace SocketServer.Data.Models
 {
     public class DatabaseContainer
     {
-        [Key]
         public Guid DatabaseContainerId { get; set; }
         [Required]
         public string ContainerId { get; set; }
@@ -16,7 +15,6 @@ namespace SocketServer.Data.Models
 
         // Navigation properties
         public Guid ServerId { get; set; }
-        [ForeignKey("ServerId")]
         public Server Server { get; set; }
     }
 }

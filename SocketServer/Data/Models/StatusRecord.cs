@@ -17,7 +17,6 @@ namespace SocketServer.Data.Models
     }
     public class StatusRecord
     {
-        [Key]
         public int StatusRecordId { get; set; }
 
         [Required]
@@ -29,7 +28,6 @@ namespace SocketServer.Data.Models
 
         // Navigation properties
         public Guid DatabaseContainerId { get; set; }
-        [ForeignKey("DatabaseContainerId")]
         public DatabaseContainer DatabaseContainer { get; set; }
     }
 }

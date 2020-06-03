@@ -38,14 +38,13 @@ namespace SocketServer.BackgroundWorkers
         {
             var consumerConfig = new ConsumerConfig
             {
-                GroupId = "socket-server-consumer" + Guid.NewGuid(), // NOTE: If the socket server restarts it will never join the same group. This is to ensure it always reads the latest data
+                GroupId = "socket-server-consumer",
                 BootstrapServers = KafkaHelpers.BootstrapServers,
                 AutoOffsetReset = AutoOffsetReset.Latest,
             };
 
             using(var c = new ConsumerBuilder<Ignore, string>(consumerConfig).Build())
             {
-
                 c.Subscribe(new List<string> { KafkaHelpers.OverviewTopic, KafkaHelpers.StatsTopic });
 
                 _logger.LogInformation("Listening for updates");

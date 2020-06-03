@@ -8,7 +8,8 @@ namespace SocketServer.Data
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         public DbSet<Server> Servers { get; set; }
-        public DbSet<DatabaseContainer> Containers { get; set; }
+        public DbSet<DatabaseContainer> DatabaseContainers { get; set; }
+        public DbSet<UpdaterContainer> UpdaterContainers { get; set; }
         public DbSet<StatusRecord> ContainerUptimes { get; set; }
         public DbSet<RessourceUsageRecord> ContainerRessourceUsages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -27,16 +28,6 @@ namespace SocketServer.Data
             modelBuilder.Entity<Server>()
                 .HasIndex(s => s.Servername)
                 .IsUnique();
-
-            modelBuilder.Entity<Server>()
-                .HasMany(s => s.Containers)
-                .WithOne()
-                .HasForeignKey(c => c.ServerId);
-
-            modelBuilder.Entity<Server>()
-                .HasOne(s => s.UpdaterContainer)
-                .WithOne();
-                
         }
     }
 }
