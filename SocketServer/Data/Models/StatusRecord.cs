@@ -27,7 +27,6 @@ namespace SocketServer.Data.Models
         public ContainerHealth? Health { get; set; } // not all containers will have health information
 
         // Navigation properties
-        public Guid DatabaseContainerId { get; set; }
         public DatabaseContainer DatabaseContainer { get; set; }
     }
 }

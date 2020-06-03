@@ -8,7 +8,8 @@ namespace SocketServer.Data.Repositories
 {
     public interface IContainerUpdateRepo
     {
-        Task CreateServer(string servername, List<OverviewContainerData> containers);
+        Task<Server> CreateServer(string servername, IList<OverviewContainerData> containers);
+        Task<Server> CreateServer(string servername, IList<StatsContainerData> containers);
         Task<bool> ServerExists(string servername);
         Task<DatabaseContainer> AddStatusRecordToUpdaterContainer(string servername, StatusRecord record);
         Task AddStatusRecord(string servername, OverviewContainerData containerData);

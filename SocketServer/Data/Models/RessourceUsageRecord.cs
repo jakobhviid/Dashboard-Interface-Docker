@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -19,7 +18,6 @@ namespace SocketServer.Data.Models
         public ulong NetOutputBytes { get; set; }
         
         // Navigation properties
-        public Guid DatabaseContainerId { get; set; }
         public DatabaseContainer DatabaseContainer { get; set; }
     }
 }

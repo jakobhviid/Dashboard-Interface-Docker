@@ -10,7 +10,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SocketServer.ContainerModels.ContainerUpdates;
-using SocketServer.Data;
 using SocketServer.Data.Models;
 using SocketServer.Data.Repositories;
 using SocketServer.Helpers;
@@ -145,17 +144,24 @@ namespace SocketServer.BackgroundWorkers
         {
             try
             {
-                var newStatsData = JsonConvert.DeserializeObject<StatsData>(message);
-
-                var lastStatsData = JsonConvert.DeserializeObject<StatsData>(KafkaHelpers.LatestStatsInfo);
+                var statsData = JsonConvert.DeserializeObject<StatsData>(message);
 
                 var containerIndex = 0;
-                foreach (var newContainerState in newStatsData.Containers)
+                foreach (var newContainerState in statsData.Containers)
                 {
                     using(var scope = _services.CreateScope())
                     {
                         var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
-                        await repo.AddRessourceUsageRecord(newStatsData.Servername, newContainerState);
+                        try
+                        {
+                            await repo.AddRessourceUsageRecord(statsData.Servername, newContainerState);
+                        }
+                        catch (ArgumentException) // Server does not exist
+                        {
+                            await repo.CreateServer(statsData.Servername, statsData.Containers);
+                            await repo.AddRessourceUsageRecord(statsData.Servername, newContainerState);
+                        }
+
                     }
                     // TODO: If the ressource usage is worrisome send a notice to the dashboard interface for the relevant users
                     containerIndex++;
