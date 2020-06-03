@@ -1,11 +1,12 @@
 using Newtonsoft.Json;
 
-namespace SocketServer.ContainerRequests
+namespace SocketServer.ContainerModels.ContainerRequest
 {
-    public class StartContainerParameters
+    public class StopContainerParameters
     {
         [JsonProperty(Required = Required.Always)]
-        public const ContainerActionType Action = ContainerActionType.START;
+        public const ContainerActionType Action = ContainerActionType.STOP;
+
         [JsonProperty(Required = Required.Always)]
         public string ContainerId { get; set; }
     }

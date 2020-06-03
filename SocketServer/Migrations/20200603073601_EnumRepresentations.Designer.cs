@@ -10,8 +10,8 @@ using SocketServer.Data;
 namespace SocketServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20200525090214_Init")]
-    partial class Init
+    [Migration("20200603073601_EnumRepresentations")]
+    partial class EnumRepresentations
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,36 +21,43 @@ namespace SocketServer.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("SocketServer.Data.Models.Container", b =>
+            modelBuilder.Entity("SocketServer.Data.Models.DatabaseContainer", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid>("DatabaseContainerId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ContainerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ServerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasKey("DatabaseContainerId");
 
                     b.HasIndex("ServerId");
 
-                    b.ToTable("Containers");
+                    b.ToTable("DatabaseContainers");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("DatabaseContainer");
                 });
 
             modelBuilder.Entity("SocketServer.Data.Models.RessourceUsageRecord", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("RessourceUsageRecordId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("CPUPercentageUse")
-                        .HasColumnType("int");
+                    b.Property<double>("CPUPercentageUse")
+                        .HasColumnType("float");
 
-                    b.Property<Guid>("ContainerId")
+                    b.Property<Guid?>("DatabaseContainerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("DiskInputBytes")
@@ -71,11 +78,11 @@ namespace SocketServer.Migrations
                     b.Property<DateTime>("TimeOfRecordInsertion")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.HasKey("RessourceUsageRecordId");
 
-                    b.HasIndex("ContainerId");
+                    b.HasIndex("DatabaseContainerId");
 
-                    b.ToTable("ContainerRessourceUsages");
+                    b.ToTable("ContainerRessourceUsageRecords");
                 });
 
             modelBuilder.Entity("SocketServer.Data.Models.Server", b =>
@@ -85,43 +92,63 @@ namespace SocketServer.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Servername")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid?>("UpdaterContainerDatabaseContainerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UpdaterContainerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Servername")
+                        .IsUnique();
+
+                    b.HasIndex("UpdaterContainerDatabaseContainerId");
 
                     b.ToTable("Servers");
                 });
 
             modelBuilder.Entity("SocketServer.Data.Models.StatusRecord", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("StatusRecordId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<Guid>("ContainerId")
+                    b.Property<Guid?>("DatabaseContainerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("Health")
-                        .HasColumnType("int");
+                    b.Property<string>("Health")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("TimeOfRecordInsertion")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.HasKey("StatusRecordId");
 
-                    b.HasIndex("ContainerId");
+                    b.HasIndex("DatabaseContainerId");
 
-                    b.ToTable("ContainerUptimes");
+                    b.ToTable("ContainerStatusRecords");
                 });
 
-            modelBuilder.Entity("SocketServer.Data.Models.Container", b =>
+            modelBuilder.Entity("SocketServer.Data.Models.UpdaterContainer", b =>
+                {
+                    b.HasBaseType("SocketServer.Data.Models.DatabaseContainer");
+
+                    b.HasDiscriminator().HasValue("UpdaterContainer");
+                });
+
+            modelBuilder.Entity("SocketServer.Data.Models.DatabaseContainer", b =>
                 {
                     b.HasOne("SocketServer.Data.Models.Server", "Server")
-                        .WithMany("Container")
+                        .WithMany("Containers")
                         .HasForeignKey("ServerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -129,20 +156,23 @@ namespace SocketServer.Migrations
 
             modelBuilder.Entity("SocketServer.Data.Models.RessourceUsageRecord", b =>
                 {
-                    b.HasOne("SocketServer.Data.Models.Container", "Container")
+                    b.HasOne("SocketServer.Data.Models.DatabaseContainer", "DatabaseContainer")
                         .WithMany("RessourceUsageRecords")
-                        .HasForeignKey("ContainerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DatabaseContainerId");
+                });
+
+            modelBuilder.Entity("SocketServer.Data.Models.Server", b =>
+                {
+                    b.HasOne("SocketServer.Data.Models.UpdaterContainer", "UpdaterContainer")
+                        .WithMany()
+                        .HasForeignKey("UpdaterContainerDatabaseContainerId");
                 });
 
             modelBuilder.Entity("SocketServer.Data.Models.StatusRecord", b =>
                 {
-                    b.HasOne("SocketServer.Data.Models.Container", "Container")
+                    b.HasOne("SocketServer.Data.Models.DatabaseContainer", "DatabaseContainer")
                         .WithMany("StatusRecords")
-                        .HasForeignKey("ContainerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DatabaseContainerId");
                 });
 #pragma warning restore 612, 618
         }
