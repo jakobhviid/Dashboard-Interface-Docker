@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +18,7 @@ using SocketServer.BackgroundWorkers;
 using SocketServer.Data;
 using SocketServer.Data.Models;
 using SocketServer.Data.Repositories;
+using SocketServer.DTOs.OutputDTOs;
 using SocketServer.Hubs.DockerUpdatersHub;
 
 namespace SocketServer
@@ -36,6 +40,36 @@ namespace SocketServer
                     builder.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed((host) => true).AllowCredentials();
                 });
             });
+
+            services.AddControllers();
+            services.Configure<ApiBehaviorOptions>(o =>
+            {
+                o.InvalidModelStateResponseFactory = actionContext =>
+                {
+                    List<string> errors = new List<string>();
+                    foreach (var value in actionContext.ModelState.Values)
+                    {
+                        foreach (var error in value.Errors)
+                        {
+                            errors.Add(error.ErrorMessage);
+                        }
+                    }
+                    if (errors.Count == 1)
+                    {
+                        return new BadRequestObjectResult(new GenericReturnMessageDTO
+                        {
+                            StatusCode = 400,
+                                Message = errors[0]
+                        });
+                    }
+                    return new BadRequestObjectResult(new GenericReturnMessageDTO
+                    {
+                        StatusCode = 400,
+                            Message = errors
+                    });
+                };
+            });
+
             var connectionString = Environment.GetEnvironmentVariable("DASHBOARD_MSSQL_CONNECTION_STRING");
             if (connectionString == null)
             {
@@ -81,8 +115,6 @@ namespace SocketServer
                         }
                     };
                 });
-
-            
 
             services.AddScoped<IContainerUpdateRepo, ContainerUpdateRepo>();
 

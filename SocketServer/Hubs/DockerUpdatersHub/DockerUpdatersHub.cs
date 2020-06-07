@@ -8,7 +8,6 @@ using SocketServer.Helpers;
 
 namespace SocketServer.Hubs.DockerUpdatersHub
 {
-    [Authorize]
     public class DockerUpdatersHub : Hub<IDockerUpdaters>
     {
         private readonly ILogger<DockerUpdatersHub> _logger;

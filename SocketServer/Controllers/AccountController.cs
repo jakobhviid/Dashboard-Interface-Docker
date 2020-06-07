@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using SocketServer.Contracts;
 using SocketServer.Data.Models;
 using SocketServer.DTOs.InputDTOs;
@@ -62,8 +65,8 @@ namespace SocketServer.Controllers
             if (!ValidAPIKey(input.APIKey))
                 return StatusCode(StatusCodes.Status403Forbidden, new GenericReturnMessageDTO { StatusCode = 403, Message = ErrorMessages.APIKeyIncorrect });
 
-            var userExists = await _userManager.FindByEmailAsync(input.NewUserEmail);
-            if (userExists != null)
+            var user = await _userManager.FindByEmailAsync(input.NewUserEmail);
+            if (user != null) // User already exists
                 return StatusCode(StatusCodes.Status400BadRequest, new GenericReturnMessageDTO
                 {
                     StatusCode = 400,
@@ -71,17 +74,27 @@ namespace SocketServer.Controllers
                 });
 
             // create a new user
-            var user = new ApplicationUser { Email = input.NewUserEmail, UserName = input.NewUserEmail };
-            var result = await _userManager.CreateAsync(user, input.NewUserPassword);
-
-            // add the email claim and value for this user
-            await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Email, input.NewUserEmail));
-
-            return StatusCode(StatusCodes.Status201Created, new GenericReturnMessageDTO
+            var newUser = new ApplicationUser { Email = input.NewUserEmail, UserName = input.NewUserEmail };
+            var result = await _userManager.CreateAsync(newUser, input.NewUserPassword);
+            if (result.Succeeded)
             {
-                StatusCode = 201,
-                    Message = SuccessMessages.UserCreated
-            });
+                // add the email claim and value for this user
+                await _userManager.AddClaimAsync(newUser, new Claim(ClaimTypes.Email, input.NewUserEmail));
+                // TODO: Confirm email
+                return StatusCode(StatusCodes.Status201Created, new GenericReturnMessageDTO
+                {
+                    StatusCode = 201,
+                        Message = SuccessMessages.UserCreated
+                });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new GenericReturnMessageDTO
+                {
+                    StatusCode = 400,
+                        Message = result.Errors.Select(e => e.Description)
+                });
+            }
         }
 
         private bool ValidAPIKey(string apiKey)

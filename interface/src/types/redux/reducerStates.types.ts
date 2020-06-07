@@ -27,10 +27,31 @@ export interface IContainerDataState {
   loadingContainers: any;
 }
 
-export const useTypedSelector: TypedUseSelectorHook<IRootState> = useSelector;
+export interface IMonitoringEvents {
+  activeWarnings: any[];
+}
+
+export interface INotifier {
+  activeNotifications: any[];
+}
+
+export interface IUI {
+  headerTitle: string;
+}
+
+export interface IUserState {
+  jwt?: string;
+  displayName: string;
+}
+
 export interface IRootState {
   containerData: IContainerDataState;
+  notifications: INotifier;
+  monitoringEvents: IMonitoringEvents;
+  ui: IUI;
+  user: IUserState;
 }
+export const useTypedSelector: TypedUseSelectorHook<IRootState> = useSelector;
 
 export interface ReducerAction extends Action {
   type: string;

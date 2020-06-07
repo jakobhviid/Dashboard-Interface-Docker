@@ -1,11 +1,12 @@
 import types from "./monitoringEvents.types";
 import produce from "immer";
+import { IMonitoringEvents, ReducerAction } from "../../types/redux/reducerStates.types";
 
-const INITIAL_STATE = {
+const INITIAL_STATE: IMonitoringEvents = {
   activeWarnings: [],
 };
 
-export default (state = INITIAL_STATE, action) => {
+export default (state = INITIAL_STATE, action: ReducerAction) => {
   switch (action.type) {
     case types.CONTAINER_WARNING_FOUND:
       return produce(state, (nextState) => {

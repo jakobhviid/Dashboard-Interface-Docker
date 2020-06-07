@@ -12,7 +12,7 @@ import { createMuiTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "@material-ui/styles";
 
 import Header from "./components/header/Header.component";
-import { OVERVIEW_URL, RESSOURCE_USAGE_URL } from "./util/navigationEndpoints";
+import { OVERVIEW_URL, RESSOURCE_USAGE_URL, LOGIN_URL } from "./util/navigationEndpoints";
 
 import useStyles from "./App.styles";
 import Notifier from "./components/notifier/Notifier.component";
@@ -31,6 +31,7 @@ import { useTypedSelector } from "./types/redux/reducerStates.types";
 
 const Overview = lazy(() => import("./pages/overview_page/Overview.page"));
 const RessourceUsage = lazy(() => import("./pages/ressource_usage_page/RessourceUsage.page"));
+const Login = lazy(() => import("./pages/login/Login.page"))
 
 const theme = createMuiTheme({
   palette: {
@@ -87,6 +88,7 @@ function App() {
                 <Container maxWidth="xl" className={styleClasses.container}>
                   <Route exact path={OVERVIEW_URL} component={Overview} />
                   <Route path={RESSOURCE_USAGE_URL} component={RessourceUsage} />
+                  <Route path={LOGIN_URL} component={Login} />
                   {/* <Footer /> */}
                 </Container>
               </main>

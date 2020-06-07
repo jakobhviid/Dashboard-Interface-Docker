@@ -1,0 +1,133 @@
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Checkbox from "@material-ui/core/Checkbox";
+import Link from "@material-ui/core/Link";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import Avatar from "@material-ui/core/Avatar";
+import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
+import Container from "@material-ui/core/Container";
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@material-ui/core";
+
+import useStyles from "./Login.styles";
+import { login } from "../../api/accountRequests";
+import { enqueueSnackbar } from "../../redux/notifier/notifier.actions";
+import { loginWithJwt } from "../../redux/user/user.actions";
+
+function SignIn() {
+  const [forgotPasswordEmailInput, setForgotPasswordEmailInput] = useState("");
+  const [emailInput, setEmailInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [forgotPasswordDialogOpen, setForgotPasswordDialogOpen] = useState(false);
+  const dispatch = useDispatch();
+
+  async function onLogInSubmit(event: any) {
+    event.preventDefault();
+    // TODO: send request to API and get a return (with typescript) and call a redux action to insert jwt
+    const loginResponse = await login(emailInput, passwordInput);
+    // TODO: fix that it returns undefined (async await, promise thing)
+
+    if (Array.isArray(loginResponse)) {
+      // Error response
+      // TODO: handle properly
+      console.log("What");
+      dispatch(
+        enqueueSnackbar({
+          message: loginResponse[0],
+          options: { key: new Date().getTime() + Math.random(), persist: false, variant: "error" },
+        })
+      );
+    } else {
+      console.log("What3");
+
+      dispatch(loginWithJwt(loginResponse));
+    }
+  }
+
+  function onForgotPassword(email: any) {
+    console.log(email);
+  }
+
+  const classes = useStyles();
+  return (
+    <Container maxWidth="xs">
+      <div className={classes.formContainer}>
+        <Avatar className={classes.formLoginIcon}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Log ind
+        </Typography>
+        <form className={classes.form} noValidate onSubmit={onLogInSubmit}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="Email Adresse"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            onChange={(event) => setEmailInput(event.target.value)}
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Kodeord"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            onChange={(event) => setPasswordInput(event.target.value)}
+          />
+          <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Husk mig" />
+          <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+            Log ind
+          </Button>
+          <Grid item xs>
+            <Link onClick={() => setForgotPasswordDialogOpen(true)} variant="body2" style={{ cursor: "pointer" }}>
+              Glemt kodeord?
+            </Link>
+          </Grid>
+        </form>
+        <Dialog
+          open={forgotPasswordDialogOpen}
+          onClose={() => setForgotPasswordDialogOpen(false)}
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title">Glemt Kodeord</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Få tilsendt en email hvor du kan sætte et nyt kodeord</DialogContentText>
+            <TextField
+              autoComplete="email"
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Email adresse"
+              type="email"
+              fullWidth
+              onChange={(event) => setForgotPasswordEmailInput(event.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setForgotPasswordDialogOpen(false)} color="primary">
+              Annuller
+            </Button>
+            <Button onClick={(enteredEmail: any) => onForgotPassword(enteredEmail)} color="primary">
+              Send
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </Container>
+  );
+}
+
+export default SignIn;

@@ -1,8 +1,8 @@
 import types from "./ui.types";
 import produce from "immer";
-import { ReducerAction } from "../../types/redux/reducerStates.types";
+import { ReducerAction, IUI } from "../../types/redux/reducerStates.types";
 
-const INITIAL_STATE = {
+const INITIAL_STATE: IUI = {
   headerTitle: "Dashboard",
 };
 

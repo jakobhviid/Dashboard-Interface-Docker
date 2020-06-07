@@ -1,16 +1,17 @@
 import produce from "immer";
 import { overviewActionTypes, ressourceActionTypes, containerActionTypes } from "./containerData.types";
+import { IContainerDataState, ReducerAction } from "../../types/redux/reducerStates.types";
 
 const signalR = require("@microsoft/signalr");
 
-const INITIAL_STATE = {
+const INITIAL_STATE: IContainerDataState = {
   socketConnection: new signalR.HubConnectionBuilder().withUrl("http://127.0.0.1:5000/updates").build(),
   overviewData: {},
   statsData: {},
   loadingContainers: [],
 };
 
-const addCommandTopicToContainers = (containers, payload) => {
+const addCommandTopicToContainers = (containers: any, payload: any) => {
   for (const container of containers) {
     if (payload.commandRequestTopic && payload.commandResponseTopic) {
       container["commandRequestTopic"] = payload.commandRequestTopic;
@@ -19,7 +20,7 @@ const addCommandTopicToContainers = (containers, payload) => {
   }
 };
 
-const overviewReducer = (state = INITIAL_STATE, action) => {
+const overviewReducer = (state = INITIAL_STATE, action: ReducerAction) => {
   switch (action.type) {
     case overviewActionTypes.COLLECTION_SUCCESS_OVERVIEW:
       addCommandTopicToContainers(action.payload.containers, action.payload);
@@ -48,14 +49,16 @@ const overviewReducer = (state = INITIAL_STATE, action) => {
 
     case containerActionTypes.CONTAINER_LOAD_START:
       return produce(state, (nextState) => {
-        action.payload.forEach(containerId => {
+        action.payload.forEach((containerId: any) => {
           nextState.loadingContainers.push(containerId);
         });
       });
 
     case containerActionTypes.CONTAINER_LOAD_FINISHED:
       return produce(state, (nextState) => {
-        nextState.loadingContainers = nextState.loadingContainers.filter((containerId) => !action.payload.includes(containerId));
+        nextState.loadingContainers = nextState.loadingContainers.filter(
+          (containerId: any) => !action.payload.includes(containerId)
+        );
       });
 
     default:
