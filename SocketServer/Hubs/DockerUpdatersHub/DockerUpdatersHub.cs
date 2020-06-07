@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using SocketServer.ContainerModels.ContainerRequest;
@@ -7,6 +8,7 @@ using SocketServer.Helpers;
 
 namespace SocketServer.Hubs.DockerUpdatersHub
 {
+    [Authorize]
     public class DockerUpdatersHub : Hub<IDockerUpdaters>
     {
         private readonly ILogger<DockerUpdatersHub> _logger;

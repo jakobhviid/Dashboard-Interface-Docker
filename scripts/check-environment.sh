@@ -10,7 +10,12 @@ if [[ -z "$KAFKA_URL" ]]; then
     exit 1
 fi
 
-# if [[ -z "$DASHBOARD_MSSQL_CONNECTION_STRING" ]]; then
-#     echo -e "\e[1;32mERROR - 'DASHBOARD_MSSQL_CONNECTION_STRING' has not been provided \e[0m"
-#     exit 1
-# fi
+if [[ -z "$API_KEY" ]]; then
+    echo -e "\e[1;32mERROR - 'API_KEY' must be set \e[0m"
+    exit 1
+fi
+
+if [[ -z "$DASHBOARD_MSSQL_CONNECTION_STRING" ]]; then
+    echo -e "\e[1;32mERROR - 'DASHBOARD_MSSQL_CONNECTION_STRING' has not been provided \e[0m"
+    exit 1
+fi
