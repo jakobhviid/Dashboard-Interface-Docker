@@ -24,7 +24,10 @@ namespace SocketServer
                 });
             });
             var connectionString = Environment.GetEnvironmentVariable("DASHBOARD_MSSQL_CONNECTION_STRING");
-            if (connectionString == null) System.Environment.Exit(1);
+            if (connectionString == null) {
+                Console.WriteLine("Database Connection string not found");
+                System.Environment.Exit(1);
+            }
             services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
             
             services.AddScoped<IContainerUpdateRepo, ContainerUpdateRepo>();

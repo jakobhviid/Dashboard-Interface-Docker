@@ -14,7 +14,6 @@ namespace SocketServer.Data.Models
         public ICollection<RessourceUsageRecord> RessourceUsageRecords { get; set; }
 
         // Navigation properties
-        public Guid ServerId { get; set; }
         public Server Server { get; set; }
     }
 }

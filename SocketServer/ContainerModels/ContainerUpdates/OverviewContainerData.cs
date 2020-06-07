@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace SocketServer.ContainerModels.ContainerUpdates
 {
-    public struct OverviewContainerData : IEquatable<OverviewContainerData>
+    public class OverviewContainerData : IEquatable<OverviewContainerData>
     {
         [JsonProperty(Required = Required.Always)]
         public string Id { get; set; }
@@ -32,6 +32,7 @@ namespace SocketServer.ContainerModels.ContainerUpdates
 
         public bool Equals([AllowNull] OverviewContainerData other)
         {
+            Console.WriteLine("WHAT");
             return (
                 this.Image.Equals(other.Image) &&
                 this.State.Equals(other.State) &&

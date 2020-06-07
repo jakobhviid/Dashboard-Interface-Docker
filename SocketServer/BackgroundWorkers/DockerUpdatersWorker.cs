@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -54,8 +55,10 @@ namespace SocketServer.BackgroundWorkers
                     switch (consumeResult.Topic)
                     {
                         case KafkaHelpers.OverviewTopic:
+                            _logger.LogInformation("Am i ever recieved here");
                             await _updatersHub.Clients.All.SendOverviewData(consumeResult.Message.Value);
                             // NOTE: The method checks on LatestOverviewInfo, so it's important this is called before LatestOverviewInfo is set after the record has been saved
+                            _logger.LogInformation("What about here?");
                             await SaveStatusRecordInDb(consumeResult.Message.Value);
                             KafkaHelpers.LatestOverviewInfo = consumeResult.Message.Value;
                             break;
@@ -70,37 +73,53 @@ namespace SocketServer.BackgroundWorkers
                 c.Close();
             }
         }
+        
         /*
         Starts a timer for a server which will save a record to the database if 15 minutes is exceeded.
         */
-        private void SetOverviewTimer(string servername)
+        private void SetOverviewTimer(string servername, List<OverviewContainerData> containers)
         {
+            _logger.LogInformation("Timer just set for " + servername);
             // The updater container will at minimum send new data every 15 minutes
-            var timer = new System.Timers.Timer(TimeSpan.FromMinutes(15).TotalMilliseconds);
+            var timer = new System.Timers.Timer(TimeSpan.FromSeconds(2).TotalMilliseconds);
             timer.AutoReset = true;
             timer.Enabled = true;
             timer.Elapsed += async(Object source, ElapsedEventArgs e) =>
             {
-                try
+                _logger.LogError("Overview has not sent data in 15 minutes. Notifying interface");
+                // TODO: notify relevant clients about this
+                using(var scope = _services.CreateScope())
                 {
-                    _logger.LogError("Overview has not sent data in 15 minutes. Notifying interface");
-                    // TODO: notify relevant clients about this
-                    using(var scope = _services.CreateScope())
+                    var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
+                    try
                     {
-                        var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
-                        await repo.AddStatusRecordToUpdaterContainer(servername, new StatusRecord
+                        if (await repo.ServerExists(servername))
                         {
-                            TimeOfRecordInsertion = DateTime.Now,
-                                Status = ContainerStatus.Down,
-                                Health = ContainerHealth.UnHealthy
-                        });
+                            await repo.AddStatusRecordToUpdaterContainer(servername, new StatusRecord
+                            {
+                                TimeOfRecordInsertion = DateTime.Now,
+                                    Status = ContainerStatus.Down,
+                                    Health = ContainerHealth.UnHealthy
+                            });
+                        }
+                        else
+                        {
+                            await repo.CreateServer(servername, containers);
+                            await repo.AddStatusRecordToUpdaterContainer(servername, new StatusRecord
+                            {
+                                TimeOfRecordInsertion = DateTime.Now,
+                                    Status = ContainerStatus.Down,
+                                    Health = ContainerHealth.UnHealthy
+                            });
+                        }
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        _logger.LogError(ex.Message);
                     }
                 }
-                catch (ArgumentException)
-                {
-                    // TODO: Server doesn't exist handling
-                }
             };
+            timer.Start();
             overviewUpdateTimers.Add(servername, timer);
         }
 
@@ -109,44 +128,65 @@ namespace SocketServer.BackgroundWorkers
             try
             {
                 var newOverviewData = JsonConvert.DeserializeObject<OverViewData>(message);
-
-                var lastOverviewData = JsonConvert.DeserializeObject<OverViewData>(KafkaHelpers.LatestOverviewInfo);
+                OverViewData lastOverviewData = null;
+                if (KafkaHelpers.LatestOverviewInfo != null) 
+                    lastOverviewData = JsonConvert.DeserializeObject<OverViewData>(KafkaHelpers.LatestOverviewInfo);
 
                 var containerIndex = 0;
                 foreach (var newContainerState in newOverviewData.Containers)
                 {
                     var lastContainerState = lastOverviewData.Containers[containerIndex];
-                    if (!newContainerState.Equals(lastContainerState))
-                    { // If the container is different
+                    _logger.LogInformation("HEYY WHAT");
+                    if (lastOverviewData == null || !newContainerState.Equals(lastContainerState)) // If the container is different
+                    {
+                        _logger.LogInformation("I AM NOT EQUQAL");
                         using(var scope = _services.CreateScope())
                         {
                             var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
-                            await repo.AddStatusRecord(newOverviewData.Servername, newContainerState);
+                            try
+                            {
+                                if (await repo.ServerExists(newOverviewData.Servername))
+                                    await repo.AddStatusRecord(newOverviewData.Servername, newContainerState);
+                                else
+                                {
+                                    await repo.CreateServer(newOverviewData.Servername, newOverviewData.Containers);
+                                    await repo.AddStatusRecord(newOverviewData.Servername, newContainerState);
+                                }
+                            }
+                            catch (ArgumentException ex)
+                            {
+                                _logger.LogError(ex.Message);
+                            }
+
                         }
                     }
                     // TODO: If the change is worrisome (unhealthy, or down) send a notice to the dashboard interface
                     containerIndex++;
                 }
 
-                SetOverviewTimer(newOverviewData.Servername);
+                SetOverviewTimer(newOverviewData.Servername, newOverviewData.Containers.ToList());
+                
             }
             catch (Newtonsoft.Json.JsonException)
             {
                 _logger.LogError("Invalid data");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.GetType().FullName);
+                _logger.LogError(ex.Message);
             }
 
         }
 
         // TODO: An endpoint for the dashboard to get historical data for a graph overview
         // TODO: Maybe make a procedure which automatically calculates uptime for each container whenever a new insertion is made?
-
         private async Task SaveRessourceUsageRecordInDb(string message)
         {
             try
             {
                 var statsData = JsonConvert.DeserializeObject<StatsData>(message);
 
-                var containerIndex = 0;
                 foreach (var newContainerState in statsData.Containers)
                 {
                     using(var scope = _services.CreateScope())
@@ -154,17 +194,21 @@ namespace SocketServer.BackgroundWorkers
                         var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
                         try
                         {
-                            await repo.AddRessourceUsageRecord(statsData.Servername, newContainerState);
+                            if (await repo.ServerExists(statsData.Servername))
+                                await repo.AddRessourceUsageRecord(statsData.Servername, newContainerState);
+                            else
+                            {
+                                await repo.CreateServer(statsData.Servername, statsData.Containers);
+                                await repo.AddRessourceUsageRecord(statsData.Servername, newContainerState);
+                            }
                         }
-                        catch (ArgumentException) // Server does not exist
+                        catch (ArgumentException ex)
                         {
-                            await repo.CreateServer(statsData.Servername, statsData.Containers);
-                            await repo.AddRessourceUsageRecord(statsData.Servername, newContainerState);
+                            _logger.LogError(ex.Message);
                         }
 
                     }
                     // TODO: If the ressource usage is worrisome send a notice to the dashboard interface for the relevant users
-                    containerIndex++;
                 }
             }
             catch (Newtonsoft.Json.JsonException)

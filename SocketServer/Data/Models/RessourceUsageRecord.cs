@@ -9,12 +9,18 @@ namespace SocketServer.Data.Models
         [Required]
         public DateTime TimeOfRecordInsertion { get; set; }
         [Required]
+        [Range(0.0001, 100)]
         public double CPUPercentageUse { get; set; }
         [Required]
-        public int MemoryPercentageUse { get; set; }
+        [Range(0.0001, 100)]
+        public double MemoryPercentageUse { get; set; }
+        [Required]
         public ulong DiskInputBytes { get; set; }
+        [Required]
         public ulong DiskOutputBytes { get; set; }
+        [Required]
         public ulong NetInputBytes { get; set; }
+        [Required]
         public ulong NetOutputBytes { get; set; }
         
         // Navigation properties

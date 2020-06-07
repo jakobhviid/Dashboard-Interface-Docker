@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace SocketServer.ContainerModels.ContainerUpdates
 {
-    public struct OverViewData
+    public class OverViewData
     {
         [JsonProperty(Required = Required.Always)]
         public string Servername { get; set; }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SocketServer.Data;
 
 namespace SocketServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200603081509_ForeignKeyUpdates")]
+    partial class ForeignKeyUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,8 +66,8 @@ namespace SocketServer.Migrations
                     b.Property<decimal>("DiskOutputBytes")
                         .HasColumnType("decimal(20,0)");
 
-                    b.Property<double>("MemoryPercentageUse")
-                        .HasColumnType("float");
+                    b.Property<int>("MemoryPercentageUse")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("NetInputBytes")
                         .HasColumnType("decimal(20,0)");

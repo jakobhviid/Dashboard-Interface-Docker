@@ -3,37 +3,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SocketServer.ContainerModels.ContainerUpdates;
 using SocketServer.Data.Models;
 using SocketServer.Helpers;
+using static SocketServer.Helpers.ContainerHelpers;
 
 namespace SocketServer.Data.Repositories
 {
     public class ContainerUpdateRepo : IContainerUpdateRepo
     {
         private readonly DataContext _context;
-        public ContainerUpdateRepo(DataContext context)
+        private readonly ILogger<ContainerUpdateRepo> _logger;
+        public ContainerUpdateRepo(DataContext context, ILogger<ContainerUpdateRepo> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<Server> CreateServer(string servername, IList<OverviewContainerData> containers)
         {
+            _logger.LogInformation("Server does not exist: " + servername);
             bool serverExists = await ServerExists(servername);
             if (serverExists)throw new ArgumentException("Server already exists");
             try
             {
-                var updaterContainer = ContainerHelpers.FindUpdaterContainer(containers.ToList());
+                var updaterContainer = FindUpdaterContainer(containers.ToList());
+                if (updaterContainer == null)throw new ArgumentException("Server does not contain information on updater container");
                 var server = new Server
                 {
                     Servername = servername,
-                    UpdaterContainer = new UpdaterContainer
-                    {
-                    ContainerId = updaterContainer.Id
-                    }
+                    UpdaterContainer = new UpdaterContainer { ContainerId = updaterContainer.Id },
                 };
+
+                server.UpdaterContainer.Server = server; // Foreign key navigation property
+
                 _context.Servers.Add(server);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Created a new server: " + servername);
                 return server;
             }
             catch (ArgumentNullException)
@@ -44,21 +51,24 @@ namespace SocketServer.Data.Repositories
 
         public async Task<Server> CreateServer(string servername, IList<StatsContainerData> containers)
         {
+            _logger.LogInformation("Server does not exist: " + servername);
             bool serverExists = await ServerExists(servername);
             if (serverExists)throw new ArgumentException("Server already exists");
             try
             {
-                var updaterContainer = ContainerHelpers.FindUpdaterContainer(containers.ToList());
+                var updaterContainer = FindUpdaterContainer(containers.ToList());
+                if (updaterContainer == null)throw new ArgumentException("Server does not contain information on updater container");
                 var server = new Server
                 {
                     Servername = servername,
-                    UpdaterContainer = new UpdaterContainer
-                    {
-                    ContainerId = updaterContainer.Id
-                    }
+                    UpdaterContainer = new UpdaterContainer { ContainerId = updaterContainer.Id }
                 };
+
+                server.UpdaterContainer.Server = server; // Foreign key navigation property
+
                 _context.Servers.Add(server);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Created a new server: " + servername);
                 return server;
             }
             catch (ArgumentNullException)
@@ -72,7 +82,7 @@ namespace SocketServer.Data.Repositories
             return await _context.Servers.AnyAsync(s => s.Servername.Equals(servername));
         }
 
-        public async Task AddRessourceUsageRecord(string servername, StatsContainerData containerData)
+        public async Task AddRessourceUsageRecord(string servername, StatsContainerData container)
         {
             var server = await _context.Servers.Where(s => s.Servername.Equals(servername))
                 .Include(s => s.UpdaterContainer)
@@ -86,25 +96,35 @@ namespace SocketServer.Data.Repositories
             var ressourceUsageRecord = new RessourceUsageRecord
             {
                 TimeOfRecordInsertion = DateTime.Now,
-                CPUPercentageUse = containerData.CpuPercentage,
-
+                CPUPercentageUse = container.CpuPercentage,
+                MemoryPercentageUse = container.MemoryPercentage,
+                DiskInputBytes = container.DiskInputBytes,
+                DiskOutputBytes = container.DiskOutputBytes,
+                NetInputBytes = container.NetInputBytes,
+                NetOutputBytes = container.NetOutputBytes
             };
-
-            if (containerData.Id.Equals(server.UpdaterContainer.ContainerId))
+            if (ContainerIsUpdater(container.Image))
             {
                 ressourceUsageRecord.DatabaseContainer = server.UpdaterContainer;
                 server.UpdaterContainer.RessourceUsageRecords.Add(ressourceUsageRecord);
+                server.UpdaterContainer.ContainerId = container.Id;
             }
-            else
+            else // Add it to the appropriate container
             {
-                var container = server.Containers.FirstOrDefault(c => c.ContainerId.Equals(containerData.Id));
-                ressourceUsageRecord.DatabaseContainer = container;
+                var databaseContainer = server.Containers.FirstOrDefault(c => c.ContainerId.Equals(container.Id));
+                if (databaseContainer == null) // the server does not hold any records for this container yet
+                {
+                    databaseContainer = new DatabaseContainer { ContainerId = container.Id };
+                    server.Containers.Add(databaseContainer);
+                }
+
+                ressourceUsageRecord.DatabaseContainer = databaseContainer;
             }
 
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddStatusRecord(string servername, OverviewContainerData containerData)
+        public async Task AddStatusRecord(string servername, OverviewContainerData container)
         {
             var server = await _context.Servers.Where(s => s.Servername.Equals(servername))
                 .Include(s => s.UpdaterContainer)
@@ -120,26 +140,33 @@ namespace SocketServer.Data.Repositories
                 TimeOfRecordInsertion = DateTime.Now,
             };
 
-            if (containerData.Health != null)
-                if (containerData.Health.ToLower().Contains("unhealthy"))
+            if (container.Health != null)
+                if (container.Health.ToLower().Contains("unhealthy"))
                     statusRecord.Health = ContainerHealth.UnHealthy;
                 else
                     statusRecord.Health = ContainerHealth.Healthy;
 
-            if (containerData.Status.ToLower().Contains("up"))
+            if (container.Status.ToLower().Contains("up"))
                 statusRecord.Status = ContainerStatus.Up;
             else
                 statusRecord.Status = ContainerStatus.Down;
 
-            if (containerData.Id.Equals(server.UpdaterContainer.ContainerId))
+            if (ContainerIsUpdater(container.Image)) // Add the record to the updater container
             {
                 statusRecord.DatabaseContainer = server.UpdaterContainer;
                 server.UpdaterContainer.StatusRecords.Add(statusRecord);
+                server.UpdaterContainer.ContainerId = container.Id;
             }
-            else
+            else // Add it to the appropriate container
             {
-                var container = server.Containers.FirstOrDefault(c => c.ContainerId.Equals(containerData.Id));
-                statusRecord.DatabaseContainer = container;
+                var databaseContainer = server.Containers.FirstOrDefault(c => c.ContainerId.Equals(container.Id));
+                if (databaseContainer == null) // the server does not hold any records for this container yet
+                {
+                    databaseContainer = new DatabaseContainer { ContainerId = container.Id };
+                    server.Containers.Add(databaseContainer);
+                }
+
+                statusRecord.DatabaseContainer = databaseContainer;
             }
 
             await _context.SaveChangesAsync();
