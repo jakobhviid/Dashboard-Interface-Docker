@@ -24,14 +24,15 @@ import {
   stopCollectingOverview,
   stopCollectingRessources,
   startListeningForCommandResponses,
-  stopListeningForCommandResponses
+  stopListeningForCommandResponses,
 } from "./redux/container_data/containerData.effects";
 import { useTypedSelector } from "./types/redux/reducerStates.types";
-
+import { loadAndTestJwtLocalStorage } from "./util/reduxHelpers";
+import { loginWithJwt } from "./redux/user/user.actions";
 
 const Overview = lazy(() => import("./pages/overview_page/Overview.page"));
 const RessourceUsage = lazy(() => import("./pages/ressource_usage_page/RessourceUsage.page"));
-const Login = lazy(() => import("./pages/login/Login.page"))
+const Login = lazy(() => import("./pages/login/Login.page"));
 
 const theme = createMuiTheme({
   palette: {
@@ -44,7 +45,7 @@ const theme = createMuiTheme({
 function App() {
   const dispatch = useDispatch();
   const styleClasses = useStyles();
-  const socketConnection = useTypedSelector(store => store.containerData.socketConnection)
+  const socketConnection = useTypedSelector((store) => store.containerData.socketConnection);
 
   React.useEffect(() => {
     socketConnection.start().then(() => {
@@ -52,7 +53,10 @@ function App() {
       dispatch(startCollectingRessources());
       dispatch(startListeningForCommandResponses());
     });
-
+    const jwt = loadAndTestJwtLocalStorage();
+    if (typeof jwt === "string") {
+      dispatch(loginWithJwt(jwt));
+    }
     return () => {
       dispatch(stopCollectingOverview());
       dispatch(stopCollectingRessources());

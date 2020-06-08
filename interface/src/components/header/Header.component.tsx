@@ -73,7 +73,7 @@ function Header() {
           </IconButton>
           {userJwt ? (
             <div>
-              <Avatar className={styleClasses.avatar}>{userDisplayName.charAt(0)}</Avatar>
+              <Avatar className={styleClasses.avatar}>{userDisplayName.substring(0, 2).toUpperCase()}</Avatar>
             </div>
           ) : (
             <Button component={RouterLink} to={LOGIN_URL} color="inherit" className={styleClasses.logInButton}>

@@ -5,5 +5,5 @@ export interface ISuccessfulLoginResponse {
 }
 export interface IErrorLoginResponse {
   statusCode: number;
-  message: string[];
+  message: string | string[];
 }

@@ -27,29 +27,23 @@ function SignIn() {
 
   async function onLogInSubmit(event: any) {
     event.preventDefault();
-    // TODO: send request to API and get a return (with typescript) and call a redux action to insert jwt
-    const loginResponse = await login(emailInput, passwordInput);
-    // TODO: fix that it returns undefined (async await, promise thing)
-
-    if (Array.isArray(loginResponse)) {
+    try {
+      const loginResponse: string = await login(emailInput, passwordInput);
+      dispatch(loginWithJwt(loginResponse));
+    } catch (error) {
       // Error response
-      // TODO: handle properly
-      console.log("What");
       dispatch(
         enqueueSnackbar({
-          message: loginResponse[0],
+          message: error.message,
           options: { key: new Date().getTime() + Math.random(), persist: false, variant: "error" },
         })
       );
-    } else {
-      console.log("What3");
-
-      dispatch(loginWithJwt(loginResponse));
     }
   }
 
-  function onForgotPassword(email: any) {
-    console.log(email);
+  function onForgotPassword(event: any) {
+    // TODO:
+    console.log(forgotPasswordEmailInput);
   }
 
   const classes = useStyles();
@@ -62,7 +56,12 @@ function SignIn() {
         <Typography component="h1" variant="h5">
           Log ind
         </Typography>
-        <form className={classes.form} noValidate onSubmit={onLogInSubmit}>
+        <form
+          onKeyPress={(event) => (event.key === "Enter" ? onLogInSubmit(event) : null)}
+          className={classes.form}
+          noValidate
+          onSubmit={onLogInSubmit}
+        >
           <TextField
             variant="outlined"
             margin="normal"
