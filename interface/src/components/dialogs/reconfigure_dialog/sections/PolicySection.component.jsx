@@ -31,16 +31,17 @@ function RestartPolicySection({
           fullWidth
           variant="outlined"
           label="Restart Policy"
-          value={restartValue.name}
+          value={restartValue.restartPolicy}
           onChange={restartNameOnChange}
           SelectProps={{
             native: true,
           }}
           helperText="When to restart container if it exits"
         >
-          <option value={"{}"}>None</option>
-          <option value={"on-failure"}>Restart On Failure Exit</option>
-          <option value={"always"}>Restart Always On exit</option>
+          <option value="none">None</option>
+          <option value="always">Restart Always On exit</option>
+          <option value="onFailure">Restart On Failure Exit</option>
+          <option value="unlessStopped">Restart Unless Stopped</option>
         </TextField>
       </Grid>
       <Grid item xs={4}>

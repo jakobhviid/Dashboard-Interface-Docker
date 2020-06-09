@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using SocketServer.ContainerModels.ContainerRequest;
+using Newtonsoft.Json;
+using SocketServer.ContainerModels.ContainerRequests;
 using SocketServer.Helpers;
 
 namespace SocketServer.Hubs.DockerUpdatersHub
@@ -51,10 +52,25 @@ namespace SocketServer.Hubs.DockerUpdatersHub
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new RemoveContainerParameters { ContainerId = containerId, RemoveVolumes = removeVolumes });
         }
-        public async void CreateNewContainer(string serverRequestTopic)
+        public async void CreateNewContainer(string serverRequestTopic, string parametersSerialized)
         {
-            await KafkaHelpers.SendMessageAsync(serverRequestTopic,
-                new RunNewContainerParameters { Command = new string[] { "tail", "-f", "/dev/null" }, Image = "ubuntu", Name = "TODO" });
+            try
+            {
+                // Check that all parameters is present and is correct by deserializing
+                if (parametersSerialized == null)// TODO: client error
+                    return;
+                
+                var parameters = JsonConvert.DeserializeObject<RunNewContainerParameters>(parametersSerialized);
+                parameters.Action = ContainerActionType.RUN_NEW;
+                Console.WriteLine(JsonConvert.SerializeObject(parameters));
+                await KafkaHelpers.SendMessageAsync(serverRequestTopic, parameters);
+            }
+            catch (Newtonsoft.Json.JsonException ex)
+            {
+                Console.WriteLine(parametersSerialized);
+                Console.WriteLine("ERROR! : " + ex.Message);
+                // TODO: client error
+            }
         }
         public async void UpdateContainerConfiguration(string serverRequestTopic, string containerId)
         {

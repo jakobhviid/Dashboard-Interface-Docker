@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace SocketServer.ContainerModels.ContainerRequest
+namespace SocketServer.ContainerModels.ContainerRequests
 {
     public class RenameContainerParameter
     {

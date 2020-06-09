@@ -55,17 +55,15 @@ namespace SocketServer.BackgroundWorkers
                     switch (consumeResult.Topic)
                     {
                         case KafkaHelpers.OverviewTopic:
-                            _logger.LogInformation("Am i ever recieved here");
                             await _updatersHub.Clients.All.SendOverviewData(consumeResult.Message.Value);
                             // NOTE: The method checks on LatestOverviewInfo, so it's important this is called before LatestOverviewInfo is set after the record has been saved
-                            _logger.LogInformation("What about here?");
-                            await SaveStatusRecordInDb(consumeResult.Message.Value);
+                            // await SaveStatusRecordInDb(consumeResult.Message.Value);
                             KafkaHelpers.LatestOverviewInfo = consumeResult.Message.Value;
                             break;
                         case KafkaHelpers.StatsTopic:
                             await _updatersHub.Clients.All.SendStatsData(consumeResult.Message.Value);
                             // NOTE: The method checks on LatestOverviewInfo, so it's important this is called before LatestOverviewInfo is set after the record has been saved
-                            await SaveRessourceUsageRecordInDb(consumeResult.Message.Value);
+                            // await SaveRessourceUsageRecordInDb(consumeResult.Message.Value);
                             KafkaHelpers.LatestStatsInfo = consumeResult.Message.Value;
                             break;
                     }
@@ -136,10 +134,8 @@ namespace SocketServer.BackgroundWorkers
                 foreach (var newContainerState in newOverviewData.Containers)
                 {
                     var lastContainerState = lastOverviewData.Containers[containerIndex];
-                    _logger.LogInformation("HEYY WHAT");
                     if (lastOverviewData == null || !newContainerState.Equals(lastContainerState)) // If the container is different
                     {
-                        _logger.LogInformation("I AM NOT EQUQAL");
                         using(var scope = _services.CreateScope())
                         {
                             var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();

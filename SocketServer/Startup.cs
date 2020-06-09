@@ -95,7 +95,7 @@ namespace SocketServer
                     ValidateAudience = false,
                     ValidateIssuer = false,
                     ValidateActor = false,
-                    ValidateLifetime = false,
+                    ValidateLifetime = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]))
                         };
                     options.Events = new JwtBearerEvents

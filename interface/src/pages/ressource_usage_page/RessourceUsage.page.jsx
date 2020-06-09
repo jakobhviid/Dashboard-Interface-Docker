@@ -2,8 +2,8 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import Switch from "@material-ui/core/Switch";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import ContainerTable from "../../components/container_table/ContainerTable.component";
+import { Typography, Button } from "@material-ui/core";
 
 import { reconfigureContainer } from "../../redux/container_data/containerData.effects";
 import { changeHeaderTitle } from "../../redux/ui/ui.actions";
@@ -74,49 +74,52 @@ function RessourceUsage() {
 
   return Object.keys(serverContainers).length === 0 ? (
     <div style={{ textAlign: "center" }}>
-      <CircularProgress color="secondary" />
+      <Typography variant="h5" gutterBottom>
+        Looks like you don't have any running servers at the moment
+      </Typography>
+      <Button variant="outlined" color="secondary">ADD NEW SERVER</Button>
     </div>
   ) : (
-    <React.Fragment>
-      <div style={{ textAlign: "right" }}>
-        <Switch
-          checked={serverMode}
-          onChange={() => setServerMode(!serverMode)}
-          name="Server Mode"
-          inputProps={{ "aria-label": "server mode checkbox" }}
-        />
-      </div>
-      {serverMode ? (
-        Object.keys(containerView).map((servername) => (
-          <div style={{ marginBottom: "18px" }} key={servername}>
+      <React.Fragment>
+        <div style={{ textAlign: "right" }}>
+          <Switch
+            checked={serverMode}
+            onChange={() => setServerMode(!serverMode)}
+            name="Server Mode"
+            inputProps={{ "aria-label": "server mode checkbox" }}
+          />
+        </div>
+        {serverMode ? (
+          Object.keys(containerView).map((servername) => (
+            <div style={{ marginBottom: "18px" }} key={servername}>
+              <ContainerTable
+                title={servername}
+                columns={columns.perServerView}
+                data={containerView[servername].containers}
+                dense="small"
+                actions={actions}
+              />
+            </div>
+          ))
+        ) : (
             <ContainerTable
-              title={servername}
-              columns={columns.perServerView}
-              data={containerView[servername].containers}
+              title="All Containers"
+              columns={columns.containerView}
+              data={containerView}
               dense="small"
               actions={actions}
             />
-          </div>
-        ))
-      ) : (
-        <ContainerTable
-          title="All Containers"
-          columns={columns.containerView}
-          data={containerView}
-          dense="small"
-          actions={actions}
+          )}
+        <ReconfigureContainerDialog
+          open={reconfigureDialogOpen}
+          handleClose={() => setReconfigureDialogOpen(false)}
+          handleConfirmation={handleReconfigure}
+          dialogTitle="Reconfiguring Container"
+          dialogText="How should the container be configured?"
+          label="Container Name"
         />
-      )}
-      <ReconfigureContainerDialog
-        open={reconfigureDialogOpen}
-        handleClose={() => setReconfigureDialogOpen(false)}
-        handleConfirmation={handleReconfigure}
-        dialogTitle="Reconfiguring Container"
-        dialogText="How should the container be configured?"
-        label="Container Name"
-      />
-    </React.Fragment>
-  );
+      </React.Fragment>
+    );
 }
 
 export default RessourceUsage;

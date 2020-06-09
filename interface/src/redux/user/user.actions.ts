@@ -4,3 +4,7 @@ export const loginWithJwt = (jwt: string) => ({
   type: UserActionTypes.LOGIN,
   payload: jwt,
 });
+
+export const logout = () => ({
+  type: UserActionTypes.LOGOUT,
+});

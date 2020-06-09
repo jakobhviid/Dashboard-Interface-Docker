@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace SocketServer.ContainerModels.ContainerRequest
+namespace SocketServer.ContainerModels.ContainerRequests
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum ContainerActionType

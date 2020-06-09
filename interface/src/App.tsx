@@ -53,6 +53,7 @@ function App() {
       dispatch(startCollectingRessources());
       dispatch(startListeningForCommandResponses());
     });
+
     const jwt = loadAndTestJwtLocalStorage();
     if (typeof jwt === "string") {
       dispatch(loginWithJwt(jwt));
@@ -69,7 +70,7 @@ function App() {
       maxSnack={2}
       anchorOrigin={{
         vertical: "bottom",
-        horizontal: "right",
+        horizontal: "center",
       }}
       dense
       preventDuplicate

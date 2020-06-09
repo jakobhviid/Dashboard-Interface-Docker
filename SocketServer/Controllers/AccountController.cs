@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -50,7 +51,7 @@ namespace SocketServer.Controllers
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var claims = new [] { new Claim(ClaimTypes.Email, input.Email) };
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(claims: claims, signingCredentials: credentials);
+            var token = new JwtSecurityToken(claims: claims, signingCredentials: credentials, expires: DateTime.Now.AddDays(30));
             return StatusCode(StatusCodes.Status200OK, new TokenResponseDTO
             {
                 StatusCode = 200,

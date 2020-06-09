@@ -2,7 +2,6 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { HubConnection } from "@microsoft/signalr";
 
-import CircularProgress from "@material-ui/core/CircularProgress";
 import Switch from "@material-ui/core/Switch";
 import ContainerTable from "../../components/container_table/ContainerTable.component";
 import Fab from "@material-ui/core/Fab";
@@ -16,6 +15,7 @@ import {
   REMOVE_CONTAINER_REQUEST,
   CREATE_NEW_CONTAINER_REQUEST,
   REFETCH_OVERVIEW_DATA,
+  NEWEST_OVERVIEW_DATA_REQUEST,
 } from "../../util/socketEvents";
 
 import { changeHeaderTitle } from "../../redux/ui/ui.actions";
@@ -25,6 +25,7 @@ import NewContainerDialog from "../../components/dialogs/newcontainer_dialog/New
 
 import useStyles from "./Overview.styles";
 import { IRootState } from "../../types/redux/reducerStates.types";
+import { Typography, Button } from "@material-ui/core";
 
 const columnsServerView = [
   { title: "Name", alignment: "left", field: "name" },
@@ -154,44 +155,23 @@ function Overview() {
     }
   }
 
-  function createNewContainer(values: any) {
-    const objectToSend: any = {};
-
-    if (values["image"] !== "") objectToSend["image"] = values["image"];
-    if (values["name"] !== "") objectToSend["name"] = values["name"];
-    if (values["command"] !== "") objectToSend["command"] = values["command"];
-
-    if (values["restart_policy"]["name"] !== "{}") {
-      const restartPolicyObject: any = { Name: values["restart_policy"]["name"] };
-      if (values["restart_policy"]["maximumRetryCount"] !== "")
-        restartPolicyObject["MaximumRetryCount"] = parseInt(values["restart_policy"]["maximumRetryCount"]);
-      objectToSend["restart_policy"] = restartPolicyObject;
-    }
-
-    const ports: any = {};
-    for (const port of values["ports"]) {
-      ports[port.portContainer + "/tcp"] = port.portHost;
-    }
-    if (Object.keys(ports).length !== 0) objectToSend["ports"] = ports;
-
-    const environmentVariables = [];
-    for (const environment of values["environment"]) {
-      environmentVariables.push(environment.key + "=" + environment.value);
-    }
-    if (environmentVariables.length !== 0) objectToSend["environment"] = environmentVariables;
-
-    const volumes: any = {};
-    for (const volume of values["volumes"]) {
-      volumes[volume.hostPath] = { bind: volume.bind, mode: volume.mode };
-    }
-    if (Object.keys(volumes).length !== 0) objectToSend["volumes"] = volumes;
-
-    socketConnection.invoke(CREATE_NEW_CONTAINER_REQUEST, values.server); // TODO: Give parameters once server supports it
-  }
-
   return Object.keys(overviewData).length === 0 ? (
     <div style={{ textAlign: "center" }}>
-      <CircularProgress color="secondary" />
+      <Typography variant="h5" gutterBottom>
+        Looks like you don't have any running servers at the moment
+      </Typography>
+      <Button variant="outlined" color="secondary">
+        ADD NEW SERVER
+      </Button>
+      <Button
+        variant="outlined"
+        color="secondary"
+        onClick={() => {
+          socketConnection.invoke(NEWEST_OVERVIEW_DATA_REQUEST);
+        }}
+      >
+        OR TRY TO REFETCH
+      </Button>
     </div>
   ) : (
     <React.Fragment>
@@ -253,7 +233,6 @@ function Overview() {
       <NewContainerDialog
         open={createContainerDialogOpen}
         handleClose={() => setCreateContainerDialogOpen(false)}
-        handleConfirmation={createNewContainer}
         dialogTitle="Run a new Container"
         servers={Object.keys(overviewData).map((servername) => {
           if (overviewData[servername].commandRequestTopic) {
