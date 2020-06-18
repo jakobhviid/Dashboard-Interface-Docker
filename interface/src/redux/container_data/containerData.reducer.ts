@@ -5,7 +5,7 @@ import { IContainerDataState, ReducerAction } from "../../types/redux/reducerSta
 const signalR = require("@microsoft/signalr");
 
 const INITIAL_STATE: IContainerDataState = {
-  socketConnection: new signalR.HubConnectionBuilder().withUrl("http://127.0.0.1:5000/updates").build(),
+  socketConnection: undefined,
   overviewData: {},
   statsData: {},
   loadingContainers: [],
@@ -20,7 +20,7 @@ const addCommandTopicToContainers = (containers: any, payload: any) => {
   }
 };
 
-const overviewReducer = (state = INITIAL_STATE, action: ReducerAction) => {
+const containerDataReducer = (state = INITIAL_STATE, action: ReducerAction) => {
   switch (action.type) {
     case overviewActionTypes.COLLECTION_SUCCESS_OVERVIEW:
       addCommandTopicToContainers(action.payload.containers, action.payload);
@@ -61,9 +61,21 @@ const overviewReducer = (state = INITIAL_STATE, action: ReducerAction) => {
         );
       });
 
+    case containerActionTypes.SOCKET_CONNECTION_INIT:
+      return produce(state, (nextState) => {
+        nextState.socketConnection = new signalR.HubConnectionBuilder()
+          .withUrl("http://127.0.0.1:5000/updates", { accessTokenFactory: () => action.payload })
+          .build();
+      });
+
+    case containerActionTypes.SOCKET_CONNECTION_OFF:
+      return produce(state, (nextState) => {
+        nextState.socketConnection = undefined;
+      });
+
     default:
       return state;
   }
 };
 
-export default overviewReducer;
+export default containerDataReducer;

@@ -1,5 +1,5 @@
 import { LOGIN_ENDPOINT } from "./endpoints";
-import { ISuccessfulLoginResponse, IErrorLoginResponse } from "../types/api_response/account.types";
+import { IErrorLoginResponse } from "../types/api_response/account.types";
 
 export async function login(email: string, password: string) {
   const response = await fetch(LOGIN_ENDPOINT, {
@@ -14,7 +14,6 @@ export async function login(email: string, password: string) {
     if (Array.isArray(errorResponse.message)) throw new Error(errorResponse.message[0]);
     else throw new Error(errorResponse.message);
   } else {
-    const successResponse: ISuccessfulLoginResponse = response;
     return response.token;
   }
 }

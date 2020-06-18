@@ -19,9 +19,10 @@ import { IRootState } from "../../../types/redux/reducerStates.types";
 import { CREATE_NEW_CONTAINER_REQUEST } from "../../../util/socketEvents";
 import { removeEmptyNullUndefinedValues } from "../../../util/helpers";
 import { enqueueSnackbar } from "../../../redux/notifier/notifier.actions";
+import { INewContainerValues, IContainerValuesToSend, templates } from "./Templates";
 
 function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
-  const [values, setValues] = React.useState<any>({
+  const [values, setValues] = React.useState<INewContainerValues>({
     image: "",
     name: "",
     command: "",
@@ -33,7 +34,8 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
     networkMode: "",
   });
   const [selectedServer, setSelectedServer] = React.useState<string>(servers[0].url);
-  const socketConnection: HubConnection = useSelector((store: IRootState) => store.containerData.socketConnection);
+  const [selectedTemplate, setSelectedTemplate] = React.useState<string>("");
+  const socketConnection: HubConnection | undefined = useSelector((store: IRootState) => store.containerData.socketConnection);
   const dispatch = useDispatch();
 
   function handleConfirmation() {
@@ -50,17 +52,41 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
       );
       return;
     }
-    const valuesToSend = produce(values, (valuesCopy: any) => {
+    const valuesToSend = produce(values, (valuesCopy: IContainerValuesToSend) => {
       removeEmptyNullUndefinedValues(valuesCopy);
-      if (valuesCopy.restartPolicy.restartPolicy === "none") delete valuesCopy.restartPolicy;
+
+      if (values.restartPolicy.restartPolicy === "none") delete valuesCopy.restartPolicy;
     });
     console.log(JSON.stringify(valuesToSend));
-    socketConnection.invoke(CREATE_NEW_CONTAINER_REQUEST, selectedServer, JSON.stringify(valuesToSend));
+    if (socketConnection !== undefined)
+      socketConnection.invoke(CREATE_NEW_CONTAINER_REQUEST, selectedServer, JSON.stringify(valuesToSend));
+  }
+
+  function handleAutoFillTemplate(templateName: string) {
+    setSelectedTemplate(templateName);
+    if (templateName === "") {
+      setValues({
+        image: "",
+        name: "",
+        command: "",
+        ports: [],
+        environment: [],
+        restartPolicy: { restartPolicy: "none", maximumRetryCount: "" },
+        volumes: [],
+        volumesFrom: [],
+        networkMode: "",
+      });
+      return
+    }
+    var name: any = Object.keys(templates).find((template) => template === templateName);
+    const template: INewContainerValues = templates[name];
+    setValues(template);
   }
 
   return (
     <div>
       <Dialog
+        maxWidth="xl"
         open={open}
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
@@ -95,6 +121,31 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                 </TextField>
               </Grid>
               <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>
+                <Typography variant="subtitle2">Choose a Template Here</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  variant="outlined"
+                  label="Autofill Template"
+                  select
+                  SelectProps={{
+                    native: true,
+                  }}
+                  type="text"
+                  fullWidth
+                  value={selectedTemplate}
+                  onChange={(event: any) => handleAutoFillTemplate(event.target.value)}
+                >
+                  <option key={"none"} value={""} />
+                  {Object.keys(templates).map((templateName: string) => (
+                    <option key={templateName} value={templateName}>
+                      {templateName}
+                    </option>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>
                 <Typography variant="subtitle2">Basics</Typography>
               </Grid>
               <Grid item xs={12}>
@@ -107,7 +158,7 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                   autoFocus
                   value={values.image}
                   onChange={(event) => setValues({ ...values, image: event.target.value })}
-                  helperText="Image to Run (example: ubuntu:18.04)"
+                  helperText="Image to Run (example: ubuntu)"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -150,8 +201,8 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                 restartRetryCountOnChange={(event: any) =>
                   setValues({
                     ...values,
-                    restart_policy: {
-                      ...values.restart_policy,
+                    restartPolicy: {
+                      ...values.restartPolicy,
                       maximumRetryCount: event.target.value,
                     },
                   })

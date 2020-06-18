@@ -25,7 +25,7 @@ import useStyles from "./Header.styles";
 import { overviewItems } from "./listitems";
 import NotificationMenu from "./notification_menu/NotificationMenu.component";
 import { IRootState } from "../../types/redux/reducerStates.types";
-import { LOGIN_URL, OVERVIEW_URL } from "../../util/navigationEndpoints";
+import { LOGIN_URL, OVERVIEW_URL, PROFILE_URL } from "../../util/navigationEndpoints";
 import { Menu, MenuItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import { logout } from "../../redux/user/user.actions";
 
@@ -103,7 +103,7 @@ function Header() {
                 open={accountMenuOpen}
                 onClose={() => setAnchorEl(null)}
               >
-                <MenuItem component={RouterLink} to="/profil" onClick={() => setAnchorEl(null)}>
+                <MenuItem component={RouterLink} to={PROFILE_URL} onClick={() => setAnchorEl(null)}>
                   <ListItemIcon>
                     <EditIcon />
                   </ListItemIcon>

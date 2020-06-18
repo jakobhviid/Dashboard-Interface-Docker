@@ -27,16 +27,13 @@ import { useSelector } from "react-redux";
 
 import { get } from "lodash";
 
-import {
-  useTableStyles,
-  useToolbarStyles,
-  useHeaderStyles,
-} from "./ContainerTable.styles";
+import { useTableStyles, useToolbarStyles, useHeaderStyles } from "./ContainerTable.styles";
+import { IRootState } from "../../types/redux/reducerStates.types";
 
 // Return -1 if element b should be on the left of element a
 // Return +1 if element b should be on the right of element a
 // Return 0 if they are placed correctly
-function descendingComparator(a, b, orderByProperty) {
+function descendingComparator(a: any, b: any, orderByProperty: any) {
   if (get(b, orderByProperty) < get(a, orderByProperty)) {
     return -1;
   }
@@ -48,35 +45,35 @@ function descendingComparator(a, b, orderByProperty) {
 
 // Returns a callable function which takes the two elements to be compared
 // and returns either an ascending comparator or a descending comparator with the orderBy injected
-function getComparator(order, orderByProperty) {
+function getComparator(order: any, orderByProperty: any) {
   return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderByProperty)
-    : (a, b) => -descendingComparator(a, b, orderByProperty);
+    ? (a: any, b: any) => descendingComparator(a, b, orderByProperty)
+    : (a: any, b: any) => -descendingComparator(a, b, orderByProperty);
 }
 
-function stableSort(array, comparator) {
-  const arrayWithIndex = array.map((el, index) => [el, index]);
-  arrayWithIndex.sort((a, b) => {
+function stableSort(array: any, comparator: any) {
+  const arrayWithIndex = array.map((el: any, index: any) => [el, index]);
+  arrayWithIndex.sort((a: any, b: any) => {
     const order = comparator(a[0], b[0]);
 
     if (order !== 0) return order; // If order isn't already in place
     return a[1] - b[1];
   });
 
-  return arrayWithIndex.map((el) => el[0]);
+  return arrayWithIndex.map((el: any) => el[0]);
 }
 
-function ContainerTableHeader({ columns, orderBy, order, onRequestSort }) {
+function ContainerTableHeader({ columns, orderBy, order, onRequestSort }: any) {
   const classes = useHeaderStyles();
 
-  const createSortHandler = (property) => (event) => {
+  const createSortHandler = (property: any) => (event: any) => {
     onRequestSort(event, property);
   };
 
   return (
     <TableHead>
       <TableRow>
-        {columns.map((column) => (
+        {columns.map((column: any) => (
           <TableCell
             key={column.title}
             align={column.alignment}
@@ -90,9 +87,7 @@ function ContainerTableHeader({ columns, orderBy, order, onRequestSort }) {
             >
               {column.title}
               {orderBy === column.title ? (
-                <span className={classes.visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </span>
+                <span className={classes.visuallyHidden}>{order === "desc" ? "sorted descending" : "sorted ascending"}</span>
               ) : null}
             </TableSortLabel>
           </TableCell>
@@ -103,16 +98,11 @@ function ContainerTableHeader({ columns, orderBy, order, onRequestSort }) {
   );
 }
 
-function TableToolbar({ title, onSearchChange, searchValue, onRefetch }) {
+function TableToolbar({ title, onSearchChange, searchValue, onRefetch }: any) {
   const classes = useToolbarStyles();
   return (
     <Toolbar className={classes.root}>
-      <Typography
-        className={classes.title}
-        variant="h6"
-        id="tableTitle"
-        component="div"
-      >
+      <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
         {title}
       </Typography>
       <div className={classes.search}>
@@ -147,7 +137,8 @@ const StyledMenu = withStyles({
   paper: {
     border: "1px solid #d3d4d5",
   },
-})((props) => (
+})((props: any) => (
+  // @ts-ignore
   <Menu
     elevation={0}
     getContentAnchorEl={null}
@@ -163,19 +154,18 @@ const StyledMenu = withStyles({
   />
 ));
 
-function ContainerTable({ columns, title, data, dense, actions, onRefetch }) {
+function ContainerTable({ columns, title, data, dense, actions, onRefetch }: any) {
   const classes = useTableStyles();
   const [page, setPage] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState(columns[0].field);
-  const [selectedContainer, setSelectedContainer] = React.useState(null);
-  const [lastUpdatedTooltips, setlastUpdatedTooltips] = React.useState({});
+  const [selectedContainer, setSelectedContainer] = React.useState<any>(null);
+  const [lastUpdatedTooltips, setlastUpdatedTooltips] = React.useState<any>({});
   const [searchValue, setSearchValue] = React.useState("");
-  const loadingContainers = useSelector(
-    (store) => store.containerData.loadingContainers
-  );
-  const handleRequestSort = (event, property) => {
+  const loadingContainers = useSelector((store: IRootState) => store.containerData.loadingContainers);
+
+  const handleRequestSort = (event: any, property: any) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
 
@@ -184,27 +174,27 @@ function ContainerTable({ columns, title, data, dense, actions, onRefetch }) {
 
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (event: any, newPage: any) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (event: any) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const handleActionClick = (action) => {
+  const handleActionClick = (action: any) => {
     setAnchorEl(null);
     action.onClick(selectedContainer);
   };
 
-  const handleOnSearchChange = (event) => {
+  const handleOnSearchChange = (event: any) => {
     setSearchValue(event.target.value);
   };
 
   function searchSort() {
-    const searchedData = [];
-    data.filter((row) => {
+    const searchedData: any = [];
+    data.filter((row: any) => {
       // Check all the key value pairs inside each row in the data
       for (const column of columns) {
         const value = get(row, column.field).toString();
@@ -221,12 +211,7 @@ function ContainerTable({ columns, title, data, dense, actions, onRefetch }) {
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <TableToolbar
-          title={title}
-          onSearchChange={handleOnSearchChange}
-          searchValue={searchValue}
-          onRefetch={onRefetch}
-        />
+        <TableToolbar title={title} onSearchChange={handleOnSearchChange} searchValue={searchValue} onRefetch={onRefetch} />
         <TableContainer>
           <Table
             className={classes.table}
@@ -234,24 +219,15 @@ function ContainerTable({ columns, title, data, dense, actions, onRefetch }) {
             size={dense ? "small" : "medium"}
             aria-label="container table"
           >
-            <ContainerTableHeader
-              columns={columns}
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-            />
+            <ContainerTableHeader columns={columns} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
             <TableBody>
               {stableSort(searchSort(), getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
+                .map((row: any, index: any) => {
                   return (
                     <Tooltip
                       key={index}
-                      title={
-                        lastUpdatedTooltips[row.id]
-                          ? lastUpdatedTooltips[row.id]
-                          : ""
-                      }
+                      title={lastUpdatedTooltips[row.id] ? lastUpdatedTooltips[row.id] : ""}
                       placement="right"
                       onOpen={() =>
                         setlastUpdatedTooltips({
@@ -263,11 +239,8 @@ function ContainerTable({ columns, title, data, dense, actions, onRefetch }) {
                       enterDelay={500}
                     >
                       <TableRow hover>
-                        {columns.map((column) => (
-                          <TableCell
-                            align={column.alignment}
-                            key={column.title}
-                          >
+                        {columns.map((column: any) => (
+                          <TableCell align={column.alignment} key={column.title}>
                             {get(row, column.field)}
                           </TableCell>
                         ))}
@@ -278,22 +251,22 @@ function ContainerTable({ columns, title, data, dense, actions, onRefetch }) {
                                 <CircularProgress size={20} thickness={4} />
                               </div>
                             ) : (
-                                <IconButton
-                                  aria-label="container actions"
-                                  aria-controls="actions"
-                                  aria-haspopup="true"
-                                  onClick={(event) => {
-                                    setAnchorEl(event.currentTarget);
-                                    setSelectedContainer(row);
-                                  }}
-                                >
-                                  <MoreVertIcon />
-                                </IconButton>
-                              )}
+                              <IconButton
+                                aria-label="container actions"
+                                aria-controls="actions"
+                                aria-haspopup="true"
+                                onClick={(event: any) => {
+                                  setAnchorEl(event.currentTarget);
+                                  setSelectedContainer(row);
+                                }}
+                              >
+                                <MoreVertIcon />
+                              </IconButton>
+                            )}
                           </TableCell>
                         ) : (
-                            <TableCell align="right"></TableCell>
-                          )}
+                          <TableCell align="right"></TableCell>
+                        )}
                       </TableRow>
                     </Tooltip>
                   );
@@ -311,19 +284,9 @@ function ContainerTable({ columns, title, data, dense, actions, onRefetch }) {
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
-
-      <StyledMenu
-        id="actions-menu"
-        anchorEl={anchorEl}
-        keepMounted
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-      >
-        {actions.map((action) => (
-          <MenuItem
-            key={action.label}
-            onClick={() => handleActionClick(action)}
-          >
+      <StyledMenu id="actions-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+        {actions.map((action: any) => (
+          <MenuItem key={action.label} onClick={() => handleActionClick(action)}>
             {action.label}
           </MenuItem>
         ))}

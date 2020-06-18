@@ -1,5 +1,5 @@
 export default {
     LOGIN: "LOGIN",
-    LOGOUT: "LOGOUT"
+    REMOVE_JWT: "REMOVE_JWT"
 };
   

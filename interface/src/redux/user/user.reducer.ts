@@ -1,7 +1,7 @@
 import UserActionTypes from "./user.types";
 import { IUserState, ReducerAction } from "../../types/redux/reducerStates.types";
 import produce from "immer";
-import { saveJwtLocalStorage, loadAndTestJwtLocalStorage, removeJwtLocalStorage } from "../../util/reduxHelpers";
+import { saveJwtLocalStorage, removeJwtLocalStorage } from "../../util/reduxHelpers";
 
 const INTIAL_STATE: IUserState = {
   jwt: undefined,
@@ -22,7 +22,7 @@ const userReducer = (state = INTIAL_STATE, action: ReducerAction) => {
         nextstate.jwt = action.payload;
         saveJwtLocalStorage(action.payload);
       });
-    case UserActionTypes.LOGOUT:
+    case UserActionTypes.REMOVE_JWT:
       return produce(state, (nextstate) => {
         removeJwtLocalStorage();
         nextstate.jwt = undefined;

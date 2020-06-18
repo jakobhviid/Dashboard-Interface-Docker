@@ -9,6 +9,7 @@ using SocketServer.Helpers;
 
 namespace SocketServer.Hubs.DockerUpdatersHub
 {
+    [Authorize]
     public class DockerUpdatersHub : Hub<IDockerUpdaters>
     {
         private readonly ILogger<DockerUpdatersHub> _logger;
@@ -62,7 +63,6 @@ namespace SocketServer.Hubs.DockerUpdatersHub
                 
                 var parameters = JsonConvert.DeserializeObject<RunNewContainerParameters>(parametersSerialized);
                 parameters.Action = ContainerActionType.RUN_NEW;
-                Console.WriteLine(JsonConvert.SerializeObject(parameters));
                 await KafkaHelpers.SendMessageAsync(serverRequestTopic, parameters);
             }
             catch (Newtonsoft.Json.JsonException ex)

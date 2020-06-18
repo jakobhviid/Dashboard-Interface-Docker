@@ -5,9 +5,9 @@ import Switch from "@material-ui/core/Switch";
 import ContainerTable from "../../components/container_table/ContainerTable.component";
 import { Typography, Button } from "@material-ui/core";
 
-import { reconfigureContainer } from "../../redux/container_data/containerData.effects";
 import { changeHeaderTitle } from "../../redux/ui/ui.actions";
 import ReconfigureContainerDialog from "../../components/dialogs/reconfigure_dialog/ReconfigureContainerDialog.component";
+import { IRootState } from "../../types/redux/reducerStates.types";
 
 const columns = {
   perServerView: [
@@ -32,33 +32,30 @@ const columns = {
 function RessourceUsage() {
   const [serverMode, setServerMode] = React.useState(true);
   const [selectedContainer, setSelectedContainer] = React.useState(null);
-  const [reconfigureDialogOpen, setReconfigureDialogOpen] = React.useState(
-    false
-  );
+  const [reconfigureDialogOpen, setReconfigureDialogOpen] = React.useState(false);
   const dispatch = useDispatch();
-  const serverContainers = useSelector(
-    (store) => store.containerData.statsData
-  );
+  const serverContainers = useSelector((store: IRootState) => store.containerData.statsData);
+  const userJwt = useSelector((store: IRootState) => store.user.jwt);
 
   React.useEffect(() => {
     dispatch(changeHeaderTitle("Container Ressource Usage"));
-  }, []);
+  }, [dispatch]);
 
   const actions = [
     {
       label: "Update Configuration",
-      onClick: (selectedContainer) => {
+      onClick: (selectedContainer: any) => {
         setSelectedContainer(selectedContainer);
         setReconfigureDialogOpen(true);
       },
     },
   ];
 
-  const handleReconfigure = (values) => {
+  const handleReconfigure = (values: any) => {
     // dispatch(reconfigureContainer(selectedContainer, values)); TODO:
   };
 
-  let containerView = null;
+  let containerView: any = null;
   if (Object.keys(serverContainers).length !== 0) {
     if (!serverMode) {
       containerView = [];
@@ -72,54 +69,66 @@ function RessourceUsage() {
     }
   }
 
-  return Object.keys(serverContainers).length === 0 ? (
-    <div style={{ textAlign: "center" }}>
-      <Typography variant="h5" gutterBottom>
-        Looks like you don't have any running servers at the moment
-      </Typography>
-      <Button variant="outlined" color="secondary">ADD NEW SERVER</Button>
-    </div>
-  ) : (
-      <React.Fragment>
-        <div style={{ textAlign: "right" }}>
-          <Switch
-            checked={serverMode}
-            onChange={() => setServerMode(!serverMode)}
-            name="Server Mode"
-            inputProps={{ "aria-label": "server mode checkbox" }}
-          />
-        </div>
-        {serverMode ? (
-          Object.keys(containerView).map((servername) => (
-            <div style={{ marginBottom: "18px" }} key={servername}>
-              <ContainerTable
-                title={servername}
-                columns={columns.perServerView}
-                data={containerView[servername].containers}
-                dense="small"
-                actions={actions}
-              />
-            </div>
-          ))
-        ) : (
+  if (userJwt == null) {
+    return (
+      <div style={{ textAlign: "center" }}>
+        <Typography variant="h5" gutterBottom>
+          Login
+        </Typography>
+      </div>
+    );
+  } else if (Object.keys(serverContainers).length === 0) {
+    return (
+      <div style={{ textAlign: "center" }}>
+        <Typography variant="h5" gutterBottom>
+          Looks like you don't have any running servers at the moment
+        </Typography>
+        <Button variant="outlined" color="secondary">
+          ADD NEW SERVER
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <React.Fragment>
+      <div style={{ textAlign: "right" }}>
+        <Switch
+          checked={serverMode}
+          onChange={() => setServerMode(!serverMode)}
+          name="Server Mode"
+          inputProps={{ "aria-label": "server mode checkbox" }}
+        />
+      </div>
+      {serverMode ? (
+        Object.keys(containerView).map((servername) => (
+          <div style={{ marginBottom: "18px" }} key={servername}>
             <ContainerTable
-              title="All Containers"
-              columns={columns.containerView}
-              data={containerView}
+              title={servername}
+              columns={columns.perServerView}
+              data={containerView[servername].containers}
               dense="small"
               actions={actions}
             />
-          )}
-        <ReconfigureContainerDialog
-          open={reconfigureDialogOpen}
-          handleClose={() => setReconfigureDialogOpen(false)}
-          handleConfirmation={handleReconfigure}
-          dialogTitle="Reconfiguring Container"
-          dialogText="How should the container be configured?"
-          label="Container Name"
+          </div>
+        ))
+      ) : (
+        <ContainerTable
+          title="All Containers"
+          columns={columns.containerView}
+          data={containerView}
+          dense="small"
+          actions={actions}
         />
-      </React.Fragment>
-    );
+      )}
+      <ReconfigureContainerDialog
+        open={reconfigureDialogOpen}
+        handleClose={() => setReconfigureDialogOpen(false)}
+        handleConfirmation={handleReconfigure}
+        dialogTitle="Reconfiguring Container"
+      />
+    </React.Fragment>
+  );
 }
 
 export default RessourceUsage;

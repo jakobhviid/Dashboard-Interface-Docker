@@ -79,8 +79,10 @@ function NotificationMenu({ anchorEl, handleClose }) {
               break;
             case eventType.INFO:
               notificationIcon = <InfoIcon className={classes.infoIcon} />;
+              break;
             default:
               notificationIcon = <InfoIcon className={classes.infoIcon} />;
+              break;
           }
           return (
             <div key={index}>

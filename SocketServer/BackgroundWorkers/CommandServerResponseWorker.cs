@@ -40,6 +40,7 @@ namespace SocketServer.BackgroundWorkers
                 {
                     // consumer does not have an async method. So it is wrapped in a task, so that the rest of the application doesn't hang here
                     var consumeResult = await Task.Factory.StartNew(() => c.Consume(stoppingToken));
+                    Console.WriteLine("Found a result! " + consumeResult.Message.Value);
                     await _updatersHub.Clients.All.SendCommandResponses(consumeResult.Message.Value);
                 }
                 c.Close();

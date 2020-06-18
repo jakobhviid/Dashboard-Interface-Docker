@@ -13,7 +13,6 @@ import {
   START_CONTAINER_REQUEST,
   RESTART_CONTAINER_REQUEST,
   REMOVE_CONTAINER_REQUEST,
-  CREATE_NEW_CONTAINER_REQUEST,
   REFETCH_OVERVIEW_DATA,
   NEWEST_OVERVIEW_DATA_REQUEST,
 } from "../../util/socketEvents";
@@ -71,17 +70,20 @@ function Overview() {
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
   const dispatch = useDispatch();
   const overviewData = useSelector((store: IRootState) => store.containerData.overviewData);
-  const socketConnection: HubConnection = useSelector((store: IRootState) => store.containerData.socketConnection);
+  const socketConnection: HubConnection | undefined = useSelector((store: IRootState) => store.containerData.socketConnection);
+  const userJwt = useSelector((store: IRootState) => store.user.jwt);
+
   const classes = useStyles();
 
   React.useEffect(() => {
     dispatch(changeHeaderTitle("Container Overview"));
-  }, []);
+  }, [dispatch]);
 
   const handleRename = (newName: string) => {
     if (selectedContainer != null) {
       dispatch(containerLoadStart([selectedContainer.id]));
-      socketConnection.invoke(RENAME_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, newName);
+      if (socketConnection !== undefined)
+        socketConnection.invoke(RENAME_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, newName);
     }
   };
 
@@ -99,22 +101,28 @@ function Overview() {
         if (selectedContainer.commandRequestTopic != null)
           if (selectedContainer.state.includes("running")) {
             dispatch(containerLoadStart([selectedContainer.id]));
-            socketConnection.invoke(STOP_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
-          } else socketConnection.invoke(START_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
+            if (socketConnection !== undefined)
+              socketConnection.invoke(STOP_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
+          } else {
+            if (socketConnection !== undefined)
+              socketConnection.invoke(START_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
+          }
       },
     },
     {
       label: "Restart",
       onClick: (selectedContainer: IContainerState) => {
         dispatch(containerLoadStart([selectedContainer.id]));
-        socketConnection.invoke(RESTART_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
+        if (socketConnection !== undefined)
+          socketConnection.invoke(RESTART_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
       },
     },
     {
       label: "Remove",
       onClick: (selectedContainer: IContainerState) => {
         dispatch(containerLoadStart([selectedContainer.id]));
-        socketConnection.invoke(REMOVE_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, true); //TODO: Ask user if they want to remove volumes aswell
+        if (socketConnection !== undefined)
+          socketConnection.invoke(REMOVE_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, true); //TODO: Ask user if they want to remove volumes aswell
       },
     },
   ];
@@ -123,14 +131,14 @@ function Overview() {
     if (!serverMode) {
       for (const servername of Object.keys(overviewData)) {
         dispatch(containerLoadStart(overviewData[servername].containers.map((container) => container.id)));
-        if (overviewData[servername].commandRequestTopic)
+        if (overviewData[servername].commandRequestTopic && socketConnection !== undefined)
           socketConnection.invoke(REFETCH_OVERVIEW_DATA, overviewData[servername].commandRequestTopic);
       }
     } else {
       servers.forEach((servername) => {
         const containerIds = overviewData[servername].containers.map((container) => container.id);
         dispatch(containerLoadStart(containerIds));
-        if (overviewData[servername].commandRequestTopic)
+        if (overviewData[servername].commandRequestTopic && socketConnection !== undefined)
           socketConnection.invoke(REFETCH_OVERVIEW_DATA, overviewData[servername].commandRequestTopic);
       });
     }
@@ -155,25 +163,37 @@ function Overview() {
     }
   }
 
-  return Object.keys(overviewData).length === 0 ? (
-    <div style={{ textAlign: "center" }}>
-      <Typography variant="h5" gutterBottom>
-        Looks like you don't have any running servers at the moment
-      </Typography>
-      <Button variant="outlined" color="secondary">
-        ADD NEW SERVER
-      </Button>
-      <Button
-        variant="outlined"
-        color="secondary"
-        onClick={() => {
-          socketConnection.invoke(NEWEST_OVERVIEW_DATA_REQUEST);
-        }}
-      >
-        OR TRY TO REFETCH
-      </Button>
-    </div>
-  ) : (
+  if (userJwt == null) {
+    return (
+      <div style={{ textAlign: "center" }}>
+        <Typography variant="h5" gutterBottom>
+          Login
+        </Typography>
+      </div>
+    );
+  } else if (Object.keys(overviewData).length === 0) {
+    return (
+      <div style={{ textAlign: "center" }}>
+        <Typography variant="h5" gutterBottom>
+          Looks like you don't have any running servers at the moment
+        </Typography>
+        <Button variant="outlined" color="secondary">
+          ADD NEW SERVER
+        </Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => {
+            if (socketConnection !== undefined) socketConnection.invoke(NEWEST_OVERVIEW_DATA_REQUEST);
+          }}
+        >
+          OR TRY TO REFETCH
+        </Button>
+      </div>
+    );
+  }
+
+  return (
     <React.Fragment>
       <div style={{ textAlign: "right" }}>
         <Switch

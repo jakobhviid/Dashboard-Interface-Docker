@@ -10,15 +10,22 @@ import {
   COMMAND_RESPONSES_FUNCTION,
 } from "../../util/socketEvents";
 import { calculateAppropiateByteType } from "../../util/helpers";
-import {
-  collectionSuccessOverview,
-  ressourceCollectionSuccess,
-  containerLoadFinished
-} from "./containerData.actions";
+import { collectionSuccessOverview, ressourceCollectionSuccess, containerLoadFinished } from "./containerData.actions";
 import { checkContainerOverviewData, checkContainerStats } from "../monitoring_events/monitoringEvents.actions";
 import { Dispatch } from "redux";
 import { IAPIOverviewData, IAPIStatsData } from "../../types/api_response/container.types";
 import { HubConnection } from "@microsoft/signalr";
+
+export const dataCollectionStart = () => {
+  return (dispatch: any, getState: any) => {
+    const socketConnection: HubConnection = getState().containerData.socketConnection;
+    socketConnection.start().then(() => {
+      dispatch(startCollectingOverview());
+      dispatch(startCollectingRessources());
+      dispatch(startListeningForCommandResponses());
+    });
+  };
+};
 
 export const startCollectingOverview = () => {
   return (dispatch: any, getState: any) => {
@@ -79,7 +86,7 @@ export const stopCollectingRessources = () => {
 interface ICommandResponse {
   responseStatusCode: number;
   message: string;
-  containerIds: string[]
+  containerIds: string[];
 }
 
 export const startListeningForCommandResponses = () => {
@@ -88,7 +95,7 @@ export const startListeningForCommandResponses = () => {
 
     socketConnection.on(COMMAND_RESPONSES_FUNCTION, (response: string) => {
       const parsedResponse: ICommandResponse = JSON.parse(response);
-      var succesful:boolean = parsedResponse.responseStatusCode.toString().startsWith("2");
+      var succesful: boolean = parsedResponse.responseStatusCode.toString().startsWith("2");
       dispatch(
         enqueueSnackbar({
           message: parsedResponse.message,
@@ -99,7 +106,7 @@ export const startListeningForCommandResponses = () => {
           },
         })
       );
-      dispatch(containerLoadFinished(parsedResponse.containerIds))
+      dispatch(containerLoadFinished(parsedResponse.containerIds));
     });
   };
 };

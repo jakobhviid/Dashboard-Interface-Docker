@@ -1,25 +1,30 @@
-import {
-  overviewActionTypes,
-  ressourceActionTypes,
-  containerActionTypes,
-} from "./containerData.types";
+import { overviewActionTypes, ressourceActionTypes, containerActionTypes } from "./containerData.types";
 
-export const collectionSuccessOverview = (data:any) => ({
+export const collectionSuccessOverview = (data: any) => ({
   type: overviewActionTypes.COLLECTION_SUCCESS_OVERVIEW,
   payload: data,
 });
 
-export const ressourceCollectionSuccess = (data:any) => ({
+export const ressourceCollectionSuccess = (data: any) => ({
   type: ressourceActionTypes.COLLECTION_SUCCESS_RESSOURCE,
   payload: data,
 });
 
-export const containerLoadStart = (containerIds:string[]) => ({
+export const containerLoadStart = (containerIds: string[]) => ({
   type: containerActionTypes.CONTAINER_LOAD_START,
   payload: containerIds,
 });
 
-export const containerLoadFinished = (containerIds:string[]) => ({
+export const containerLoadFinished = (containerIds: string[]) => ({
   type: containerActionTypes.CONTAINER_LOAD_FINISHED,
   payload: containerIds,
+});
+
+export const hubConnectionInitialization = (token: string) => ({
+  type: containerActionTypes.SOCKET_CONNECTION_INIT,
+  payload: token,
+});
+
+export const hubConnectionOff = () => ({
+  type: containerActionTypes.SOCKET_CONNECTION_OFF,
 });

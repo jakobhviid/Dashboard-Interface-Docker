@@ -15,7 +15,7 @@ export interface IContainerData {
 }
 
 export interface IContainerDataState {
-  socketConnection: HubConnection;
+  socketConnection: HubConnection | undefined;
   overviewData: {
     [key: string]: {
       containers: IContainerData[];
