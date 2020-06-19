@@ -71,7 +71,7 @@ function SignIn() {
             margin="normal"
             required
             fullWidth
-            id="email"
+            id="userEmail"
             label="Email Address"
             name="email"
             autoComplete="email"
@@ -86,7 +86,7 @@ function SignIn() {
             name="password"
             label="Password"
             type="password"
-            id="password"
+            id="userPassword"
             autoComplete="current-password"
             onChange={(event) => setPasswordInput(event.target.value)}
           />

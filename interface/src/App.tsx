@@ -12,29 +12,24 @@ import { createMuiTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "@material-ui/styles";
 
 import Header from "./components/header/Header.component";
-import { OVERVIEW_URL, RESSOURCE_USAGE_URL, LOGIN_URL } from "./util/navigationEndpoints";
+import { OVERVIEW_URL, RESSOURCE_USAGE_URL, LOGIN_URL, KERBEROS_URL } from "./util/navigationEndpoints";
 
 import useStyles from "./App.styles";
 import Notifier from "./components/notifier/Notifier.component";
 import { closeSnackbar } from "./redux/notifier/notifier.actions";
 
 import {
-  startCollectingOverview,
-  startCollectingRessources,
-  stopCollectingOverview,
-  stopCollectingRessources,
-  startListeningForCommandResponses,
-  stopListeningForCommandResponses,
-  dataCollectionStart,
+  dataCollectionStart, stopCollectingOverview, stopCollectingRessources, stopListeningForCommandResponses,
 } from "./redux/container_data/containerData.effects";
-import { useTypedSelector } from "./types/redux/reducerStates.types";
+import { useTypedSelector, IRootState } from "./types/redux/reducerStates.types";
 import { loadAndTestJwtLocalStorage } from "./util/reduxHelpers";
 import { loginWithJwt } from "./redux/user/user.actions";
-import { hubConnectionInitialization } from "./redux/container_data/containerData.actions";
+import { hubConnectionInitialization, hubConnectionOff } from "./redux/container_data/containerData.actions";
 
 const Overview = lazy(() => import("./pages/overview_page/Overview.page"));
 const RessourceUsage = lazy(() => import("./pages/ressource_usage_page/RessourceUsage.page"));
 const Login = lazy(() => import("./pages/login/Login.page"));
+const Kerberos = lazy(() => import("./pages/kerberos/Kerberos.page"));
 
 const theme = createMuiTheme({
   palette: {
@@ -47,7 +42,8 @@ const theme = createMuiTheme({
 function App() {
   const dispatch = useDispatch();
   const styleClasses = useStyles();
-  const userToken = useTypedSelector((store) => store.user.jwt);
+  const userToken = useTypedSelector((store:IRootState) => store.user.jwt);
+  const socketConnection = useTypedSelector((store:IRootState) => store.containerData.socketConnection);
 
   React.useEffect(() => {
     const jwt = loadAndTestJwtLocalStorage();
@@ -56,7 +52,15 @@ function App() {
       dispatch(hubConnectionInitialization(jwt));
       dispatch(dataCollectionStart());
     }
-  }, [dispatch, userToken]);
+    return () => {
+      if (socketConnection !== undefined) {
+        dispatch(stopCollectingOverview());
+        dispatch(stopCollectingRessources());
+        dispatch(stopListeningForCommandResponses());
+        dispatch(hubConnectionOff())
+      }
+    }
+  }, [dispatch]);
 
   return (
     <SnackbarProvider
@@ -87,7 +91,7 @@ function App() {
                   <Route exact path={OVERVIEW_URL} component={Overview} />
                   <Route path={RESSOURCE_USAGE_URL} component={RessourceUsage} />
                   <Route path={LOGIN_URL} component={Login} />
-                  {/* <Footer /> */}
+                  <Route path={KERBEROS_URL} component={Kerberos} />
                 </Container>
               </main>
             </Suspense>

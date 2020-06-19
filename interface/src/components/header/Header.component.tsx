@@ -30,7 +30,7 @@ import { Menu, MenuItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import { logout } from "../../redux/user/user.actions";
 
 function Header() {
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<any>(null);
   const [notificationMenuAnchorEl, setNotificationMenuAnchorEl] = React.useState(null);
   const monitorEvents = useSelector((store: IRootState) => store.monitoringEvents.activeWarnings);
@@ -145,8 +145,6 @@ function Header() {
         </div>
         <Divider />
         <List>{overviewItems}</List>
-        {/* <Divider />
-        <List>{commandItems}</List> */}
       </Drawer>
 
       <NotificationMenu anchorEl={notificationMenuAnchorEl} handleClose={handleNotificationMenuClose} />

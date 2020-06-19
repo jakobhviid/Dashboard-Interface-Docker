@@ -3,3 +3,4 @@ export const RESSOURCE_USAGE_URL = "/stats";
 export const COMMANDS_URL = "/configure";
 export const LOGIN_URL = "/login"
 export const PROFILE_URL = "/profile"
+export const KERBEROS_URL ="/kerberos"

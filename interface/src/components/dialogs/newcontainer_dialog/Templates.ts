@@ -64,7 +64,7 @@ export const templates: ITemplate = {
       { key: "KAFKA_INTER_BROKER_LISTENER_NAME", value: "INTERNAL_SASL_PLAINTEXT" },
       { key: "KAFKA_AUTHENTICATION", value: "KERBEROS" },
       { key: "KERBEROS_PUBLIC_URL", value: "127.0.0.1" },
-      { key: "KERBEROS_REALM", value: "KAFKA.SECURE" },
+      { key: "KERBEROS_REALM", value: "CFEI.SECURE" },
       { key: "KERBEROS_API_URL", value: "http://127.0.0.1:3000/get-keytab" },
       { key: "KERBEROS_API_KAFKA_USERNAME", value: "kafka/localhost" },
       { key: "KERBEROS_API_KAFKA_PASSWORD", value: "kafkaPasswordTester" },
@@ -97,12 +97,11 @@ export const templates: ITemplate = {
       { key: "ZOO_PORT", value: "2181" },
       { key: "ZOO_AUTHENTICATION", value: "KERBEROS" },
       { key: "ZOO_KERBEROS_PUBLIC_URL", value: "127.0.0.1" },
-      { key: "ZOO_KERBEROS_REALM", value: "KAFKA.SECURE" },
+      { key: "ZOO_KERBEROS_REALM", value: "CFEI.SECURE" },
       { key: "ZOO_KERBEROS_API_URL", value: "http://127.0.0.1:3000/get-keytab" },
       { key: "ZOO_KERBEROS_API_USERNAME", value: "zookeeper/localhost" },
       { key: "ZOO_KERBEROS_API_PASSWORD", value: "zookeeperPasswordTester" },
       { key: "ZOO_REMOVE_HOST_AND_REALM", value: "true" },
-      { key: "ZOO_KERBEROS_PRINCIPAL", value: "zookeeper/localhost@KAFKA.SECURE" },
       { key: "ZOO_SERVERS", value: "server.1=0.0.0.0:2888:3888,server.2=REPLACE:2888:3888,server.3=REPLACE:2888:3888"},
     ],
     restartPolicy: {
@@ -113,4 +112,26 @@ export const templates: ITemplate = {
     volumesFrom: [],
     networkMode: "",
   },
+  Kerberos: {
+    image: "cfei/kerberos",
+    name: "kerberos",
+    command: "",
+    ports: [
+      { containerPort: "3000", hostPort: "3000" },
+    ],
+    networkMode: "host",
+    restartPolicy: {
+      restartPolicy: "onFailure",
+      maximumRetryCount: "3",
+    },
+    environment: [
+      { key: "KERBEROS_ADMIN_PW", value: "password" },
+      { key: "KERBEROS_HOST_DNS", value: "127.0.0.1" },
+      { key: "KERBEROS_REALM", value: "CFEI.SECURE" },
+      { key: "KERBEROS_API_PORT", value: "3000" },
+      { key: "KERBEROS_MSSQL_CONNECTION_STRING", value: "Server=<<mssql_ip_address>>;Database=<<database_name>;User Id=<<database_user>>;Password=<<database_password>>;" },
+    ],
+    volumes: [],
+    volumesFrom: [],
+  }
 };

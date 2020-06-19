@@ -186,6 +186,19 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                   helperText="Optional Command to Run on Startup"
                 />
               </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  variant="outlined"
+                  label="Network Mode"
+                  type="text"
+                  fullWidth
+                  value={values.networkMode}
+                  onChange={(event) => {
+                    setValues({ ...values, networkMode: event.target.value });
+                  }}
+                  helperText="Network Mode (example: host)"
+                />
+              </Grid>
 
               <PolicySection
                 restartValue={values.restartPolicy}
