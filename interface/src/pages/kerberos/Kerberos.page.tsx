@@ -1,12 +1,13 @@
-import React, { useState, FormEvent } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Container, Avatar, Typography, Grid, TextField, Button, Paper, Tabs, Tab, Box } from "@material-ui/core";
+import { Container, Paper, Tabs, Tab, Box } from "@material-ui/core";
 import LockIcon from "@material-ui/icons/Lock";
 import KeyIcon from "@material-ui/icons/VpnKey";
 import useStyles from "./Kerberos.styles";
-import { enqueueSnackbar } from "../../redux/notifier/notifier.actions";
+import SecurityIcon from "@material-ui/icons/Security";
 import CreateKerberosKeys from "./CreateKerberosKeys.component";
 import DownloadKeytabs from "./DownloadKeytabs.component";
+import SecurityManagerTab from "./SecurityManager.component";
 
 function TabPanel(props: any) {
   const { children, value, index, ...other } = props;
@@ -44,6 +45,7 @@ function KerberosPage() {
         >
           <Tab value="one" icon={<LockIcon color="secondary" />} label="CREATE KEYTABS" />
           <Tab value="two" icon={<KeyIcon color="secondary" />} label="DOWNLOAD KEYTABS" />
+          <Tab value="three" icon={<SecurityIcon color="secondary" />} label="SECURITY-MANAGER" />
         </Tabs>
       </Paper>
       <TabPanel value={activeTab} index="one">
@@ -51,6 +53,9 @@ function KerberosPage() {
       </TabPanel>
       <TabPanel value={activeTab} index="two">
         <DownloadKeytabs />
+      </TabPanel>
+      <TabPanel value={activeTab} index="three">
+        <SecurityManagerTab />
       </TabPanel>
     </Container>
   );
