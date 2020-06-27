@@ -70,13 +70,13 @@ namespace SocketServer
                 };
             });
 
-            var connectionString = Environment.GetEnvironmentVariable("DASHBOARD_MSSQL_CONNECTION_STRING");
+            var connectionString = Environment.GetEnvironmentVariable("DASHBOARD_POSTGRES_CONNECTION_STRING");
             if (connectionString == null)
             {
                 Console.WriteLine("Database Connection string not found");
                 System.Environment.Exit(1);
             }
-            services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
+            services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<DataContext>()

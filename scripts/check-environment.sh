@@ -15,7 +15,7 @@ if [[ -z "$API_KEY" ]]; then
     exit 1
 fi
 
-if [[ -z "$DASHBOARD_MSSQL_CONNECTION_STRING" ]]; then
-    echo -e "\e[1;32mERROR - 'DASHBOARD_MSSQL_CONNECTION_STRING' has not been provided \e[0m"
+if [[ -z "$DASHBOARD_POSTGRES_CONNECTION_STRING" ]]; then
+    echo -e "\e[1;32mERROR - 'DASHBOARD_POSTGRES_CONNECTION_STRING' has not been provided \e[0m"
     exit 1
 fi

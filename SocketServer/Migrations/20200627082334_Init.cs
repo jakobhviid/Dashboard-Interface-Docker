@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace SocketServer.Migrations
 {
-    public partial class User : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -51,7 +52,7 @@ namespace SocketServer.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     RoleId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -72,7 +73,7 @@ namespace SocketServer.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<string>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
                     ClaimValue = table.Column<string>(nullable: true)
@@ -152,6 +153,75 @@ namespace SocketServer.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ContainerRessourceUsageRecords",
+                columns: table => new
+                {
+                    RessourceUsageRecordId = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TimeOfRecordInsertion = table.Column<DateTime>(nullable: false),
+                    CPUPercentageUse = table.Column<double>(nullable: false),
+                    MemoryPercentageUse = table.Column<double>(nullable: false),
+                    DiskInputBytes = table.Column<decimal>(nullable: false),
+                    DiskOutputBytes = table.Column<decimal>(nullable: false),
+                    NetInputBytes = table.Column<decimal>(nullable: false),
+                    NetOutputBytes = table.Column<decimal>(nullable: false),
+                    DatabaseContainerId = table.Column<Guid>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContainerRessourceUsageRecords", x => x.RessourceUsageRecordId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ContainerStatusRecords",
+                columns: table => new
+                {
+                    StatusRecordId = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TimeOfRecordInsertion = table.Column<DateTime>(nullable: false),
+                    Status = table.Column<string>(nullable: false),
+                    Health = table.Column<string>(nullable: true),
+                    DatabaseContainerId = table.Column<Guid>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContainerStatusRecords", x => x.StatusRecordId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Servers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Servername = table.Column<string>(nullable: false),
+                    UpdaterContainerDatabaseContainerId = table.Column<Guid>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Servers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DatabaseContainers",
+                columns: table => new
+                {
+                    DatabaseContainerId = table.Column<Guid>(nullable: false),
+                    ContainerId = table.Column<string>(nullable: false),
+                    ServerId = table.Column<Guid>(nullable: true),
+                    Discriminator = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DatabaseContainers", x => x.DatabaseContainerId);
+                    table.ForeignKey(
+                        name: "FK_DatabaseContainers_Servers_ServerId",
+                        column: x => x.ServerId,
+                        principalTable: "Servers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -161,8 +231,7 @@ namespace SocketServer.Migrations
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -188,12 +257,65 @@ namespace SocketServer.Migrations
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ContainerRessourceUsageRecords_DatabaseContainerId",
+                table: "ContainerRessourceUsageRecords",
+                column: "DatabaseContainerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ContainerStatusRecords_DatabaseContainerId",
+                table: "ContainerStatusRecords",
+                column: "DatabaseContainerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DatabaseContainers_ServerId",
+                table: "DatabaseContainers",
+                column: "ServerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Servers_Servername",
+                table: "Servers",
+                column: "Servername",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Servers_UpdaterContainerDatabaseContainerId",
+                table: "Servers",
+                column: "UpdaterContainerDatabaseContainerId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ContainerRessourceUsageRecords_DatabaseContainers_DatabaseC~",
+                table: "ContainerRessourceUsageRecords",
+                column: "DatabaseContainerId",
+                principalTable: "DatabaseContainers",
+                principalColumn: "DatabaseContainerId",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ContainerStatusRecords_DatabaseContainers_DatabaseContainer~",
+                table: "ContainerStatusRecords",
+                column: "DatabaseContainerId",
+                principalTable: "DatabaseContainers",
+                principalColumn: "DatabaseContainerId",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Servers_DatabaseContainers_UpdaterContainerDatabaseContaine~",
+                table: "Servers",
+                column: "UpdaterContainerDatabaseContainerId",
+                principalTable: "DatabaseContainers",
+                principalColumn: "DatabaseContainerId",
+                onDelete: ReferentialAction.Restrict);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Servers_DatabaseContainers_UpdaterContainerDatabaseContaine~",
+                table: "Servers");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -210,10 +332,22 @@ namespace SocketServer.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ContainerRessourceUsageRecords");
+
+            migrationBuilder.DropTable(
+                name: "ContainerStatusRecords");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "DatabaseContainers");
+
+            migrationBuilder.DropTable(
+                name: "Servers");
         }
     }
 }
