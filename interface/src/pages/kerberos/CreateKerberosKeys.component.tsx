@@ -14,6 +14,8 @@ function CreateKerberosKeys() {
   const [kerberosPassword, setKerberosPassword] = useState("");
   const [kerberosHost, setKerberosHost] = useState("");
   const [downloadKeyTabDirectly, setDownloadKeyTabDirectly] = useState(true);
+  const [aclManagerUrl, setAclManagerUrl] = useState("");
+  const [aclManagerAPIKey, setAclManagerAPIKey] = useState("");
 
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -72,7 +74,7 @@ function CreateKerberosKeys() {
           if (kerberosHost !== "") {
             postBody["host"] = kerberosHost;
           }
-
+          // Downloading keytab if the user wants that
           downloadKeytab(kerberosUrl, postBody)
             .then((keytab) => {
               var name = kerberosName + ".keytab";
@@ -86,6 +88,37 @@ function CreateKerberosKeys() {
                 })
               );
             });
+
+          // Making the user a super user if acl manager host is specified
+          if (aclManagerUrl !== "") {
+            const aclManagerPostBody: any = {
+              apiKey: aclManagerAPIKey,
+              principalName: kerberosName,
+            };
+            if (kerberosHost !== "") aclManagerPostBody["host"] = kerberosHost;
+
+            fetch(aclManagerUrl + "/new-super-user", {
+              method: "post",
+              body: JSON.stringify(aclManagerPostBody),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                var successful = !data.status.toString().startsWith("4");
+                dispatch(
+                  enqueueSnackbar({
+                    message: data.message,
+                    options: {
+                      key: new Date().getTime() + Math.random(),
+                      persist: false,
+                      variant: successful ? "success" : "error",
+                    },
+                  })
+                );
+              });
+          }
         }
       })
       .catch((error) => {
@@ -178,6 +211,32 @@ function CreateKerberosKeys() {
               type="url"
               id="url"
               onChange={(event) => setKerberosHost(event.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              helperText="URL of the ACL-Manager. The created kerberos user will become a super user in kafka/zookeeper"
+              autoComplete="off"
+              variant="outlined"
+              fullWidth
+              name="url"
+              label="ACL Manager Host"
+              type="url"
+              id="url"
+              onChange={(event) => setAclManagerUrl(event.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              helperText="API Key for ACL-Manager."
+              autoComplete="off"
+              variant="outlined"
+              fullWidth
+              name="aclapikey"
+              label="ACL Manager API Key"
+              type="password"
+              id="aclapikey"
+              onChange={(event) => setAclManagerAPIKey(event.target.value)}
             />
           </Grid>
           <Grid item xs={12}>
