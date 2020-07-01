@@ -8,7 +8,7 @@ services:
       - 3000:3000
       - 5000:5000
     environment: 
-      UI_PORT: 3000
-      DASHBOARD_POSTGRES_CONNECTION_STRING: "Host=161.35.145.151;Port=5432;Database=test;Username=admin;Password=Database_password1"
-      KAFKA_URL: kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092
-      API_KEY: jahfgjwetkoj14h3i3289
+      DASHBOARDI_UI_PORT: 3000
+      DASHBOARDI_SOCKET_SERVER_PORT: 5000
+      DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=161.35.145.151;Port=5432;Database=test;Username=admin;Password=Database_password1"
+      DASHBOARDI_API_KEY: test

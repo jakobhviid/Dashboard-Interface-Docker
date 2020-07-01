@@ -70,7 +70,7 @@ namespace SocketServer
                 };
             });
 
-            var connectionString = Environment.GetEnvironmentVariable("DASHBOARD_POSTGRES_CONNECTION_STRING");
+            var connectionString = Environment.GetEnvironmentVariable("DASHBOARDI_POSTGRES_CONNECTION_STRING");
             if (connectionString == null)
             {
                 Console.WriteLine("Database Connection string not found");

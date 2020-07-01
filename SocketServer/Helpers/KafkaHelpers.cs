@@ -9,7 +9,7 @@ namespace SocketServer.Helpers
 {
     public static class KafkaHelpers
     {
-        public static readonly string BootstrapServers = Environment.GetEnvironmentVariable("KAFKA_URL") ?? "kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092";
+        public static readonly string BootstrapServers = Environment.GetEnvironmentVariable("DASHBOARDI_KAFKA_URL") ?? "kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092";
         public const string OverviewTopic = "f0e1e946-50d0-4a2b-b1a5-f21b92e09ac1-general_info";
         public const string StatsTopic = "33a325ce-b0c0-43a7-a846-4f46acdb367e-stats_info";
         public const string CommandResponseTopicPrefix = "command-responses-"; // TODO: Place all these shared variables such as overviewtopic, statstopic etc. plus containerRequests inside a shared nuget folder between the container server and the container interface
