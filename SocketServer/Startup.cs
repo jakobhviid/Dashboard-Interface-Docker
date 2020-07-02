@@ -131,7 +131,7 @@ namespace SocketServer
             {
                 app.UseDeveloperExceptionPage();
             }
-            UpdateDatabase(app);
+            // UpdateDatabase(app);
             app.UseCors();
             app.UseRouting();
 

@@ -1,6 +1,15 @@
 version: "3"
 
 services:
+  interface-database:
+    image: postgres
+    container_name: interface-database
+    restart: always
+    environment:
+      POSTGRES_USER: interface
+      POSTGRES_PASSWORD: Interface_database_password1
+      POSTGRES_DB: interface_db
+
   interface:
     image: omvk97/docker-dashboard-interface
     container_name: interface
@@ -10,5 +19,7 @@ services:
     environment: 
       DASHBOARDI_UI_PORT: 3000
       DASHBOARDI_SOCKET_SERVER_PORT: 5000
-      DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=161.35.145.151;Port=5432;Database=test;Username=admin;Password=Database_password1"
+      DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=161.35.145.151;Port=5432;Database=interface_db;Username=interface;Password=Interface_database_password1"
       DASHBOARDI_API_KEY: test
+    depends_on: 
+      - interface-database
