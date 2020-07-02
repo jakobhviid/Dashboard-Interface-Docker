@@ -89,6 +89,7 @@ Visit the DNS-resolvable ip of Server1 on port 3000.
 
 TODO: Create images of the relevant pictures of the Dashboard-Interface and put them inside a folder in github repo. in the bottom of this file you should then put references to the pictures
 You should see this:
+
 ![interface homepage][interface-homepage]
 
 **Server3**: Dashbaord-Server + Zookeeper + Kafka
@@ -130,4 +131,5 @@ Public ports refers to DNS-resolvable ports which are used for user connections.
 In addition, all servers should preferably be on a closed network with minimal open ports to the outside.
 
 TODO:
-[interface-homepage]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+
+[interface-homepage]: https://unsplash.com/photos/5Oe8KFH5998/download "Interface Homepage"
