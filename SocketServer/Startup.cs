@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,7 +25,6 @@ namespace SocketServer
     public class Startup
     {
         public static readonly SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
-
         private readonly IConfiguration _configuration;
         public Startup(IConfiguration configuration) => _configuration = configuration;
 
@@ -73,7 +71,13 @@ namespace SocketServer
             var connectionString = Environment.GetEnvironmentVariable("DASHBOARDI_POSTGRES_CONNECTION_STRING");
             if (connectionString == null)
             {
-                Console.WriteLine("Database Connection string not found");
+                Console.WriteLine("'DASHBOARDI_POSTGRES_CONNECTION_STRING' Database Connection string not found");
+                System.Environment.Exit(1);
+            }
+            var jwtKey = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY");
+            if (jwtKey == null)
+            {
+                Console.WriteLine("'DASHBOARDI_JWT_KEY' not found");
                 System.Environment.Exit(1);
             }
             services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
@@ -96,7 +100,7 @@ namespace SocketServer
                     ValidateIssuer = false,
                     ValidateActor = false,
                     ValidateLifetime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
                         };
                     options.Events = new JwtBearerEvents
                     {
@@ -131,7 +135,7 @@ namespace SocketServer
             {
                 app.UseDeveloperExceptionPage();
             }
-            // UpdateDatabase(app);
+            UpdateDatabase(app);
             app.UseCors();
             app.UseRouting();
 
@@ -144,6 +148,7 @@ namespace SocketServer
                 endpoints.MapControllers();
             });
         }
+
         // Ensures an updated database to the latest migration
         private static void UpdateDatabase(IApplicationBuilder app)
         {

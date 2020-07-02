@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using SocketServer.Contracts;
 using SocketServer.Data.Models;
 using SocketServer.DTOs.InputDTOs;
@@ -48,7 +47,7 @@ namespace SocketServer.Controllers
                         Message = ErrorMessages.IncorrectCredentials
                 });
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY")));
             var claims = new [] { new Claim(ClaimTypes.Email, input.Email) };
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var token = new JwtSecurityToken(claims: claims, signingCredentials: credentials, expires: DateTime.Now.AddDays(30));
@@ -100,7 +99,7 @@ namespace SocketServer.Controllers
 
         private bool ValidAPIKey(string apiKey)
         {
-            return apiKey.Equals(_configuration["DASHBOARDI_API_KEY"]);
+            return apiKey.Equals(Environment.GetEnvironmentVariable("DASHBOARDI_API_KEY"));
         }
     }
 }

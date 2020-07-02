@@ -27,6 +27,7 @@ services:
       DASHBOARDI_UI_PORT: 3000
       DASHBOARDI_SOCKET_SERVER_PORT: 5000
       DASHBOARDI_API_KEY: cfeisecurekey
+      DASHBOARDI_JWT_KEY: cfeisecureJWTkey
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=<<postgres_ip>>;Port=5432;Database=<<database_name>;Username=<<database_user>>;Password=<<database_password>>;"
 
 ```
@@ -37,19 +38,26 @@ The image consists of two parts. A graphical interface and a socket server. The 
 #### Required environment variables
 - `DASHBOARDI_UI_PORT`: The port on which the graphical interface will run.
 - `DASHBOARDI_SOCKET_SERVER_PORT`: The port on which the socket server will run.
-- `DASHBOARDI_API_KEY`: The API key to use. This API Key provides access to the http server inside the image for user management. With this it's possible to create new users with access to the interface. Store it safely.
+- `DASHBOARDI_API_KEY`: The API key to use. This API Key provides access to the http server inside the image for user management. With this it's possible to create new users with access to the interface. Store it safely!
 - `DASHBOARDI_POSTGRES_CONNECTION_STRING`: The connection string for a postgres database. The database is crucial in order to collect data for container statistics and alerts.
+- `DASHBOARDI_JWT_KEY`: The JSON Web Token key to use. Everyone with access to this key has access to the whole application. Store it safely!
 #### Optional environment variables
 - `DASHBOARDI_KAFKA_URL`: Comma seperated list of one or more kafka urls. It will default to cfei's own kafka cluster 'kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092'.
+- `DASHBOARDI_INIT_USER_EMAIL`: Used if you want to create a user during container startup which can be used in the interface
+- `DASHBAORDI_INIT_PASSWORD`: Used if you want to create a user during container startup which can be used in the interface
 
 # CFEI Kafka / Zookeper stack guide
 The stack consists of multiple elements, which combined creates a robust kafka & zookeeper cluster alongside a user friendly admin tool to manage the clusters. This includes both cluster health & notifications but most importantly it has the ability to grant/limit access to the cluster.
 
+In this guide two different approaches are described. The first is the recommended approach where you at minimum have 4 servers. Where you afterwards are able to extend the zookeeper & kafka cluster by adding more servers.
+
+The other approach is if you only have a single server. It is not recommended, but can be great in development situations.
+
 ## Step by step multiple servers (recommended)
 For the following steps you need to have access to minimum 4 servers ('server1', 'server2', 'server3', 'server4') which all pass requirements described in [server setup](#server-setup).
 
-#### Server1:
-On this server we will install Dashboard-Interface alongside a postgres database
+#### Step 1:
+On **server1** we install Dashboard-Interface alongside a postgres database
 Create a docker-compose file with the following contents:
 ```
 version: "3"
@@ -68,13 +76,16 @@ services:
     image: omvk97/docker-dashboard-interface
     container_name: interface
     ports:
-      - 3000:3000
+      - 3001:3001
       - 5000:5000
-    environment: 
-      DASHBOARDI_UI_PORT: 3000
+    environment:
+      DASHBOARDI_UI_PORT: 3001
       DASHBOARDI_SOCKET_SERVER_PORT: 5000
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=interface-database;Port=5432;Database=interface_db;Username=interface;Password=Interface_database_password1"
-      DASHBOARDI_API_KEY: test
+      DASHBOARDI_API_KEY: secureapiKey
+      DASHBOARDI_JWT_KEY: cfeisecureJWTkey
+      DASHBOARDI_INIT_USER_EMAIL: testUser@email.com
+      DASHBAORDI_INIT_PASSWORD: testUserPassword%1.
     depends_on: 
       - interface-database
 
@@ -82,18 +93,78 @@ services:
 
 Now change 'POSTGRES_USER' and 'POSTGRES_PASSWORD' alongside 'DASHBOARDI_POSTGRES_CONNECTION_STRING' to fit accordingly.
 
-#### Server2 Dashboard-Server + Kerberos + Kerberos Database
-On this server we will install the Dashboard-Server in order to remotely install Kerberos alongside a postgres database.
+Now run the following command in the same directory you created the docker-compose file: `docker-compose up`. Check that the output doesn't contain errors.
 
-Visit the DNS-resolvable ip of Server1 on port 3000.
+Try to visit the DNS-resolvable ip of Server1 on port 3001 from a webbrowser.
+
+In the upper right corner, login with testUser@email.com and password: testUserPassword%1.
 
 TODO: Create images of the relevant pictures of the Dashboard-Interface and put them inside a folder in github repo. in the bottom of this file you should then put references to the pictures
-You should see this:
+
+After login, you should see this:
 
 ![interface homepage][interface-homepage]
 
-**Server3**: Dashbaord-Server + Zookeeper + Kafka
-**Server4**: Dashbaord-Server + ACL-Security-Manager
+
+
+#### Step 2
+On server2, server3 and server4 we install the Dashboard-Server in order to remotely install services.
+
+Create a docker-compose file on all three servers with the following contents:
+```
+version: "3"
+
+services:
+  server:
+    image: cfei/docker-dashboard-server
+    container_name: dashboard-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      SERVER_NAME: <<SERVERNAME>>
+```
+Change 'SERVER_NAME' accordingly (server2, server3, server4)
+
+Now run the following command in the same directory you created the docker-compose file: `docker-compose up`. Check that the output doesn't contain errors.
+
+#### Step 3
+
+TODO:
+Now go to the dashboard interface
+PICTURE - CREATE NEW CONTAINER
+SELECT Server2
+USE database template
+CHANGE ENVIRONMENT VARIABLES ACCORDINGLY
+RUN CONTAINER, WAIT FOR SUCCESS MESSAGES
+CHECK OVERVIEW TO ENSURE IT WORKS
+
+CREATE NEW CONTAINER
+SELECT SERVER2
+USE kerberos template
+CHANGE ENVIRONMENT VARIABLES ACCORDINGLY
+RUN CONTAINER, WAIT FOR SUCCESS MESSAGES
+CHECK OVERVIEW TO ENSURE IT WORKS
+
+CREATE NEW CONTAINER
+SELECT Server3
+USE ZOOKEEPER template
+CHANGE ENVIRONMENT VARIABLES ACCORDINGLY
+RUN CONTAINER, WAIT FOR SUCCESS MESSAGES
+CHECK OVERVIEW TO ENSURE IT WORKS
+
+CREATE NEW CONTAINER
+SELECT Server3
+USE kafka template
+CHANGE ENVIRONMENT VARIABLES ACCORDINGLY
+RUN CONTAINER, WAIT FOR SUCCESS MESSAGES
+CHECK OVERVIEW TO ENSURE IT WORKS
+
+CREATE NEW CONTAINER
+SELECT server4
+USE ACL-Security-Manager template
+CHANGE ENVIRONMENT VARIABLES ACCORDINGLY
+RUN CONTAINER, WAIT FOR SUCCESS MESSAGES
+CHECK OVERVIEW TO ENSURE IT WORKS
 
 ## Step by step one server
 For this setup you run the whole stack on a single server. It is not recommended for obvious reasons, but can be good for development setups.
@@ -104,7 +175,13 @@ This server is refered to as 'SingleServer'. Make sure this server pass the requ
 - All servers needs to run a linux OS.
 - All servers should have docker and docker-compose installed. (**ubuntu**: `sudo apt update && sudo apt install -y docker.io docker-compose`)
 
-### Server Requirements
+#### Server Requirements
+
+**Definitions**
+- Network ports refers to necessary open ports which is used for internal communication between all the servers. 
+- Public ports refers to DNS-resolvable ports which are used for user connections. Many of the public ports can be changed depending on your docker container setup. For example Dashboard-Interface 3000 & 5000 is an example.
+- In addition, all servers should preferably be on a closed network with minimal open ports to the outside.
+
 | Name                              |CPU| RAM |Storage|Network Ports      |Public Ports |
 | --------------------------------- |:-:| :-: | :---: | :---------------: | :---------: |
 | Server1                           | 4 | 6GB | 100GB | -                 | 3000, 5000  |
@@ -113,7 +190,7 @@ This server is refered to as 'SingleServer'. Make sure this server pass the requ
 | Server4                           | 4 | 8GB | 100GB | -                 | 3000, 5000  |
 | SingleServer                      | 6 | 12GB| 250GB | -                 | 2181, 9092, 3000, 5000 |
 
-### Individual Requirements
+#### Individual Service Requirements
 | Name                              |CPU| RAM |Storage|Network Ports      |Public Ports |
 | --------------------------------- |:-:| :-: | :---: | :---------------: | :---------: |
 | Dashboard-Interface               | 2 | 2GB | 5GB   | -                 | 3000, 5000  |
@@ -124,12 +201,5 @@ This server is refered to as 'SingleServer'. Make sure this server pass the requ
 | Zookeeper                         | 1 | 2GB | 80GB  | 2888, 3888        | 2181        |
 | ACL-Security-Manager              | 2 | 2GB | 20GB  | 9000              | -           |
 | Kafka                             | 4 | 8GB | 100GB | 9093              | 9092        |
-
-**NOTE**
-Network ports refers to necessary open ports which is used for internal communication between all the servers. 
-Public ports refers to DNS-resolvable ports which are used for user connections. Many of the public ports can be changed depending on your docker container setup. For example Dashboard-Interface 3000 & 5000 is an example.
-In addition, all servers should preferably be on a closed network with minimal open ports to the outside.
-
-TODO:
 
 [interface-homepage]: https://unsplash.com/photos/5Oe8KFH5998/download "Interface Homepage"
