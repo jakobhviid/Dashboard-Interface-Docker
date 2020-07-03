@@ -21,8 +21,7 @@ services:
       DASHBOARDI_SOCKET_SERVER_PORT: 5000
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=interface-database;Port=5432;Database=interface_db;Username=interface;Password=Interface_database_password1"
       DASHBOARDI_API_KEY: secureapiKey
-      DASHBOARDI_JWT_KEY: secureJWTKey
-      DASHBOARDI_API_DNS: http://localhost:5000
+      DASHBOARDI_API_DNS: https://localhost:5000
       DASHBOARDI_INIT_USER_EMAIL: testUser@email.com
       DASHBAORDI_INIT_PASSWORD: testUserPassword%1.
     depends_on: 

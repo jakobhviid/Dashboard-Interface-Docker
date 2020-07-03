@@ -24,6 +24,8 @@ namespace SocketServer
 {
     public class Startup
     {
+        // We use a key generated on this server during startup to secure our JSON Web Tokens.
+        // This means that if the app restarts, existing tokens become invalid.
         public static readonly SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
         private readonly IConfiguration _configuration;
         public Startup(IConfiguration configuration) => _configuration = configuration;
@@ -78,13 +80,13 @@ namespace SocketServer
                 Console.WriteLine("'DASHBOARDI_POSTGRES_CONNECTION_STRING' Database Connection string not found");
                 System.Environment.Exit(1);
             }
-            var jwtKey = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY");
-            if (jwtKey == null)
+            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_API_DNS");
+            if (jwtIssuerAuthorithy == null)
             {
-                Console.WriteLine("'DASHBOARDI_JWT_KEY' not found");
+                Console.WriteLine("'DASHBOARDI_API_DNS' not found");
                 System.Environment.Exit(1);
             }
-            
+
             services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -98,7 +100,7 @@ namespace SocketServer
                 })
                 .AddJwtBearer(options =>
                 {
-                    options.Authority = 
+                    options.Authority = jwtIssuerAuthorithy;
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
@@ -123,7 +125,6 @@ namespace SocketServer
             services.AddHostedService<DockerUpdatersWorker>();
             services.AddHostedService<CommandServerResponseWorker>();
             services.AddSingleton<IUserIdProvider, EmailBasedUserIdProvider>();
-
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

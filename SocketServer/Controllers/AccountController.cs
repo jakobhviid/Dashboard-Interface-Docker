@@ -26,6 +26,7 @@ namespace SocketServer.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly IConfiguration _configuration;
         private readonly JwtSecurityTokenHandler _jwtTokenHandler = new JwtSecurityTokenHandler();
+        private static readonly SigningCredentials SigningCreds = new SigningCredentials(Startup.SecurityKey, SecurityAlgorithms.HmacSha256);
 
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
             ILogger<AccountController> logger, IConfiguration configuration)
@@ -47,10 +48,8 @@ namespace SocketServer.Controllers
                         Message = ErrorMessages.IncorrectCredentials
                 });
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY")));
             var claims = new [] { new Claim(ClaimTypes.Email, input.Email) };
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(claims: claims, signingCredentials: credentials, expires: DateTime.Now.AddDays(30));
+            var token = new JwtSecurityToken(claims: claims, signingCredentials: SigningCreds, expires: DateTime.Now.AddDays(30));
             return StatusCode(StatusCodes.Status200OK, new TokenResponseDTO
             {
                 StatusCode = 200,
