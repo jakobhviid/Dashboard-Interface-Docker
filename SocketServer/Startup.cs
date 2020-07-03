@@ -30,6 +30,7 @@ namespace SocketServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // allow all cors
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(builder =>
@@ -40,6 +41,8 @@ namespace SocketServer
             });
 
             services.AddControllers();
+
+            // Custom Error return behavior
             services.Configure<ApiBehaviorOptions>(o =>
             {
                 o.InvalidModelStateResponseFactory = actionContext =>
@@ -68,6 +71,7 @@ namespace SocketServer
                 };
             });
 
+            // environment variables check
             var connectionString = Environment.GetEnvironmentVariable("DASHBOARDI_POSTGRES_CONNECTION_STRING");
             if (connectionString == null)
             {
@@ -80,6 +84,7 @@ namespace SocketServer
                 Console.WriteLine("'DASHBOARDI_JWT_KEY' not found");
                 System.Environment.Exit(1);
             }
+            
             services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -93,15 +98,7 @@ namespace SocketServer
                 })
                 .AddJwtBearer(options =>
                 {
-                    options.TokenValidationParameters =
-                    new TokenValidationParameters
-                    {
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                    ValidateActor = false,
-                    ValidateLifetime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-                        };
+                    options.Authority = 
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
@@ -140,7 +137,6 @@ namespace SocketServer
             app.UseRouting();
 
             app.UseAuthentication();
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
