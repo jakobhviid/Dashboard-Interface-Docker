@@ -26,7 +26,7 @@ namespace SocketServer
     {
         // We use a key generated on this server during startup to secure our JSON Web Tokens.
         // This means that if the app restarts, existing tokens become invalid.
-        public static readonly SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray());
+        public static readonly SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY")));
         private readonly IConfiguration _configuration;
         public Startup(IConfiguration configuration) => _configuration = configuration;
 
@@ -86,6 +86,20 @@ namespace SocketServer
                 Console.WriteLine("'DASHBOARDI_API_DNS' not found");
                 System.Environment.Exit(1);
             }
+            var jwtKey = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY");
+            if (jwtKey == null)
+            {
+                Console.WriteLine("'DASHBOARDI_JWT_KEY' not found");
+                System.Environment.Exit(1);
+            }
+            else
+            {
+                if (jwtKey.Length < 16)
+                {
+                    Console.WriteLine("'DASHBOARDI_JWT_KEY' must be atleast 16 characters long");
+                    System.Environment.Exit(1);
+                }
+            }
 
             services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
 
@@ -95,12 +109,21 @@ namespace SocketServer
 
             services.AddAuthentication(options =>
                 {
+                    // Use Jwt by default (makes authorization work)
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
                 .AddJwtBearer(options =>
                 {
-                    options.Authority = jwtIssuerAuthorithy;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = SecurityKey,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidIssuer = jwtIssuerAuthorithy,
+                    ValidAudience = jwtIssuerAuthorithy
+                    };
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
@@ -119,12 +142,18 @@ namespace SocketServer
                     };
                 });
 
+            // database repos injection
             services.AddScoped<IContainerUpdateRepo, ContainerUpdateRepo>();
 
             services.AddSignalR();
+
+            // constant working threads
             services.AddHostedService<DockerUpdatersWorker>();
             services.AddHostedService<CommandServerResponseWorker>();
+
+            // users are identified by their email
             services.AddSingleton<IUserIdProvider, EmailBasedUserIdProvider>();
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -138,6 +167,7 @@ namespace SocketServer
             app.UseRouting();
 
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

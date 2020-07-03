@@ -42,13 +42,12 @@ const theme = createMuiTheme({
 function App() {
   const dispatch = useDispatch();
   const styleClasses = useStyles();
-  const userToken = useTypedSelector((store:IRootState) => store.user.jwt);
   const socketConnection = useTypedSelector((store:IRootState) => store.containerData.socketConnection);
 
   React.useEffect(() => {
     const jwt = loadAndTestJwtLocalStorage();
     if (typeof jwt === "string") {
-      dispatch(loginWithJwt(jwt));
+      dispatch(loginWithJwt(jwt, true));
       dispatch(hubConnectionInitialization(jwt));
       dispatch(dataCollectionStart());
     }

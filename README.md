@@ -27,6 +27,7 @@ services:
       DASHBOARDI_UI_PORT: 3000
       DASHBOARDI_SOCKET_SERVER_PORT: 5000
       DASHBOARDI_API_KEY: cfeisecurekey
+      DASHBOARDI_JWT_KEY: cfeisecureJWTkey
       DASHBOARDI_API_DNS: https://<<HOST_DNS>>:5000
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=<<postgres_ip>>;Port=5432;Database=<<database_name>;Username=<<database_user>>;Password=<<database_password>>;"
 
@@ -40,6 +41,7 @@ The image consists of two parts. A graphical interface and a socket server. The 
 - `DASHBOARDI_SOCKET_SERVER_PORT`: The port on which the socket server will run.
 - `DASHBOARDI_API_KEY`: The API key to use. This API Key provides access to the http server inside the image for user management. With this it's possible to create new users with access to the interface. Store it safely!
 - `DASHBOARDI_POSTGRES_CONNECTION_STRING`: The connection string for a postgres database. The database is crucial in order to collect data for container statistics and alerts.
+- `DASHBOARDI_JWT_KEY`: The JSON Web Token key to use. Everyone with access to this key has access to the whole application. Store it safely!
 - `DASHBOARDI_API_DNS`: When writing JSON Web Tokens, this value is used as the issuing Authority. This must be a secure connection (https).
 #### Optional environment variables
 - `DASHBOARDI_KAFKA_URL`: Comma seperated list of one or more kafka urls. It will default to cfei's own kafka cluster 'kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092'.
@@ -84,6 +86,7 @@ services:
       DASHBOARDI_SOCKET_SERVER_PORT: 5000
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=interface-database;Port=5432;Database=interface_db;Username=interface;Password=Interface_database_password1"
       DASHBOARDI_API_KEY: secureapiKey
+      DASHBOARDI_JWT_KEY: cfeisecureJWTkey
       DASHBOARDI_API_DNS: https://<<SERVER1_DNS>>:5000
       DASHBOARDI_INIT_USER_EMAIL: testUser@email.com
       DASHBAORDI_INIT_PASSWORD: testUserPassword%1.
@@ -248,6 +251,7 @@ services:
       DASHBOARDI_SOCKET_SERVER_PORT: 5000
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=interface-database;Port=5432;Database=interface_db;Username=interface;Password=Interface_database_password1"
       DASHBOARDI_API_KEY: secureapiKey
+      DASHBOARDI_JWT_KEY: cfeisecureJWTkey
       DASHBOARDI_INIT_USER_EMAIL: testUser@email.com
       DASHBAORDI_INIT_PASSWORD: testUserPassword%1.
     depends_on:

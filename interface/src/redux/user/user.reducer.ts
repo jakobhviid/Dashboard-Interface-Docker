@@ -11,7 +11,8 @@ const INTIAL_STATE: IUserState = {
 const userReducer = (state = INTIAL_STATE, action: ReducerAction) => {
   switch (action.type) {
     case UserActionTypes.LOGIN:
-      const parsedJwt = parseJwt(action.payload);
+      console.log(action.payload)
+      const parsedJwt = parseJwt(action.payload.jwt);
       return produce(state, (nextstate) => {
         Object.keys(parsedJwt).forEach((key) => {
           if (key.includes("emailaddress")) {
@@ -19,8 +20,9 @@ const userReducer = (state = INTIAL_STATE, action: ReducerAction) => {
             nextstate.displayName = email.substring(0, email.indexOf("@"));
           }
         });
-        nextstate.jwt = action.payload;
-        saveJwtLocalStorage(action.payload);
+        nextstate.jwt = action.payload.jwt;
+        if (action.payload.saveJwt)
+          saveJwtLocalStorage(action.payload.jwt);
       });
     case UserActionTypes.REMOVE_JWT:
       return produce(state, (nextstate) => {

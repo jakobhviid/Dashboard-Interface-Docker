@@ -24,6 +24,7 @@ function SignIn() {
   const [forgotPasswordEmailInput, setForgotPasswordEmailInput] = useState("");
   const [emailInput, setEmailInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [forgotPasswordDialogOpen, setForgotPasswordDialogOpen] = useState(false);
   const dispatch = useDispatch();
   const routeHistory = useHistory();
@@ -32,7 +33,7 @@ function SignIn() {
     event.preventDefault();
     try {
       const loginResponse: string = await login(emailInput, passwordInput);
-      dispatch(loginWithJwt(loginResponse));
+      dispatch(loginWithJwt(loginResponse, rememberMe));
       routeHistory.push(OVERVIEW_URL);
     } catch (error) {
       // Error response
@@ -90,7 +91,12 @@ function SignIn() {
             autoComplete="current-password"
             onChange={(event) => setPasswordInput(event.target.value)}
           />
-          <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Husk mig" />
+          <FormControlLabel
+            control={
+              <Checkbox value="remember" checked={rememberMe} color="primary" onChange={() => setRememberMe(!rememberMe)} />
+            }
+            label="Keep me logged in"
+          />
           <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
             Login
           </Button>

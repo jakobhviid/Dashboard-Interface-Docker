@@ -1,6 +1,7 @@
 import produce from "immer";
 import { overviewActionTypes, ressourceActionTypes, containerActionTypes } from "./containerData.types";
 import { IContainerDataState, ReducerAction } from "../../types/redux/reducerStates.types";
+import { SOCKET_SERVER_UPDATES_ENDPOINT } from "../../api/endpoints";
 
 const signalR = require("@microsoft/signalr");
 
@@ -64,7 +65,7 @@ const containerDataReducer = (state = INITIAL_STATE, action: ReducerAction) => {
     case containerActionTypes.SOCKET_CONNECTION_INIT:
       return produce(state, (nextState) => {
         nextState.socketConnection = new signalR.HubConnectionBuilder()
-          .withUrl("http://127.0.0.1:5000/updates", { accessTokenFactory: () => action.payload })
+          .withUrl(SOCKET_SERVER_UPDATES_ENDPOINT, { accessTokenFactory: () => action.payload })
           .build();
       });
 

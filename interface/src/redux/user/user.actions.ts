@@ -7,9 +7,9 @@ import {
 import { hubConnectionOff } from "../container_data/containerData.actions";
 import { HubConnection } from "@microsoft/signalr";
 
-export const loginWithJwt = (jwt: string) => ({
+export const loginWithJwt = (jwt: string, saveJwt: boolean) => ({
   type: UserActionTypes.LOGIN,
-  payload: jwt,
+  payload: {jwt, saveJwt},
 });
 
 export const removeJwt = () => ({

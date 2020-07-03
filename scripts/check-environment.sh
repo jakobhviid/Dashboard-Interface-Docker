@@ -15,6 +15,11 @@ if [[ -z "$DASHBOARDI_API_KEY" ]]; then
     exit 1
 fi
 
+if [[ -z "$DASHBOARDI_JWT_KEY" ]]; then
+    echo -e "\e[1;32mERROR - 'DASHBOARDI_JWT_KEY' must be set \e[0m"
+    exit 1
+fi
+
 if [[ -z "$DASHBOARDI_API_DNS" ]]; then
     echo -e "\e[1;32mERROR - 'DASHBOARDI_API_DNS' must be set \e[0m"
     exit 1

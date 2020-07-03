@@ -25,7 +25,6 @@ namespace SocketServer.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<AccountController> _logger;
         private readonly IConfiguration _configuration;
-        private readonly JwtSecurityTokenHandler _jwtTokenHandler = new JwtSecurityTokenHandler();
         private static readonly SigningCredentials SigningCreds = new SigningCredentials(Startup.SecurityKey, SecurityAlgorithms.HmacSha256);
 
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager,
@@ -42,19 +41,23 @@ namespace SocketServer.Controllers
         {
             var signInResult = await _signInManager.PasswordSignInAsync(input.Email, input.Password, false, false);
             if (!signInResult.Succeeded)
+            {
                 return StatusCode(StatusCodes.Status401Unauthorized, new GenericReturnMessageDTO
                 {
                     StatusCode = 401,
                         Message = ErrorMessages.IncorrectCredentials
                 });
+            }
 
             var claims = new [] { new Claim(ClaimTypes.Email, input.Email) };
-            var token = new JwtSecurityToken(claims: claims, signingCredentials: SigningCreds, expires: DateTime.Now.AddDays(30));
+
+            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_API_DNS");
+            var token = new JwtSecurityToken(jwtIssuerAuthorithy, jwtIssuerAuthorithy, claims, signingCredentials : SigningCreds, expires : DateTime.Now.AddDays(30));
             return StatusCode(StatusCodes.Status200OK, new TokenResponseDTO
             {
                 StatusCode = 200,
                     Message = SuccessMessages.UserLoggedIn,
-                    Token = _jwtTokenHandler.WriteToken(token)
+                    Token = new JwtSecurityTokenHandler().WriteToken(token)
             });
         }
 
