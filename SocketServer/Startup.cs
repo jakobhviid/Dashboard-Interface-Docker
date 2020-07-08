@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SocketServer.BackgroundWorkers;
 using SocketServer.Data;
@@ -28,8 +29,9 @@ namespace SocketServer
         // This means that if the app restarts, existing tokens become invalid.
         public static readonly SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY")));
         private readonly IConfiguration _configuration;
-        public Startup(IConfiguration configuration) => _configuration = configuration;
 
+        public Startup(IConfiguration configuration) => _configuration = configuration;
+        
         public void ConfigureServices(IServiceCollection services)
         {
             // allow all cors
@@ -73,6 +75,7 @@ namespace SocketServer
                 };
             });
 
+            Console.ForegroundColor = ConsoleColor.Red;
             // environment variables check
             var connectionString = Environment.GetEnvironmentVariable("DASHBOARDI_POSTGRES_CONNECTION_STRING");
             if (connectionString == null)
@@ -96,12 +99,21 @@ namespace SocketServer
             {
                 if (jwtKey.Length < 16)
                 {
+                    
                     Console.WriteLine("'DASHBOARDI_JWT_KEY' must be atleast 16 characters long");
                     System.Environment.Exit(1);
                 }
             }
+            Console.ResetColor();
+            services.AddDbContext<DataContext>(options =>
+            {
+                options.UseNpgsql(connectionString, options => options.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorCodesToAdd: null
+                ));
 
-            services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
+            });
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<DataContext>()
@@ -156,13 +168,13 @@ namespace SocketServer
 
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public async void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            UpdateDatabase(app);
+            await UpdateDatabase(app, logger);
             app.UseCors();
             app.UseRouting();
 
@@ -177,7 +189,7 @@ namespace SocketServer
         }
 
         // Ensures an updated database to the latest migration
-        private static void UpdateDatabase(IApplicationBuilder app)
+        private async Task UpdateDatabase(IApplicationBuilder app, ILogger<Startup> logger)
         {
             using(var serviceScope = app.ApplicationServices
                 .GetRequiredService<IServiceScopeFactory>()
@@ -185,7 +197,35 @@ namespace SocketServer
             {
                 using(var context = serviceScope.ServiceProvider.GetService<DataContext>())
                 {
-                    context.Database.Migrate();
+                    // Retry pattern (if database connection is not ready it will retry 3 times before finally quiting)
+                    var retryCount = 3;
+                    var currentRetry = 0;
+                    while (true)
+                    {
+                        try
+                        {
+                            context.Database.Migrate();
+
+                            break; // just break if migration is successful
+                        }
+                        catch (Npgsql.NpgsqlException)
+                        {
+                            logger.LogError("Database migration failed. Retrying in 5 seconds ...");
+
+                            currentRetry++;
+
+                            if (currentRetry == retryCount) // Here it is possible to check the type of exception if needed with an OR. And exit if it's a specific exception.
+                            {
+                                // We have tried as many times as retryCount specifies. Now we throw it and exit the application
+                                logger.LogCritical($"Database migration failed after {retryCount} retries");
+                                throw;
+                            }
+
+                        }
+                        // Waiting 5 seconds before trying again
+                        await Task.Delay(TimeSpan.FromSeconds(5));
+                    }
+
                 }
             }
         }
