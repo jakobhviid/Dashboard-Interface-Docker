@@ -31,7 +31,7 @@ namespace SocketServer
         private readonly IConfiguration _configuration;
 
         public Startup(IConfiguration configuration) => _configuration = configuration;
-        
+
         public void ConfigureServices(IServiceCollection services)
         {
             // allow all cors
@@ -99,7 +99,7 @@ namespace SocketServer
             {
                 if (jwtKey.Length < 16)
                 {
-                    
+
                     Console.WriteLine("'DASHBOARDI_JWT_KEY' must be atleast 16 characters long");
                     System.Environment.Exit(1);
                 }
@@ -197,14 +197,20 @@ namespace SocketServer
             {
                 using(var context = serviceScope.ServiceProvider.GetService<DataContext>())
                 {
-                    // Retry pattern (if database connection is not ready it will retry 3 times before finally quiting)
+                    // Npgsql resiliency strategy does not work with Database.EnsureCreated() and Database.Migrate().
+                    // Therefore a retry pattern is implemented for this purpose 
+                    // if database connection is not ready it will retry 3 times before finally quiting
                     var retryCount = 3;
                     var currentRetry = 0;
                     while (true)
                     {
                         try
                         {
+                            logger.LogInformation("Attempting database migration");
+
                             context.Database.Migrate();
+                            
+                            logger.LogInformation("Database migration & connection successful");
 
                             break; // just break if migration is successful
                         }
