@@ -30,6 +30,8 @@ namespace SocketServer.BackgroundWorkers
                 AutoOffsetReset = AutoOffsetReset.Latest,
             };
 
+            KafkaHelpers.SetKafkaConfigKerberos(consumerConfig);
+
             using(var c = new ConsumerBuilder<Ignore, string>(consumerConfig).Build())
             {
                 

@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using Newtonsoft.Json;
@@ -19,7 +18,6 @@ namespace SocketServer.Helpers
         {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
-        private static ProducerConfig producerConfig = new ProducerConfig { BootstrapServers = BootstrapServers, Acks = Acks.Leader };
 
         public static async Task SendMessageAsync(string topic, object messageToSerialize, IProducer<Null, string> p)
         {
@@ -38,7 +36,11 @@ namespace SocketServer.Helpers
         // This method creates it own kafka producer and disposes it after it has been used
         public static async Task SendMessageAsync(string topic, object messageToSerialize)
         {
-            using(var p = new ProducerBuilder<Null, string>(producerConfig).Build())
+            ProducerConfig producerConfig = new ProducerConfig { BootstrapServers = BootstrapServers, Acks = Acks.Leader };
+
+            KafkaHelpers.SetKafkaConfigKerberos(producerConfig);
+
+            using (var p = new ProducerBuilder<Null, string>(producerConfig).Build())
             {
                 try
                 {
@@ -52,6 +54,24 @@ namespace SocketServer.Helpers
                     Console.WriteLine($"Failed to deliver message: {e.Message} [{e.Error.Code}]");
                 }
             }
+        }
+
+        public static ClientConfig SetKafkaConfigKerberos(ClientConfig config)
+        {
+            var saslEnabled = Environment.GetEnvironmentVariable("DASHBOARDI_KERBEROS_PUBLIC_URL");
+
+            if (saslEnabled != null)
+            {
+                config.SecurityProtocol = SecurityProtocol.SaslPlaintext;
+                config.SaslKerberosServiceName = Environment.GetEnvironmentVariable("DASHBOARDI_BROKER_KERBEROS_SERVICE_NAME") ?? "kafka";
+                config.SaslKerberosKeytab = Environment.GetEnvironmentVariable("KEYTAB_LOCATION");
+
+                // If the principal has been provided through volumes. The environment variable 'DASHBOARDS_KERBEROS_PRINCIPAL' will be set. If not 'DASHBOARDS_KERBEROS_API_SERVICE_USERNAME' will be set.
+                var principalName = Environment.GetEnvironmentVariable("DASHBOARDI_KERBEROS_PRINCIPAL") ?? Environment.GetEnvironmentVariable("DASHBOARDI_KERBEROS_API_SERVICE_USERNAME");
+                config.SaslKerberosPrincipal = principalName;
+            }
+
+            return config;
         }
     }
 }

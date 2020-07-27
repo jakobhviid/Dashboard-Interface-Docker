@@ -43,7 +43,9 @@ namespace SocketServer.BackgroundWorkers
                 AutoOffsetReset = AutoOffsetReset.Latest,
             };
 
-            using(var c = new ConsumerBuilder<Ignore, string>(consumerConfig).Build())
+            KafkaHelpers.SetKafkaConfigKerberos(consumerConfig);
+
+            using (var c = new ConsumerBuilder<Ignore, string>(consumerConfig).Build())
             {
                 c.Subscribe(new List<string> { KafkaHelpers.OverviewTopic, KafkaHelpers.StatsTopic });
 
@@ -71,7 +73,7 @@ namespace SocketServer.BackgroundWorkers
                 c.Close();
             }
         }
-        
+
         /*
         Starts a timer for a server which will save a record to the database if 15 minutes is exceeded.
         */
@@ -82,11 +84,11 @@ namespace SocketServer.BackgroundWorkers
             var timer = new System.Timers.Timer(TimeSpan.FromSeconds(2).TotalMilliseconds);
             timer.AutoReset = true;
             timer.Enabled = true;
-            timer.Elapsed += async(Object source, ElapsedEventArgs e) =>
+            timer.Elapsed += async (Object source, ElapsedEventArgs e) =>
             {
                 _logger.LogError("Overview has not sent data in 15 minutes. Notifying interface");
                 // TODO: notify relevant clients about this
-                using(var scope = _services.CreateScope())
+                using (var scope = _services.CreateScope())
                 {
                     var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
                     try
@@ -96,8 +98,8 @@ namespace SocketServer.BackgroundWorkers
                             await repo.AddStatusRecordToUpdaterContainer(servername, new StatusRecord
                             {
                                 TimeOfRecordInsertion = DateTime.Now,
-                                    Status = ContainerStatus.Down,
-                                    Health = ContainerHealth.UnHealthy
+                                Status = ContainerStatus.Down,
+                                Health = ContainerHealth.UnHealthy
                             });
                         }
                         else
@@ -106,8 +108,8 @@ namespace SocketServer.BackgroundWorkers
                             await repo.AddStatusRecordToUpdaterContainer(servername, new StatusRecord
                             {
                                 TimeOfRecordInsertion = DateTime.Now,
-                                    Status = ContainerStatus.Down,
-                                    Health = ContainerHealth.UnHealthy
+                                Status = ContainerStatus.Down,
+                                Health = ContainerHealth.UnHealthy
                             });
                         }
                     }
@@ -127,7 +129,7 @@ namespace SocketServer.BackgroundWorkers
             {
                 var newOverviewData = JsonConvert.DeserializeObject<OverViewData>(message);
                 OverViewData lastOverviewData = null;
-                if (KafkaHelpers.LatestOverviewInfo != null) 
+                if (KafkaHelpers.LatestOverviewInfo != null)
                     lastOverviewData = JsonConvert.DeserializeObject<OverViewData>(KafkaHelpers.LatestOverviewInfo);
 
                 var containerIndex = 0;
@@ -136,7 +138,7 @@ namespace SocketServer.BackgroundWorkers
                     var lastContainerState = lastOverviewData.Containers[containerIndex];
                     if (lastOverviewData == null || !newContainerState.Equals(lastContainerState)) // If the container is different
                     {
-                        using(var scope = _services.CreateScope())
+                        using (var scope = _services.CreateScope())
                         {
                             var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
                             try
@@ -161,7 +163,7 @@ namespace SocketServer.BackgroundWorkers
                 }
 
                 SetOverviewTimer(newOverviewData.Servername, newOverviewData.Containers.ToList());
-                
+
             }
             catch (Newtonsoft.Json.JsonException)
             {
@@ -185,7 +187,7 @@ namespace SocketServer.BackgroundWorkers
 
                 foreach (var newContainerState in statsData.Containers)
                 {
-                    using(var scope = _services.CreateScope())
+                    using (var scope = _services.CreateScope())
                     {
                         var repo = scope.ServiceProvider.GetRequiredService<IContainerUpdateRepo>();
                         try
