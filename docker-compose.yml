@@ -11,18 +11,18 @@ services:
       POSTGRES_DB: interface_db
 
   interface:
-    image: omvk97/dashboard-interface
+    image: cfei/dashboard-interface
     container_name: interface
     ports:
-      - 3001:3001
+      - 3000:3000
       - 5000:5000
     environment:
-      DASHBOARDI_UI_PORT: 3001
       DASHBOARDI_KAFKA_URL: 161.35.156.138:9093
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=interface-database;Port=5432;Database=interface_db;Username=interface;Password=Interface_database_password1"
+      DASHBOARDI_HOST_DNS: http://localhost
       DASHBOARDI_API_KEY: secureapiKey
       DASHBOARDI_JWT_KEY: secureJWTKeywhatifiasdhawrhawtkhawtrkh
-      DASHBOARDI_API_DNS: https://localhost:5000
+      DASHBOARDI_JWT_ISSUER: https://localhost:5000
       DASHBOARDI_INIT_USER_EMAIL: testUser@email.com
       DASHBAORDI_INIT_PASSWORD: testUserPassword%1.
       DASHBOARDI_KERBEROS_PUBLIC_URL: 161.35.156.138

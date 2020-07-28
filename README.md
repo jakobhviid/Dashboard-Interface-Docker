@@ -26,8 +26,9 @@ services:
     environment: 
       DASHBOARDI_API_KEY: cfeisecurekey
       DASHBOARDI_JWT_KEY: cfeisecureJWTkey
-      DASHBOARDI_API_DNS: https://<<HOST_DNS>>:5000
+      DASHBOARDI_JWT_ISSUER: https://<<HOST_DNS>>:5000
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=<<postgres_ip>>;Port=5432;Database=<<database_name>;Username=<<database_user>>;Password=<<database_password>>;"
+      DASHBOARDI_HOST_DNS: http://localhost
 
 ```
 
@@ -39,10 +40,12 @@ The image consists of two parts. A graphical interface and a socket server. The 
 - `DASHBOARDI_API_KEY`: The API key to use. This API Key provides access to the http server inside the image for user management. With this it's possible to create new users with access to the interface. Store it safely!
   
 - `DASHBOARDI_POSTGRES_CONNECTION_STRING`: The connection string for a postgres database. The database is crucial in order to collect data for container statistics and alerts.
+
+- `DASHBOARDI_HOST_DNS`: The DNS-resolvable hostname of the server which dashboard interface is running on. Has to state the protocol (http/https).
   
 - `DASHBOARDI_JWT_KEY`: The JSON Web Token key to use. Everyone with access to this key has access to the whole application. Store it safely!
 
-- `DASHBOARDI_API_DNS`: When writing JSON Web Tokens, this value is used as the issuing Authority. This must be a secure connection (https).
+- `DASHBOARDI_JWT_ISSUER`: When writing JSON Web Tokens from the socket server, this value is used as the issuing Authority. This must be a secure connection (https).
 
 #### Optional environment variables
 
@@ -85,8 +88,9 @@ services:
     environment:
       DASHBOARDI_API_KEY: cfeisecurekey
       DASHBOARDI_JWT_KEY: cfeisecureJWTkey
-      DASHBOARDI_API_DNS: https://<<HOST_DNS>>:5000
+      DASHBOARDI_JWT_ISSUER: https://<<HOST_DNS>>:5000
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=<<postgres_ip>>;Port=5432;Database=<<database_name>;Username=<<database_user>>;Password=<<database_password>>;"
+      DASHBOARDI_HOST_DNS: http://localhost
       DASHBOARDI_KERBEROS_PUBLIC_URL: <<kerberos_ip>>
       DASHBOARDI_KERBEROS_REALM: KAFKA.SECURE
       DASHBOARDI_KERBEROS_API_URL: http://<<kerberos_ip>>:6000/get-keytab

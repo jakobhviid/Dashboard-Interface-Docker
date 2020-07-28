@@ -83,10 +83,10 @@ namespace SocketServer
                 Console.WriteLine("'DASHBOARDI_POSTGRES_CONNECTION_STRING' Database Connection string not found");
                 System.Environment.Exit(1);
             }
-            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_API_DNS");
+            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_ISSUER");
             if (jwtIssuerAuthorithy == null)
             {
-                Console.WriteLine("'DASHBOARDI_API_DNS' not found");
+                Console.WriteLine("'DASHBOARDI_JWT_ISSUER' not found");
                 System.Environment.Exit(1);
             }
             var jwtKey = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY");

@@ -61,7 +61,6 @@ ENV SOCKETSERVER_HOME=/opt/socketserver
 ENV INTERFACE_HOME=/opt/interface
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV CONF_FILES=/conf
-ENV INTERFACE_ENVIRONMENT=Production
 
 # Copy necessary scripts
 COPY scripts /tmp/
@@ -87,6 +86,8 @@ RUN rm -f ${SOCKETSERVER_HOME}/runtimes/linux-x64/native/librdkafka.so
 COPY --from=socketbuild /usr/local/lib/librdkafka*.so* ${SOCKETSERVER_HOME}/runtimes/linux-x64/native/
 
 COPY --from=interfacebuild /app/build ${INTERFACE_HOME}
+
+COPY ./interface/.env .
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 

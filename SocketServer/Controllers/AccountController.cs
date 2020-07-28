@@ -51,7 +51,7 @@ namespace SocketServer.Controllers
 
             var claims = new [] { new Claim(ClaimTypes.Email, input.Email) };
 
-            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_API_DNS");
+            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_ISSUER");
             var token = new JwtSecurityToken(jwtIssuerAuthorithy, jwtIssuerAuthorithy, claims, signingCredentials : SigningCreds, expires : DateTime.Now.AddDays(30));
             return StatusCode(StatusCodes.Status200OK, new TokenResponseDTO
             {
