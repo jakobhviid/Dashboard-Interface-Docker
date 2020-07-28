@@ -54,7 +54,7 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install aspnetcore-runtime-3.1 -y && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    apt-get install -y nodejs build-essential supervisor && \
+    apt-get install -y nodejs build-essential supervisor net-tools && \
     npm install -g serve
 
 ENV SOCKETSERVER_HOME=/opt/socketserver
