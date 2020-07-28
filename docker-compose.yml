@@ -18,7 +18,6 @@ services:
       - 5000:5000
     environment:
       DASHBOARDI_UI_PORT: 3001
-      DASHBOARDI_SOCKET_SERVER_PORT: 5000
       DASHBOARDI_KAFKA_URL: 161.35.156.138:9093
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=interface-database;Port=5432;Database=interface_db;Username=interface;Password=Interface_database_password1"
       DASHBOARDI_API_KEY: secureapiKey

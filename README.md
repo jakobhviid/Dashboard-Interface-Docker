@@ -24,8 +24,6 @@ services:
       - 3000:3000
       - 5000:5000
     environment: 
-      DASHBOARDI_UI_PORT: 3000
-      DASHBOARDI_SOCKET_SERVER_PORT: 5000
       DASHBOARDI_API_KEY: cfeisecurekey
       DASHBOARDI_JWT_KEY: cfeisecureJWTkey
       DASHBOARDI_API_DNS: https://<<HOST_DNS>>:5000
@@ -37,10 +35,6 @@ services:
 The image consists of two parts. A graphical interface and a socket server. The socket server is also a standard http server with a single controller. This controller is for user management (JSON Web Tokens).
 
 #### Required environment variables
-
-- `DASHBOARDI_UI_PORT`: The port on which the graphical interface will run.
-  
-- `DASHBOARDI_SOCKET_SERVER_PORT`: The port on which the socket server will run.
   
 - `DASHBOARDI_API_KEY`: The API key to use. This API Key provides access to the http server inside the image for user management. With this it's possible to create new users with access to the interface. Store it safely!
   
@@ -51,6 +45,10 @@ The image consists of two parts. A graphical interface and a socket server. The 
 - `DASHBOARDI_API_DNS`: When writing JSON Web Tokens, this value is used as the issuing Authority. This must be a secure connection (https).
 
 #### Optional environment variables
+
+- `DASHBOARDI_UI_PORT`: The port on which the graphical interface will run. Default is 3000.
+
+- `DASHBOARDI_SOCKET_SERVER_PORT`: The port on which the socket server will run. Default is 5000.
 
 - `DASHBOARDI_KAFKA_URL`: Comma seperated list of one or more kafka urls. It will default to cfei's own kafka cluster 'kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092'.
 
@@ -85,8 +83,6 @@ services:
       - 3000:3000
       - 5000:5000
     environment:
-      DASHBOARDI_UI_PORT: 3000
-      DASHBOARDI_SOCKET_SERVER_PORT: 5000
       DASHBOARDI_API_KEY: cfeisecurekey
       DASHBOARDI_JWT_KEY: cfeisecureJWTkey
       DASHBOARDI_API_DNS: https://<<HOST_DNS>>:5000

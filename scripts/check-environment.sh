@@ -2,16 +2,6 @@
 
 . helpers.sh
 
-if [ -z "$DASHBOARDI_UI_PORT" ]; then
-    echo -e "\e[1;31mERROR - 'DASHBOARDI_UI_PORT' has not been provided. \e[0m"
-    exit 1
-fi
-
-if [ -z "$DASHBOARDI_SOCKET_SERVER_PORT" ]; then
-    echo -e "\e[1;31mERROR - 'DASHBOARDI_SOCKET_SERVER_PORT' has not been provided. \e[0m"
-    exit 1
-fi
-
 if [[ -z "$DASHBOARDI_API_KEY" ]]; then
     echo -e "\e[1;31mERROR - 'DASHBOARDI_API_KEY' must be set \e[0m"
     exit 1

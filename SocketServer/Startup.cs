@@ -165,7 +165,6 @@ namespace SocketServer
 
             // users are identified by their email
             services.AddSingleton<IUserIdProvider, EmailBasedUserIdProvider>();
-
         }
 
         public async void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)

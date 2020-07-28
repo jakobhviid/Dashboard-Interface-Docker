@@ -61,6 +61,7 @@ ENV SOCKETSERVER_HOME=/opt/socketserver
 ENV INTERFACE_HOME=/opt/interface
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV CONF_FILES=/conf
+ENV INTERFACE_ENVIRONMENT=Production
 
 # Copy necessary scripts
 COPY scripts /tmp/
