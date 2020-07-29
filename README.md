@@ -11,7 +11,7 @@ These features are:
 * Server mangement (not implemented yet).
 
 # How to use
-This docker-compose file shows the deployment of the dashboard-interface container.
+This docker-compose file shows the deployment of the dashboard-interface container. The website will run on port 80.
 
 ```
 version: "3"
@@ -21,7 +21,7 @@ services:
     image: cfei/dashboard-interface
     container_name: dashboard-interface
     ports:
-      - 3000:3000
+      - 80:80
       - 5000:5000
     environment: 
       DASHBOARDI_API_KEY: cfeisecurekey
@@ -48,8 +48,6 @@ The image consists of two parts. A graphical interface and a socket server. The 
 - `DASHBOARDI_JWT_ISSUER`: When writing JSON Web Tokens from the socket server, this value is used as the issuing Authority. This must be a secure connection (https).
 
 #### Optional environment variables
-
-- `DASHBOARDI_UI_PORT`: The port on which the graphical interface will run. Default is 3000.
 
 - `DASHBOARDI_SOCKET_SERVER_PORT`: The port on which the socket server will run. Default is 5000.
 
@@ -83,7 +81,7 @@ services:
     image: cfei/dashboard-interface
     container_name: dashboard-interface
     ports:
-      - 3000:3000
+      - 80:80
       - 5000:5000
     environment:
       DASHBOARDI_API_KEY: cfeisecurekey

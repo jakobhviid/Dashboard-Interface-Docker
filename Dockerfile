@@ -54,11 +54,10 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install aspnetcore-runtime-3.1 -y && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    apt-get install -y nodejs build-essential supervisor net-tools && \
-    npm install -g serve
+    apt-get install -y nodejs build-essential supervisor net-tools
 
 ENV SOCKETSERVER_HOME=/opt/socketserver
-ENV INTERFACE_HOME=/opt/interface
+ENV INTERFACE_HOME=/usr/share/nginx/html/
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV CONF_FILES=/conf
 
@@ -85,9 +84,25 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && apt-get -y instal
 RUN rm -f ${SOCKETSERVER_HOME}/runtimes/linux-x64/native/librdkafka.so
 COPY --from=socketbuild /usr/local/lib/librdkafka*.so* ${SOCKETSERVER_HOME}/runtimes/linux-x64/native/
 
+# nginx serving
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get install nginx -y
+
+# nginx config
+RUN rm -rf /etc/nginx/conf.d
+COPY ./nginx /etc/nginx/
+
+# serving the static files from interface build into nginx html folder
 COPY --from=interfacebuild /app/build ${INTERFACE_HOME}
 
-COPY ./interface/.env .
+WORKDIR ${INTERFACE_HOME}
+
+# Runtime environment fix (by serving with nginx)
+COPY ./env.sh ./
+COPY ./.env ./
+
+RUN chmod +x ./env.sh
+
+EXPOSE 80
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 

@@ -1,5 +1,4 @@
 #!/bin/bash
 
-UI_PORT=${DASHBOARDI_UI_PORT:-3000}
-
-serve -s "$INTERFACE_HOME" --listen "$UI_PORT"
+# Running env.sh script first to ensure that react has access to runtime environment variables
+"$INTERFACE_HOME"/env.sh && nginx -g "daemon off;"

@@ -14,21 +14,21 @@ services:
     image: cfei/dashboard-interface
     container_name: interface
     ports:
-      - 3000:3000
+      - 80:80
       - 5000:5000
     environment:
-      DASHBOARDI_KAFKA_URL: 161.35.156.138:9093
+      DASHBOARDI_KAFKA_URL: 165.22.194.200:9093
       DASHBOARDI_POSTGRES_CONNECTION_STRING: "Host=interface-database;Port=5432;Database=interface_db;Username=interface;Password=Interface_database_password1"
       DASHBOARDI_HOST_DNS: http://localhost
       DASHBOARDI_API_KEY: secureapiKey
       DASHBOARDI_JWT_KEY: secureJWTKeywhatifiasdhawrhawtkhawtrkh
       DASHBOARDI_JWT_ISSUER: https://localhost:5000
       DASHBOARDI_INIT_USER_EMAIL: testUser@email.com
-      DASHBAORDI_INIT_PASSWORD: testUserPassword%1.
-      DASHBOARDI_KERBEROS_PUBLIC_URL: 161.35.156.138
+      DASHBAORDI_INIT_PASSWORD: testUserPassword1.
+      DASHBOARDI_KERBEROS_PUBLIC_URL: 165.22.194.200
       DASHBOARDI_KERBEROS_REALM: KAFKA.SECURE
-      DASHBOARDI_KERBEROS_API_URL: http://161.35.156.138:6000/get-keytab
-      DASHBOARDI_KERBEROS_API_SERVICE_USERNAME: dashboardinterface/161.35.156.138
-      DASHBOARDI_KERBEROS_API_SERVICE_PASSWORD: dashboardServerInterface
+      DASHBOARDI_KERBEROS_API_URL: http://165.22.194.200:6000/get-keytab
+      DASHBOARDI_KERBEROS_API_SERVICE_USERNAME: dashboardinterface/165.22.194.200
+      DASHBOARDI_KERBEROS_API_SERVICE_PASSWORD: dashboardInterfacePassword
     depends_on:
       - interface-database

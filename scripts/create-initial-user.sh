@@ -1,10 +1,10 @@
 #!/bin/bash
 
 if [[ -z "$DASHBOARDI_INIT_USER_EMAIL" ]]; then
-    echo "INFO - 'DASHBOARDI_INIT_USER_EMAIL' has not been provided."
+    echo "INFO - 'DASHBOARDI_INIT_USER_EMAIL' has not been provided. Skipping initial user creation"
 else
     if [[ -z "$DASHBAORDI_INIT_PASSWORD" ]]; then
-        echo -e "\e[1;31mERROR - 'DASHBAORDI_INIT_PASSWORD' has not been provided \e[0m"
+        echo -e "\e[1;31mERROR - 'DASHBAORDI_INIT_PASSWORD' has not been provided. This is required to create initial user. \e[0m"
         exit 1
     fi
 
