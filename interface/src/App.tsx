@@ -19,7 +19,10 @@ import Notifier from "./components/notifier/Notifier.component";
 import { closeSnackbar } from "./redux/notifier/notifier.actions";
 
 import {
-  dataCollectionStart, stopCollectingOverview, stopCollectingRessources, stopListeningForCommandResponses,
+  dataCollectionStart,
+  stopCollectingOverview,
+  stopCollectingRessources,
+  stopListeningForCommandResponses,
 } from "./redux/container_data/containerData.effects";
 import { useTypedSelector, IRootState } from "./types/redux/reducerStates.types";
 import { loadAndTestJwtLocalStorage } from "./util/reduxHelpers";
@@ -42,13 +45,18 @@ const theme = createMuiTheme({
 function App() {
   const dispatch = useDispatch();
   const styleClasses = useStyles();
-  const socketConnection = useTypedSelector((store:IRootState) => store.containerData.socketConnection);
+  const socketConnection = useTypedSelector((store: IRootState) => store.containerData.socketConnection);
+  const userJwt = useTypedSelector((store: IRootState) => store.user.jwt);
 
   React.useEffect(() => {
-    const jwt = loadAndTestJwtLocalStorage();
-    if (typeof jwt === "string") {
-      dispatch(loginWithJwt(jwt, true));
-      dispatch(hubConnectionInitialization(jwt));
+    // The website will during first load test if Jwt is in local storage. If it is, the user is automatically logged in
+    const jwtLocalStorage = loadAndTestJwtLocalStorage();
+    if (typeof jwtLocalStorage === "string") {
+      dispatch(loginWithJwt(jwtLocalStorage, true));
+    }
+
+    if (userJwt !== undefined) {
+      dispatch(hubConnectionInitialization(userJwt));
       dispatch(dataCollectionStart());
     }
     return () => {
@@ -56,10 +64,10 @@ function App() {
         dispatch(stopCollectingOverview());
         dispatch(stopCollectingRessources());
         dispatch(stopListeningForCommandResponses());
-        dispatch(hubConnectionOff())
+        dispatch(hubConnectionOff());
       }
-    }
-  }, [dispatch]);
+    };
+  }, [dispatch, userJwt]);
 
   return (
     <SnackbarProvider
