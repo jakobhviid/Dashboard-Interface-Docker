@@ -1,10 +1,13 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using SocketServer.BackgroundWorkers;
 using SocketServer.ContainerModels.ContainerRequests;
+using SocketServer.ContainerModels.ContainerUpdates;
 using SocketServer.Helpers;
 
 namespace SocketServer.Hubs.DockerUpdatersHub
@@ -13,9 +16,11 @@ namespace SocketServer.Hubs.DockerUpdatersHub
     public class DockerUpdatersHub : Hub<IDockerUpdaters>
     {
         private readonly ILogger<DockerUpdatersHub> _logger;
-        public DockerUpdatersHub(ILogger<DockerUpdatersHub> logger)
+        private readonly IInspectCommandResponseWorker _inspectCommandResponseWorker;
+        public DockerUpdatersHub(ILogger<DockerUpdatersHub> logger, IInspectCommandResponseWorker inspectCommandResponseWorker)
         {
             _logger = logger;
+            _inspectCommandResponseWorker = inspectCommandResponseWorker;
         }
 
         public async void ReceiveNewestOverviewData()
@@ -90,6 +95,15 @@ namespace SocketServer.Hubs.DockerUpdatersHub
             {
                 Action = ContainerActionType.REFETCH_STATS
             });
+        }
+
+        public async void InspectContainer(string containerId)
+        {
+            var inspectResponseTask = _inspectCommandResponseWorker.ExecuteAsync(containerId);
+            await KafkaHelpers.SendMessageAsync(KafkaHelpers.InspectTopic,
+                new InspectContainerParameters {ContainerId = containerId});
+            var inspectData = await inspectResponseTask;
+            await Clients.Caller.SendInspectResponse(JsonConvert.SerializeObject(inspectData));
         }
     }
 }
