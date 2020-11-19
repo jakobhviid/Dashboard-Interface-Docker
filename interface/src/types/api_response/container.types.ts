@@ -38,3 +38,9 @@ export interface IAPIStatsData {
   commandRequestTopic?: string;
   commandResponseTopic?: string;
 }
+
+export interface IAPIInspectData {
+  Servername: string;
+  ContainerId: string;
+  RawData: string;
+}

@@ -97,13 +97,21 @@ namespace SocketServer.Hubs.DockerUpdatersHub
             });
         }
 
-        public async void InspectContainer(string containerId)
+        public async void InspectContainer(string serverRequestTopic, string containerId)
         {
-            var inspectResponseTask = _inspectCommandResponseWorker.ExecuteAsync(containerId);
-            await KafkaHelpers.SendMessageAsync(KafkaHelpers.InspectTopic,
-                new InspectContainerParameters {ContainerId = containerId});
-            var inspectData = await inspectResponseTask;
-            await Clients.Caller.SendInspectResponse(JsonConvert.SerializeObject(inspectData));
+            Console.WriteLine("Inspect invoked!!!");
+            var inspectData = new InspectData
+            {
+                ContainerId = containerId,
+                RawData = "fisken_kalder_raw_data",
+                Servername = "meget_lang_servernavn"
+            };
+            await Clients.All.SendInspectResponse(JsonConvert.SerializeObject(inspectData));
+            // var inspectResponseTask = _inspectCommandResponseWorker.ExecuteAsync(containerId);
+            // await KafkaHelpers.SendMessageAsync(KafkaHelpers.InspectTopic,
+            //     new InspectContainerParameters {ContainerId = containerId});
+            // var inspectData = await inspectResponseTask;
+            // await Clients.Caller.SendInspectResponse(JsonConvert.SerializeObject(inspectData));
         }
     }
 }

@@ -15,6 +15,7 @@ import { checkContainerOverviewData, checkContainerStats } from "../monitoring_e
 import { Dispatch } from "redux";
 import { IAPIOverviewData, IAPIStatsData } from "../../types/api_response/container.types";
 import { HubConnection } from "@microsoft/signalr";
+import {startInspectDataListening} from "../inspect_container/inspectContainer.effects";
 
 export const dataCollectionStart = () => {
   return (dispatch: any, getState: any) => {
@@ -23,6 +24,7 @@ export const dataCollectionStart = () => {
       dispatch(startCollectingOverview());
       dispatch(startCollectingRessources());
       dispatch(startListeningForCommandResponses());
+      dispatch(startInspectDataListening());
     });
   };
 };
