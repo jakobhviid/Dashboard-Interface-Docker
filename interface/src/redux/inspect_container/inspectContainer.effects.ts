@@ -9,16 +9,12 @@ export const startInspectDataListening = () => {
     return (dispatch: any, getState: any) => {
         const socketConnection: HubConnection = getState().containerData.socketConnection;
         socketConnection.on(INSPECT_CONTAINER_FUNCTION, (data: string) => {
-            console.log(data);
             const apiInspectData: IAPIInspectData = JSON.parse(data);
-            console.log(apiInspectData);
             const inspectData: IInspectData = {
                 serverName: apiInspectData.Servername,
                 containerId: apiInspectData.ContainerId,
                 rawData: apiInspectData.RawData
             }
-            console.log(inspectData);
-            console.log("Received inspect, dispatching!");
             dispatch(inspectDataReceived(inspectData));
         });
     };

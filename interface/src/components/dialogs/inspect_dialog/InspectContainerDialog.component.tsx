@@ -9,12 +9,12 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import {useSelector} from "react-redux";
 import {IRootState} from "../../../types/redux/reducerStates.types";
-import {INSPECT_CONTAINER_REQUEST} from "../../../util/socketEvents";
 import {HubConnection} from "@microsoft/signalr";
 
 function InspectContainerDialog({
     open,
     handleClose,
+    handleRefresh,
     dialogTitle,
     dialogText,
     commandRequestTopic,
@@ -22,52 +22,38 @@ function InspectContainerDialog({
 }: any) {
     const [inspectFieldValue, setInspectFieldValue] = React.useState("");
     const inspectData = useSelector((store: IRootState) => store.inspectData.inspectRawData);
-    const socketConnection: HubConnection | undefined = useSelector((store: IRootState) => store.containerData.socketConnection);
 
-    console.log("Cmd: " + commandRequestTopic + ", id: " + containerId);
-    if(commandRequestTopic == null || containerId == null) {
-        // handleClose();
-    }
-
-    const onRefresh = () => {
-        if(socketConnection !== undefined && commandRequestTopic != null) {
-            console.log("SOCKET INVOKING!");
-            socketConnection.invoke(INSPECT_CONTAINER_REQUEST, commandRequestTopic, containerId);
-        }
-    };
-
-    // React.useEffect(() => {
-        console.log(inspectData);
-        if(inspectData != null && containerId != null) {
-            if(inspectData[containerId] != null) {
-                if(inspectData[containerId] != inspectFieldValue) {
-                    console.log("Setting field value!");
-                    setInspectFieldValue(inspectData[containerId]);
-                }
+    console.log(inspectData);
+    if(inspectData != null && containerId != null) {
+        if(inspectData[containerId] != null) {
+            if(inspectData[containerId] != inspectFieldValue) {
+                console.log("Setting field value!");
+                setInspectFieldValue(inspectData[containerId]);
             }
         }
-    //     setInspectFieldValue("");
-    // }, [open]);
+    }
 
 
     return (
         <div>
             <Dialog
+                maxWidth="lg"
+                fullWidth
                 open={open}
                 onClose={handleClose}
                 aria-labelledby="form-dialog-title"
-                onKeyPress={(event) => (event.key === "Enter" ? onRefresh() : null)}
+                onKeyPress={(event) => (event.key === "Enter" ? handleRefresh(containerId, commandRequestTopic) : null)}
             >
                 <DialogTitle id="form-dialog-title">{dialogTitle}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>{dialogText}</DialogContentText>
                     <TextField
                         margin="dense"
-                        label="Inspection data will be placed here when fetched"
                         type="text"
                         fullWidth
+                        multiline
                         value={inspectFieldValue}
-                        rows={10}
+                        rows={20}
                         disabled
                     />
                 </DialogContent>
@@ -75,7 +61,7 @@ function InspectContainerDialog({
                     <Button onClick={handleClose} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={onRefresh} color="primary">
+                    <Button onClick={() => handleRefresh(containerId, commandRequestTopic)} color="primary">
                         Refresh
                     </Button>
                 </DialogActions>

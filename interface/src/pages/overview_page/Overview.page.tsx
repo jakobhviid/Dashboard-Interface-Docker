@@ -15,6 +15,7 @@ import {
   REMOVE_CONTAINER_REQUEST,
   REFETCH_OVERVIEW_DATA,
   NEWEST_OVERVIEW_DATA_REQUEST,
+  INSPECT_CONTAINER_REQUEST,
 } from "../../util/socketEvents";
 
 import { changeHeaderTitle } from "../../redux/ui/ui.actions";
@@ -82,16 +83,13 @@ function Overview() {
     dispatch(changeHeaderTitle("Container Overview"));
   }, [dispatch]);
 
-  // if(inspectData != null) {
-  //   console.log(inspectData);
-  // }
-
-  // const requestInspect = (selectedContainer: IContainerState) => {
-  //   if(socketConnection !== undefined) {
-  //     console.log("Should invoke!");
-  //     socketConnection.invoke(INSPECT_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id);
-  //   }
-  // };
+  const requestInspect = (containerId: string | undefined, commandRequestTopic: string | undefined) => {
+    console.log("Requesting inspect!: " + containerId + ":" + commandRequestTopic);
+    if(socketConnection !== undefined && containerId != null && commandRequestTopic != undefined) {
+      console.log("Should invoke!");
+      socketConnection.invoke(INSPECT_CONTAINER_REQUEST, commandRequestTopic, containerId);
+    }
+  };
 
   const handleRename = (newName: string) => {
     if (selectedContainer != null) {
@@ -144,6 +142,7 @@ function Overview() {
       onClick: (selectedContainer: IContainerState) => {
         console.log("On click!");
         setSelectedContainer(selectedContainer);
+        requestInspect(selectedContainer.id, selectedContainer.commandRequestTopic);
         setInspectDialogOpen(true);
       },
     },
@@ -288,6 +287,7 @@ function Overview() {
       <InspectContainerDialog
           open={inspectDialogOpen}
           handleClose={() => setInspectDialogOpen(false)}
+          handleRefresh={() => requestInspect(selectedContainer?.id, selectedContainer?.commandRequestTopic)}
           dialogTitle="Inspecting container"
           dialogText="Inspecting a container, use refresh to update the data"
           commandRequestTopic={selectedContainer?.commandRequestTopic}
