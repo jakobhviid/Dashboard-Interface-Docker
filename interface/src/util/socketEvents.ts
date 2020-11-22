@@ -13,4 +13,4 @@ export const UPDATE_CONFIGURATION_CONTAINER_REQUEST = "UpdateContainerConfigurat
 export const REFETCH_OVERVIEW_DATA = "RefetchOverviewData";
 export const REFETCH_STATS_DATA = "RefetchStatsData";
 export const INSPECT_CONTAINER_FUNCTION = "SendInspectResponse";
-export const INSPECT_CONTAINER_REQUEST = "InspectContainer";
+export const INSPECT_CONTAINER_REQUEST = "InspectContainerRequest";

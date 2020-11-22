@@ -92,7 +92,7 @@ namespace SocketServer.Hubs.DockerUpdatersHub
             });
         }
 
-        public async void InspectContainer(string serverRequestTopic, string containerId)
+        public async void InspectContainerRequest(string serverRequestTopic, string containerId)
         {
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new InspectContainerParameters {ContainerId = containerId});
