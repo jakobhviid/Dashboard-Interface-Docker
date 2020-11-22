@@ -11,7 +11,7 @@ export const startInspectDataListening = () => {
         socketConnection.on(INSPECT_CONTAINER_FUNCTION, (data: string) => {
             const apiInspectData: IAPIInspectData = JSON.parse(data);
             const inspectData: IInspectData = {
-                serverName: apiInspectData.Servername,
+                serverName: apiInspectData.ServerName,
                 containerId: apiInspectData.ContainerId,
                 rawData: apiInspectData.RawData
             }

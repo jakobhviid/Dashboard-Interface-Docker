@@ -9,7 +9,6 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import {useSelector} from "react-redux";
 import {IRootState} from "../../../types/redux/reducerStates.types";
-import {HubConnection} from "@microsoft/signalr";
 
 function InspectContainerDialog({
     open,
@@ -23,15 +22,19 @@ function InspectContainerDialog({
     const [inspectFieldValue, setInspectFieldValue] = React.useState("");
     const inspectData = useSelector((store: IRootState) => store.inspectData.inspectRawData);
 
-    console.log(inspectData);
-    if(inspectData != null && containerId != null) {
-        if(inspectData[containerId] != null) {
-            if(inspectData[containerId] != inspectFieldValue) {
-                console.log("Setting field value!");
-                setInspectFieldValue(inspectData[containerId]);
+    const refreshFieldValue = () => {
+        if(inspectData != null && containerId != null) {
+            if(inspectData[containerId] != null) {
+                if(inspectData[containerId] != inspectFieldValue) {
+                    setInspectFieldValue(inspectData[containerId]);
+                }
+            } else if(inspectFieldValue != "") {
+                setInspectFieldValue("");
             }
         }
     }
+    refreshFieldValue();
+
 
 
     return (
@@ -40,6 +43,8 @@ function InspectContainerDialog({
                 maxWidth="lg"
                 fullWidth
                 open={open}
+                onEnter={() => handleRefresh()}
+                onEntering={() => refreshFieldValue()}
                 onClose={handleClose}
                 aria-labelledby="form-dialog-title"
                 onKeyPress={(event) => (event.key === "Enter" ? handleRefresh(containerId, commandRequestTopic) : null)}

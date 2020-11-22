@@ -40,7 +40,7 @@ export interface IAPIStatsData {
 }
 
 export interface IAPIInspectData {
-  Servername: string;
+  ServerName: string;
   ContainerId: string;
   RawData: string;
 }

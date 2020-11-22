@@ -156,9 +156,6 @@ namespace SocketServer
 
             // database repos injection
             services.AddScoped<IContainerUpdateRepo, ContainerUpdateRepo>();
-            
-            // Temporary workers
-            services.AddScoped<IInspectCommandResponseWorker, InspectCommandResponseWorker>();
 
             services.AddSignalR();
 

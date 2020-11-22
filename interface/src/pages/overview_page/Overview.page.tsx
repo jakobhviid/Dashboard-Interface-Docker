@@ -75,7 +75,6 @@ function Overview() {
   const overviewData = useSelector((store: IRootState) => store.containerData.overviewData);
   const socketConnection: HubConnection | undefined = useSelector((store: IRootState) => store.containerData.socketConnection);
   const userJwt = useSelector((store: IRootState) => store.user.jwt);
-  // const inspectData = useSelector((store: IRootState) => store.inspectData.inspectRawData);
 
   const classes = useStyles();
 
@@ -84,9 +83,7 @@ function Overview() {
   }, [dispatch]);
 
   const requestInspect = (containerId: string | undefined, commandRequestTopic: string | undefined) => {
-    console.log("Requesting inspect!: " + containerId + ":" + commandRequestTopic);
     if(socketConnection !== undefined && containerId != null && commandRequestTopic != undefined) {
-      console.log("Should invoke!");
       socketConnection.invoke(INSPECT_CONTAINER_REQUEST, commandRequestTopic, containerId);
     }
   };
@@ -140,9 +137,7 @@ function Overview() {
     {
       label: "Inspect",
       onClick: (selectedContainer: IContainerState) => {
-        console.log("On click!");
         setSelectedContainer(selectedContainer);
-        requestInspect(selectedContainer.id, selectedContainer.commandRequestTopic);
         setInspectDialogOpen(true);
       },
     },

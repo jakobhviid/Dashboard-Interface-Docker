@@ -45,9 +45,6 @@ export interface IUserState {
 }
 
 export interface IInspectDataState {
-  listeningContainers: {
-    [key: string]: string[] // Key is servername, "value" is containerId
-  };
   inspectRawData: {
     [key: string]: string // Key is containerId, "value" is inspect raw data
   };
