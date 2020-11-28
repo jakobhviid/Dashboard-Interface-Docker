@@ -102,6 +102,8 @@ COPY ./.env ./
 
 RUN chmod +x ./env.sh
 
+HEALTHCHECK --interval=60s --timeout=20s --start-period=25s --retries=2 CMD [ "healthcheck.sh" ]
+
 EXPOSE 80
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf

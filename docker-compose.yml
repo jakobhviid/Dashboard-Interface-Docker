@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: interface_db
 
   interface:
-    image: cfei/dashboard-interface
+    image: dst/interface
     container_name: interface
     ports:
       - 80:80
@@ -25,10 +25,6 @@ services:
       DASHBOARDI_JWT_ISSUER: https://localhost:5000
       DASHBOARDI_INIT_USER_EMAIL: testUser@email.com
       DASHBAORDI_INIT_PASSWORD: testUserPassword1.
-      DASHBOARDI_KERBEROS_PUBLIC_URL: 165.22.194.200
-      DASHBOARDI_KERBEROS_REALM: KAFKA.SECURE
-      DASHBOARDI_KERBEROS_API_URL: http://165.22.194.200:6000/get-keytab
-      DASHBOARDI_KERBEROS_API_SERVICE_USERNAME: dashboardinterface/165.22.194.200
-      DASHBOARDI_KERBEROS_API_SERVICE_PASSWORD: dashboardInterfacePassword
     depends_on:
       - interface-database
+      
