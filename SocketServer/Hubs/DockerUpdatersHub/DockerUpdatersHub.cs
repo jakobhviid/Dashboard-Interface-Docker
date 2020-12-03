@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -13,6 +12,7 @@ namespace SocketServer.Hubs.DockerUpdatersHub
     public class DockerUpdatersHub : Hub<IDockerUpdaters>
     {
         private readonly ILogger<DockerUpdatersHub> _logger;
+
         public DockerUpdatersHub(ILogger<DockerUpdatersHub> logger)
         {
             _logger = logger;
@@ -90,6 +90,12 @@ namespace SocketServer.Hubs.DockerUpdatersHub
             {
                 Action = ContainerActionType.REFETCH_STATS
             });
+        }
+
+        public async void InspectContainerRequest(string serverRequestTopic, string containerId)
+        {
+            await KafkaHelpers.SendMessageAsync(serverRequestTopic,
+                new InspectContainerParameters {ContainerId = containerId});
         }
     }
 }

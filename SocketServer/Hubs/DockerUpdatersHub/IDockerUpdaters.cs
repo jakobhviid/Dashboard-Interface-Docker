@@ -9,5 +9,6 @@ namespace SocketServer.Hubs.DockerUpdatersHub
         Task SendOverviewData(string update);
         Task SendStatsData(string update);
         Task SendCommandResponses(string commandResponse);
+        Task SendInspectResponse(string inspectData);
     }
 }

@@ -38,3 +38,10 @@ export interface IAPIStatsData {
   commandRequestTopic?: string;
   commandResponseTopic?: string;
 }
+
+// Corresponds to the API object that is emitted from the SocketServer
+export interface IAPIInspectData {
+  ServerName: string;
+  ContainerId: string;
+  RawData: string;
+}

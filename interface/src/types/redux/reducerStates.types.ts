@@ -44,12 +44,19 @@ export interface IUserState {
   displayName: string;
 }
 
+export interface IInspectDataState {
+  inspectRawData: {
+    [key: string]: string // Key is containerId, "value" is inspect raw data
+  };
+}
+
 export interface IRootState {
   containerData: IContainerDataState;
   notifications: INotifier;
   monitoringEvents: IMonitoringEvents;
   ui: IUI;
   user: IUserState;
+  inspectData: IInspectDataState;
 }
 export const useTypedSelector: TypedUseSelectorHook<IRootState> = useSelector;
 

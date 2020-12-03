@@ -15,12 +15,14 @@ import {
   REMOVE_CONTAINER_REQUEST,
   REFETCH_OVERVIEW_DATA,
   NEWEST_OVERVIEW_DATA_REQUEST,
+  INSPECT_CONTAINER_REQUEST,
 } from "../../util/socketEvents";
 
 import { changeHeaderTitle } from "../../redux/ui/ui.actions";
 import { containerLoadStart } from "../../redux/container_data/containerData.actions";
 import RenameContainerDialog from "../../components/dialogs/rename_dialog/RenameContainerDialog.component";
 import NewContainerDialog from "../../components/dialogs/newcontainer_dialog/NewContainerDialog.component";
+import InspectContainerDialog from "../../components/dialogs/inspect_dialog/InspectContainerDialog.component";
 
 import useStyles from "./Overview.styles";
 import { IRootState } from "../../types/redux/reducerStates.types";
@@ -68,6 +70,7 @@ function Overview() {
   const [selectedContainer, setSelectedContainer] = React.useState<IContainerState | null>(null);
   const [createContainerDialogOpen, setCreateContainerDialogOpen] = React.useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
+  const [inspectDialogOpen, setInspectDialogOpen] = React.useState(false);
   const dispatch = useDispatch();
   const overviewData = useSelector((store: IRootState) => store.containerData.overviewData);
   const socketConnection: HubConnection | undefined = useSelector((store: IRootState) => store.containerData.socketConnection);
@@ -78,6 +81,12 @@ function Overview() {
   React.useEffect(() => {
     dispatch(changeHeaderTitle("Container Overview"));
   }, [dispatch]);
+
+  const requestInspect = (containerId: string | undefined, commandRequestTopic: string | undefined) => {
+    if(socketConnection !== undefined && containerId != null && commandRequestTopic != undefined) {
+      socketConnection.invoke(INSPECT_CONTAINER_REQUEST, commandRequestTopic, containerId);
+    }
+  };
 
   const handleRename = (newName: string) => {
     if (selectedContainer != null) {
@@ -123,6 +132,13 @@ function Overview() {
         dispatch(containerLoadStart([selectedContainer.id]));
         if (socketConnection !== undefined)
           socketConnection.invoke(REMOVE_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, true); //TODO: Ask user if they want to remove volumes aswell
+      },
+    },
+    {
+      label: "Inspect",
+      onClick: (selectedContainer: IContainerState) => {
+        setSelectedContainer(selectedContainer);
+        setInspectDialogOpen(true);
       },
     },
   ];
@@ -262,6 +278,15 @@ function Overview() {
             };
           }
         })}
+      />
+      <InspectContainerDialog
+          open={inspectDialogOpen}
+          handleClose={() => setInspectDialogOpen(false)}
+          handleRefresh={() => requestInspect(selectedContainer?.id, selectedContainer?.commandRequestTopic)}
+          dialogTitle="Inspecting container"
+          dialogText="Inspecting a container, use refresh to update the data"
+          commandRequestTopic={selectedContainer?.commandRequestTopic}
+          containerId={selectedContainer?.id}
       />
     </React.Fragment>
   );
