@@ -45,3 +45,9 @@ export interface IAPIInspectData {
   ContainerId: string;
   RawData: string;
 }
+
+export interface IAPILogData{
+  servName: string,
+  servID: string,
+  logData: string
+}
