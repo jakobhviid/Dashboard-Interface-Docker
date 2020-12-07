@@ -44,10 +44,22 @@ export interface IUserState {
   displayName: string;
 }
 
+export interface ILogDataState{
+  logRawData : {
+    [idKey : string] : string
+  }
+}
+
 export interface IInspectDataState {
   inspectRawData: {
     [key: string]: string // Key is containerId, "value" is inspect raw data
   };
+}
+
+export interface ILogData{
+  servName: string,
+  servID: string,
+  logData: string
 }
 
 export interface IRootState {
@@ -57,6 +69,7 @@ export interface IRootState {
   ui: IUI;
   user: IUserState;
   inspectData: IInspectDataState;
+  logData: ILogDataState;
 }
 export const useTypedSelector: TypedUseSelectorHook<IRootState> = useSelector;
 

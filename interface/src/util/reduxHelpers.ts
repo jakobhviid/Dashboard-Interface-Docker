@@ -1,3 +1,4 @@
+import { Console } from "console";
 import jsonwebtoken from "jsonwebtoken";
 
 export function loadAndTestJwtLocalStorage() {
@@ -15,6 +16,8 @@ export function loadAndTestJwtLocalStorage() {
 
     return jwt;
   } catch (err) {
+    console.log(err);
+    console.log("triggered catch in jswowebtoken, reduxHelpers.");
     return undefined;
   }
 }
