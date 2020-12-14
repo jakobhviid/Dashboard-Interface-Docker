@@ -6,6 +6,7 @@ import monitoringEventsReducer from "./monitoring_events/monitoringEvents.reduce
 import uiReducer from "./ui/ui.reducer";
 import userReducer from "./user/user.reducer"
 import inspectContainerReducer from "./inspect_container/inspectContainer.reducer";
+import logContainerReducer from "./container_log/containerLog.reducer"
 
 const rootReducer = combineReducers({
   containerData: containerReducer,
@@ -13,7 +14,9 @@ const rootReducer = combineReducers({
   monitoringEvents: monitoringEventsReducer,
   ui: uiReducer,
   user: userReducer,
-  inspectData: inspectContainerReducer
+  inspectData: inspectContainerReducer,
+  logData: logContainerReducer,
+
 });
 
 export default rootReducer;

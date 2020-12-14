@@ -9,7 +9,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../types/redux/reducerStates.types";
 
-function LogDialog({
+function LogContainerDialog({
   isOpen,
   handleClose,
   handleRefresh,
@@ -67,4 +67,4 @@ function LogDialog({
   );
 }
 
-export default LogDialog;
+export default LogContainerDialog;

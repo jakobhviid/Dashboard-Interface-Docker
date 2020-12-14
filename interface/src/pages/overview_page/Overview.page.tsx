@@ -16,6 +16,8 @@ import {
   REFETCH_OVERVIEW_DATA,
   NEWEST_OVERVIEW_DATA_REQUEST,
   INSPECT_CONTAINER_REQUEST,
+  LOG_CONTAINER_REQUEST
+
 } from "../../util/socketEvents";
 
 import { changeHeaderTitle } from "../../redux/ui/ui.actions";
@@ -23,6 +25,7 @@ import { containerLoadStart } from "../../redux/container_data/containerData.act
 import RenameContainerDialog from "../../components/dialogs/rename_dialog/RenameContainerDialog.component";
 import NewContainerDialog from "../../components/dialogs/newcontainer_dialog/NewContainerDialog.component";
 import InspectContainerDialog from "../../components/dialogs/inspect_dialog/InspectContainerDialog.component";
+import LogContainerDialog from "../../components/dialogs/log_dialog/LogContainerDialog.component";
 
 import useStyles from "./Overview.styles";
 import { IRootState } from "../../types/redux/reducerStates.types";
@@ -69,6 +72,7 @@ function Overview() {
   const [serverMode, setServerMode] = React.useState(true);
   const [selectedContainer, setSelectedContainer] = React.useState<IContainerState | null>(null);
   const [createContainerDialogOpen, setCreateContainerDialogOpen] = React.useState(false);
+  const [logDialogOpen, setLogDialogOpen] = React.useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
   const [inspectDialogOpen, setInspectDialogOpen] = React.useState(false);
   const dispatch = useDispatch();
@@ -95,6 +99,12 @@ function Overview() {
         socketConnection.invoke(RENAME_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, newName);
     }
   };
+
+  const requestLog = (containerId: string | undefined, commandRequestTopic: string | undefined) => {
+    if(socketConnection !== undefined && containerId != null && commandRequestTopic != undefined){
+      socketConnection.invoke(LOG_CONTAINER_REQUEST, commandRequestTopic, containerId)
+    }
+  }
 
   const actions = [
     {
@@ -141,6 +151,13 @@ function Overview() {
         setInspectDialogOpen(true);
       },
     },
+    {
+      label: "Log",
+      onClick: (selectedContainer: IContainerState) =>{
+        setSelectedContainer(selectedContainer);
+        setLogDialogOpen(true);
+      }
+    }
   ];
 
   const refetchContainers = (servers: string[]) => {
@@ -287,6 +304,16 @@ function Overview() {
           dialogText="Inspecting a container, use refresh to update the data"
           commandRequestTopic={selectedContainer?.commandRequestTopic}
           containerId={selectedContainer?.id}
+      />
+      <LogContainerDialog 
+        open={logDialogOpen}
+        handleClose={() => setLogDialogOpen(false)}
+        handleRefresh={() => requestLog(selectedContainer?.id, selectedContainer?.commandRequestTopic)}
+        dialogTitle="Retrieving container logs"
+        dialogText="Retrieving the container logs"
+        commandRequestTopic={selectedContainer?.commandRequestTopic}
+        containerId={selectedContainer?.id}
+
       />
     </React.Fragment>
   );
