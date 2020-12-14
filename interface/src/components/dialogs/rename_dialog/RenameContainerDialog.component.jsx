@@ -16,7 +16,7 @@ function RenameDialog({
   dialogText,
   label,
   containerId,
-  commandRequestTopic
+  commandRequestTopic,
 }) {
   const [textFieldValue, setTextFieldValue] = React.useState("");
 
