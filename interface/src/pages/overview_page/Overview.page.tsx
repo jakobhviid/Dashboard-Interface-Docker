@@ -92,11 +92,12 @@ function Overview() {
     }
   };
 
-  const handleRename = (newName: string) => {
-    if (selectedContainer != null) {
+  const handleRename = (newName: string, containerId: string | undefined, commandRequestTopic: string | undefined) => {
+    if (selectedContainer != null && containerId != null){
       dispatch(containerLoadStart([selectedContainer.id]));
-      if (socketConnection !== undefined)
+      if(socketConnection !== undefined && commandRequestTopic != undefined){
         socketConnection.invoke(RENAME_CONTAINER_REQUEST, selectedContainer.commandRequestTopic, selectedContainer.id, newName);
+      }
     }
   };
 
@@ -155,7 +156,7 @@ function Overview() {
       label: "Log",
       onClick: (selectedContainer: IContainerState) =>{
         setSelectedContainer(selectedContainer);
-        setLogDialogOpen(true);
+        setLogDialogOpen(true)
       }
     }
   ];
@@ -278,10 +279,13 @@ function Overview() {
       <RenameContainerDialog
         open={renameDialogOpen}
         handleClose={() => setRenameDialogOpen(false)}
-        handleConfirmation={handleRename}
+        handleConfirmation={() => handleRename("",selectedContainer?.id, selectedContainer?.commandRequestTopic )}
         dialogTitle="Renaming Container"
         dialogText="What should the container be renamed to?"
         label="Container Name"
+        commandRequestTopic={selectedContainer?.commandRequestTopic}
+        containerId={selectedContainer?.id}
+
       />
       <NewContainerDialog
         open={createContainerDialogOpen}

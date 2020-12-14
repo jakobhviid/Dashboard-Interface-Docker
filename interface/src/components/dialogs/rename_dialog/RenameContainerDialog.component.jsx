@@ -15,6 +15,8 @@ function RenameDialog({
   dialogTitle,
   dialogText,
   label,
+  containerId,
+  commandRequestTopic
 }) {
   const [textFieldValue, setTextFieldValue] = React.useState("");
 
@@ -24,7 +26,7 @@ function RenameDialog({
 
   const onConfirm = () => {
     handleClose();
-    handleConfirmation(textFieldValue);
+    handleConfirmation(textFieldValue, containerId, commandRequestTopic);
   };
 
   return (
