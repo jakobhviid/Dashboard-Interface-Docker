@@ -20,7 +20,12 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DASHBOARDI_KAFKA_URL": "stage1.cfei.dk:9092,stage2.cfei.dk:9092,stage3.cfei.dk:9092",
+        "DASHBOARDI_JWT_ISSUER": "http://localhost:5000",
+        "DASHBOARDI_JWT_KEY": "secureJWTKeywhatifiasdhawrhawtkhawtrkh",
+        "DASHBOARDI_API_KEY": "secureapiKey",
+        "DASHBOARDI_POSTGRES_CONNECTION_STRING": "Host=localhost;Port=5432;Database=interface_db;Username=interface;Password=Interface_database_password1"
       }
     }
   }
