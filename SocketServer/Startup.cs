@@ -157,6 +157,9 @@ namespace SocketServer
             // database repos injection
             services.AddScoped<IContainerUpdateRepo, ContainerUpdateRepo>();
 
+            // Added basic API health check  
+            services.AddHealthChecks();
+            
             services.AddSignalR();
 
             // constant working threads
@@ -184,6 +187,7 @@ namespace SocketServer
             {
                 endpoints.MapHub<DockerUpdatersHub>("/updates");
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/diagnostics/healthcheck");
             });
         }
 
