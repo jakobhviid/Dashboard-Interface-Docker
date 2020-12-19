@@ -102,7 +102,7 @@ COPY ./.env ./
 
 RUN chmod +x ./env.sh
 
-HEALTHCHECK --interval=60s --timeout=20s --start-period=25s --retries=2 CMD [ "healthcheck.sh" ]
+HEALTHCHECK --interval=60s --timeout=20s --start-period=25s --retries=3 CMD [ "healthcheck.sh" ]
 
 EXPOSE 80
 
