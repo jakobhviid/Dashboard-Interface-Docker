@@ -227,6 +227,7 @@ function Overview() {
                 title={servername}
                 columns={columnsServerView}
                 data={containerView[servername].containers}
+                timestamp={"Data received at: " + containerView[servername].timestamp}
                 dense="small"
                 actions={actions}
                 onRefetch={() => refetchContainers([servername])}

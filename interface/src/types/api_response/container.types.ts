@@ -13,6 +13,7 @@ export interface IAPIOverviewData {
   containers: IOverviewContainer[];
   commandRequestTopic?: string;
   commandResponseTopic?: string;
+  timeStamp: string
 }
 
 export interface IStatsContainer {
