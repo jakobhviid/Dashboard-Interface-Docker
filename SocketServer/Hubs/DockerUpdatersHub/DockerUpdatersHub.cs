@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using SocketServer.BackgroundWorkers;
 using SocketServer.ContainerModels.ContainerRequests;
 using SocketServer.Helpers;
 
@@ -79,6 +80,7 @@ namespace SocketServer.Hubs.DockerUpdatersHub
         }
         public async void RefetchOverviewData(string serverRequestTopic)
         {
+            CommandServerResponseWorker._instance.checkAssignment(serverRequestTopic.Replace("requests", "responses"));
             await KafkaHelpers.SendMessageAsync(serverRequestTopic, new ContainerRequest
             {
                 Action = ContainerActionType.REFETCH_OVERVIEW
