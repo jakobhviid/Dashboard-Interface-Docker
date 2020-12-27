@@ -51,7 +51,7 @@ namespace SocketServer.Controllers
 
             var claims = new [] { new Claim(ClaimTypes.Email, input.Email) };
 
-            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_ISSUER") ?? _configuration.GetValue<String>("JwtIssuerAuthority");
+            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_ISSUER");
             var token = new JwtSecurityToken(jwtIssuerAuthorithy, jwtIssuerAuthorithy, claims, signingCredentials : SigningCreds, expires : DateTime.Now.AddDays(30));
             return StatusCode(StatusCodes.Status200OK, new TokenResponseDTO
             {
@@ -101,7 +101,7 @@ namespace SocketServer.Controllers
 
         private bool ValidAPIKey(string apiKey)
         {
-            var providedApiKey = Environment.GetEnvironmentVariable("DASHBOARDI_API_KEY") ?? _configuration.GetValue<String>("DashboardIApiKey");
+            var providedApiKey = Environment.GetEnvironmentVariable("DASHBOARDI_API_KEY");
             return apiKey.Equals(providedApiKey);
         }
     }

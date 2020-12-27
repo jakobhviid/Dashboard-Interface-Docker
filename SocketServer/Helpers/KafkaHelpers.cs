@@ -8,8 +8,9 @@ namespace SocketServer.Helpers
 {
     public static class KafkaHelpers
     {
-        public static readonly string BootstrapServers = Environment.GetEnvironmentVariable("DASHBOARDI_KAFKA_URL") ?? "kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092";
-        // public static readonly string BootstrapServers = Environment.GetEnvironmentVariable("DASHBOARDI_KAFKA_URL") ?? "stage1.cfei.dk:9092,stage2.cfei.dk:9092,stage3.cfei.dk:9092";
+        public static readonly string BootstrapServers =
+            Environment.GetEnvironmentVariable("DASHBOARDI_KAFKA_URL") ??
+            "kafka1.cfei.dk:9092,kafka2.cfei.dk:9092,kafka3.cfei.dk:9092";
         public const string OverviewTopic = "f0e1e946-50d0-4a2b-b1a5-f21b92e09ac1-general_info";
         public const string StatsTopic = "33a325ce-b0c0-43a7-a846-4f46acdb367e-stats_info";
         public const string InspectTopic = "8f69fb50-ad11-4a9d-b4ab-21fba03053f2-inspect_info"; // Random hardcoded GUID, or?

@@ -27,8 +27,8 @@ namespace SocketServer
     {
         // We use a key generated on this server during startup to secure our JSON Web Tokens.
         // This means that if the app restarts, existing tokens become invalid.
-        public static readonly SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY")));
-        // public static readonly SymmetricSecurityKey SecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secureJWTKeywhatifiasdhawrhawtkhawtrkh"));
+        public static readonly SymmetricSecurityKey SecurityKey =
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY")));
         private readonly IConfiguration _configuration;
 
         public Startup(IConfiguration configuration) => _configuration = configuration;
@@ -78,24 +78,21 @@ namespace SocketServer
 
             Console.ForegroundColor = ConsoleColor.Red;
             // environment variables check
-            var connectionString = Environment.GetEnvironmentVariable("DASHBOARDI_POSTGRES_CONNECTION_STRING") ??
-                                   _configuration.GetValue<String>("ConnectionString");
+            var connectionString = Environment.GetEnvironmentVariable("DASHBOARDI_POSTGRES_CONNECTION_STRING");
             if (connectionString == null)
             {
                 Console.WriteLine("'DASHBOARDI_POSTGRES_CONNECTION_STRING' Database Connection string not found");
                 System.Environment.Exit(1);
             }
 
-            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_ISSUER") ??
-                                      _configuration.GetValue<String>("JwtIssuerAuthority");
+            var jwtIssuerAuthorithy = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_ISSUER");
             if (jwtIssuerAuthorithy == null)
             {
                 Console.WriteLine("'DASHBOARDI_JWT_ISSUER' not found");
                 System.Environment.Exit(1);
             }
 
-            var jwtKey = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY") ??
-                         _configuration.GetValue<String>("DashboardIJwtKey");
+            var jwtKey = Environment.GetEnvironmentVariable("DASHBOARDI_JWT_KEY");
             if (jwtKey == null)
             {
                 Console.WriteLine("'DASHBOARDI_JWT_KEY' not found");
