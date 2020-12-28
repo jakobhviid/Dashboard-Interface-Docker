@@ -109,6 +109,7 @@ function RessourceUsage() {
               data={containerView[servername].containers}
               dense="small"
               actions={actions}
+              onRefetch={null}
             />
           </div>
         ))
@@ -119,6 +120,7 @@ function RessourceUsage() {
           data={containerView}
           dense="small"
           actions={actions}
+          onRefetch={null}
         />
       )}
       <ReconfigureContainerDialog

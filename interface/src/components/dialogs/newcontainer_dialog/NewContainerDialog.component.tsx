@@ -19,9 +19,25 @@ import { IRootState } from "../../../types/redux/reducerStates.types";
 import { CREATE_NEW_CONTAINER_REQUEST } from "../../../util/socketEvents";
 import { removeEmptyNullUndefinedValues } from "../../../util/helpers";
 import { enqueueSnackbar } from "../../../redux/notifier/notifier.actions";
-import { INewContainerValues, IContainerValuesToSend, templates } from "./Templates";
+import {
+  INewContainerValues,
+  IContainerValuesToSend,
+  templates,
+} from "./Templates";
 
-function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
+type NewContainerDialogProps = {
+  open: boolean;
+  handleClose: any;
+  dialogTitle: string;
+  servers: Array<any>;
+};
+
+function NewContainerDialog({
+  open,
+  handleClose,
+  dialogTitle,
+  servers,
+}: NewContainerDialogProps) {
   const [values, setValues] = React.useState<INewContainerValues>({
     image: "",
     name: "",
@@ -33,9 +49,13 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
     volumesFrom: [],
     networkMode: "",
   });
-  const [selectedServer, setSelectedServer] = React.useState<string>(servers[0].url);
+  const [selectedServer, setSelectedServer] = React.useState<string>(
+    servers[0].url
+  );
   const [selectedTemplate, setSelectedTemplate] = React.useState<string>("");
-  const socketConnection: HubConnection | undefined = useSelector((store: IRootState) => store.containerData.socketConnection);
+  const socketConnection: HubConnection | undefined = useSelector(
+    (store: IRootState) => store.containerData.socketConnection
+  );
   const dispatch = useDispatch();
 
   function handleConfirmation() {
@@ -52,14 +72,22 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
       );
       return;
     }
-    const valuesToSend = produce(values, (valuesCopy: IContainerValuesToSend) => {
-      removeEmptyNullUndefinedValues(valuesCopy);
+    const valuesToSend = produce(
+      values,
+      (valuesCopy: IContainerValuesToSend) => {
+        removeEmptyNullUndefinedValues(valuesCopy);
 
-      if (values.restartPolicy.restartPolicy === "none") delete valuesCopy.restartPolicy;
-    });
+        if (values.restartPolicy.restartPolicy === "none")
+          delete valuesCopy.restartPolicy;
+      }
+    );
     console.log(JSON.stringify(valuesToSend));
     if (socketConnection !== undefined)
-      socketConnection.invoke(CREATE_NEW_CONTAINER_REQUEST, selectedServer, JSON.stringify(valuesToSend));
+      socketConnection.invoke(
+        CREATE_NEW_CONTAINER_REQUEST,
+        selectedServer,
+        JSON.stringify(valuesToSend)
+      );
   }
 
   function handleAutoFillTemplate(templateName: string) {
@@ -76,9 +104,11 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
         volumesFrom: [],
         networkMode: "",
       });
-      return
+      return;
     }
-    var name: any = Object.keys(templates).find((template) => template === templateName);
+    var name: any = Object.keys(templates).find(
+      (template) => template === templateName
+    );
     const template: INewContainerValues = templates[name];
     setValues(template);
   }
@@ -90,14 +120,22 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
         open={open}
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
-        onKeyPress={(event) => (event.key === "Enter" ? handleConfirmation() : null)}
+        onKeyPress={(event) =>
+          event.key === "Enter" ? handleConfirmation() : null
+        }
       >
         <DialogTitle id="form-dialog-title">{dialogTitle}</DialogTitle>
         <DialogContent>
           <form noValidate autoComplete="off">
             <Grid container spacing={2}>
-              <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>
-                <Typography variant="subtitle2">Server to Start Container On</Typography>
+              <Grid
+                item
+                xs={12}
+                style={{ padding: "2px", paddingLeft: "12px" }}
+              >
+                <Typography variant="subtitle2">
+                  Server to Start Container On
+                </Typography>
               </Grid>
               <Grid item xs={12}>
                 <TextField
@@ -111,7 +149,9 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                   type="text"
                   fullWidth
                   value={selectedServer}
-                  onChange={(event: any) => setSelectedServer(event.target.value)}
+                  onChange={(event: any) =>
+                    setSelectedServer(event.target.value)
+                  }
                 >
                   {servers.map((server: any) => (
                     <option key={server.url} value={server.url}>
@@ -120,8 +160,14 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                   ))}
                 </TextField>
               </Grid>
-              <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>
-                <Typography variant="subtitle2">Choose a Template Here</Typography>
+              <Grid
+                item
+                xs={12}
+                style={{ padding: "2px", paddingLeft: "12px" }}
+              >
+                <Typography variant="subtitle2">
+                  Choose a Template Here
+                </Typography>
               </Grid>
               <Grid item xs={12}>
                 <TextField
@@ -135,7 +181,9 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                   type="text"
                   fullWidth
                   value={selectedTemplate}
-                  onChange={(event: any) => handleAutoFillTemplate(event.target.value)}
+                  onChange={(event: any) =>
+                    handleAutoFillTemplate(event.target.value)
+                  }
                 >
                   <option key={"none"} value={""} />
                   {Object.keys(templates).map((templateName: string) => (
@@ -145,7 +193,11 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                   ))}
                 </TextField>
               </Grid>
-              <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>
+              <Grid
+                item
+                xs={12}
+                style={{ padding: "2px", paddingLeft: "12px" }}
+              >
                 <Typography variant="subtitle2">Basics</Typography>
               </Grid>
               <Grid item xs={12}>
@@ -157,7 +209,9 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                   fullWidth
                   autoFocus
                   value={values.image}
-                  onChange={(event) => setValues({ ...values, image: event.target.value })}
+                  onChange={(event) =>
+                    setValues({ ...values, image: event.target.value })
+                  }
                   helperText="Image to Run (example: ubuntu)"
                 />
               </Grid>
@@ -169,7 +223,9 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                   type="text"
                   fullWidth
                   value={values.name}
-                  onChange={(event) => setValues({ ...values, name: event.target.value })}
+                  onChange={(event) =>
+                    setValues({ ...values, name: event.target.value })
+                  }
                   helperText="The Name of the Container"
                 />
               </Grid>
@@ -224,7 +280,11 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
               />
 
               <Grid container alignItems="center" justify="center">
-                <Grid item xs={10} style={{ padding: "2px", paddingLeft: "12px" }}>
+                <Grid
+                  item
+                  xs={10}
+                  style={{ padding: "2px", paddingLeft: "12px" }}
+                >
                   <Typography variant="subtitle2">Ports</Typography>
                 </Grid>
                 <Grid item xs={1}>
@@ -239,7 +299,10 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                         });
                       }}
                     >
-                      <RemoveIcon color="primary" aria-label="delete port binding" />
+                      <RemoveIcon
+                        color="primary"
+                        aria-label="delete port binding"
+                      />
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -249,7 +312,10 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                       onClick={() => {
                         setValues({
                           ...values,
-                          ports: [...values.ports, { containerPort: "", hostPort: "" }],
+                          ports: [
+                            ...values.ports,
+                            { containerPort: "", hostPort: "" },
+                          ],
                         });
                       }}
                     >
@@ -307,8 +373,14 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
               ))}
 
               <Grid container alignItems="center" justify="center">
-                <Grid item xs={10} style={{ padding: "2px", paddingLeft: "12px" }}>
-                  <Typography variant="subtitle2">Environment Variables</Typography>
+                <Grid
+                  item
+                  xs={10}
+                  style={{ padding: "2px", paddingLeft: "12px" }}
+                >
+                  <Typography variant="subtitle2">
+                    Environment Variables
+                  </Typography>
                 </Grid>
                 <Grid item xs={1}>
                   <Tooltip title="Remove Environment Variable">
@@ -322,7 +394,10 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                         });
                       }}
                     >
-                      <RemoveIcon color="primary" aria-label="delete environment variable" />
+                      <RemoveIcon
+                        color="primary"
+                        aria-label="delete environment variable"
+                      />
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -332,11 +407,17 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                       onClick={() => {
                         setValues({
                           ...values,
-                          environment: [...values.environment, { key: "", value: "" }],
+                          environment: [
+                            ...values.environment,
+                            { key: "", value: "" },
+                          ],
                         });
                       }}
                     >
-                      <AddIcon color="primary" aria-label="add environment variable" />
+                      <AddIcon
+                        color="primary"
+                        aria-label="add environment variable"
+                      />
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -388,7 +469,11 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
               ))}
 
               <Grid container alignItems="center" justify="center">
-                <Grid item xs={10} style={{ padding: "2px", paddingLeft: "12px" }}>
+                <Grid
+                  item
+                  xs={10}
+                  style={{ padding: "2px", paddingLeft: "12px" }}
+                >
                   <Typography variant="subtitle2">Volumes</Typography>
                 </Grid>
                 <Grid item xs={1}>
@@ -413,7 +498,10 @@ function NewContainerDialog({ open, handleClose, dialogTitle, servers }: any) {
                       onClick={() => {
                         setValues({
                           ...values,
-                          volumes: [...values.volumes, { hostPath: "", containerPath: "" }],
+                          volumes: [
+                            ...values.volumes,
+                            { hostPath: "", containerPath: "" },
+                          ],
                         });
                       }}
                     >

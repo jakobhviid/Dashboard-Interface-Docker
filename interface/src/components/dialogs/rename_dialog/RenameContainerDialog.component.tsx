@@ -8,6 +8,15 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
+type RenameProps = {
+  open: boolean;
+  handleClose: any;
+  handleConfirmation: any;
+  dialogTitle: string;
+  dialogText: string;
+  label: string;
+};
+
 function RenameDialog({
   open,
   handleClose,
@@ -15,7 +24,7 @@ function RenameDialog({
   dialogTitle,
   dialogText,
   label,
-}) {
+}: RenameProps) {
   const [textFieldValue, setTextFieldValue] = React.useState("");
 
   React.useEffect(() => {
