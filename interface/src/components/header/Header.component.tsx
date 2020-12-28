@@ -22,7 +22,7 @@ import LogoutIcon from "@material-ui/icons/ExitToApp";
 import Avatar from "@material-ui/core/Avatar";
 
 import useStyles from "./Header.styles";
-import { overviewItems } from "./listitems";
+import overviewItems from "./listitems";
 import NotificationMenu from "./notification_menu/NotificationMenu.component";
 import { IRootState } from "../../types/redux/reducerStates.types";
 import { LOGIN_URL, OVERVIEW_URL, PROFILE_URL } from "../../util/navigationEndpoints";

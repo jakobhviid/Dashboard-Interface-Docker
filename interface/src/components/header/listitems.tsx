@@ -2,9 +2,9 @@ import React from "react";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import {DashboardIcon} from "@material-ui/icons/Dashboard";
-import {BarChartIcon} from "@material-ui/icons/BarChart";
-import {KerberosIcon} from "@material-ui/icons/Pets"
+import DashboardIcon from "../../../node_modules/@material-ui/icons/Dashboard"
+import BarChartIcon from "../../../node_modules/@material-ui/icons/BarChart";
+import KerberosIcon from "../../../node_modules/@material-ui/icons/Pets"
 import { Link as RouterLink } from "react-router-dom";
 
 import { OVERVIEW_URL, RESSOURCE_USAGE_URL, KERBEROS_URL } from "../../util/navigationEndpoints";
