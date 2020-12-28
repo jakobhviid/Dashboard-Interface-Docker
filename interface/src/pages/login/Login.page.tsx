@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, KeyboardEvent, FormEvent } from "react";
 import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
@@ -29,7 +29,7 @@ function SignIn() {
   const dispatch = useDispatch();
   const routeHistory = useHistory();
 
-  async function onLogInSubmit(event: any) {
+  async function onLogInSubmit(event: KeyboardEvent<HTMLElement> | FormEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
       const loginResponse: string = await login(emailInput, passwordInput);
@@ -45,8 +45,8 @@ function SignIn() {
       );
     }
   }
-
-  function onForgotPassword(event: any) {
+  //TODO: Change the types as appropriate if needed when implementing the functionality.
+  function onForgotPassword(event: React.KeyboardEvent<HTMLElement> | React.FormEvent<HTMLFormElement>) {
     // TODO:
     console.log(forgotPasswordEmailInput);
   }

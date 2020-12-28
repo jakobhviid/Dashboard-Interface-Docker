@@ -21,12 +21,16 @@ import {
 } from "../../../redux/monitoring_events/monitoringEvents.actions";
 import useStyles from "./NotificationMenu.styles";
 
-const StyledMenu = withStyles({
+import { IRootState } from "../../../types/redux/reducerStates.types";
+
+const StyledMenu = withStyles ({
   paper: {
     border: "1px solid #d3d4d5",
+    id: "",
   },
-})((props) => (
+})((props :any) => (
   <Menu
+    open={true}
     style={{ marginRight: "8px" }}
     elevation={0}
     getContentAnchorEl={null}
@@ -42,10 +46,10 @@ const StyledMenu = withStyles({
   />
 ));
 
-function NotificationMenu({ anchorEl, handleClose }) {
+function NotificationMenu(anchorEl: any, handleClose: any) {
   const dispatch = useDispatch();
   const monitorEvents = useSelector(
-    (store) => store.monitoringEvents.activeWarnings
+    (store: IRootState) => store.monitoringEvents.activeWarnings
   );
   const classes = useStyles();
 
@@ -66,7 +70,7 @@ function NotificationMenu({ anchorEl, handleClose }) {
       {monitorEvents
         .slice(0)
         .reverse()
-        .map((event, index) => {
+        .map((event: any, index: any) => {
           let notificationIcon = null;
           switch (event.type) {
             case eventType.ERROR:
