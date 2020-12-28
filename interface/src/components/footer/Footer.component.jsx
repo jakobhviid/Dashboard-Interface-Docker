@@ -8,8 +8,8 @@ function Footer() {
   return (
     <Box pt={4} style={{ marginTop: "128px" }}>
       <Typography variant="body2" color="textSecondary" align="center">
-        <Link color="inherit" href="https://hub.docker.com/">
-          TODO - LinkToDockerContainerDocumentation
+        <Link color="inherit" href="https://hub.docker.com/repository/docker/cfei/dashboard-interface">
+          Interface Documentation
         </Link>{" "}
         {"Copyright © "}
         {new Date().getFullYear()}
