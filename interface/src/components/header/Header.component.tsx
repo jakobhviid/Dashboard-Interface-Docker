@@ -144,7 +144,7 @@ function Header() {
           </IconButton>
         </div>
         <Divider />
-        <List>{overviewItems}</List>
+        <List>{overviewItems()}</List>
       </Drawer>
 
       <NotificationMenu anchorEl={notificationMenuAnchorEl} handleClose={handleNotificationMenuClose} />
