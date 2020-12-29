@@ -29,7 +29,7 @@ function SignIn() {
   const dispatch = useDispatch();
   const routeHistory = useHistory();
 
-  async function onLogInSubmit(event: KeyboardEvent<HTMLElement> | FormEvent<HTMLFormElement>) {
+  async function onLogInSubmit(event: KeyboardEvent<any> | FormEvent<any>) {
     event.preventDefault();
     try {
       const loginResponse: string = await login(emailInput, passwordInput);
@@ -46,7 +46,7 @@ function SignIn() {
     }
   }
   //TODO: Change the types as appropriate if needed when implementing the functionality.
-  function onForgotPassword(event: React.KeyboardEvent<HTMLElement> | React.FormEvent<HTMLFormElement>) {
+  function onForgotPassword(event: KeyboardEvent<any> | FormEvent<any>) {
     // TODO:
     console.log(forgotPasswordEmailInput);
   }

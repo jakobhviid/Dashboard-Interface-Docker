@@ -11,7 +11,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 type RenameProps = {
   open: boolean;
   handleClose: any;
-  handleConfirmation: any;
+  handleConfirmation: (newName : string) => any;
   dialogTitle: string;
   dialogText: string;
   label: string;

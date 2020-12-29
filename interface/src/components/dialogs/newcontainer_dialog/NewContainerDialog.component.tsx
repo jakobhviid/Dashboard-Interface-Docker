@@ -27,7 +27,7 @@ import {
 
 type NewContainerDialogProps = {
   open: boolean;
-  handleClose: any;
+  handleClose: (event :any) => void;
   dialogTitle: string;
   servers: Array<any>;
 };

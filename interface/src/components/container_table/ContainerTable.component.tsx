@@ -1,9 +1,6 @@
 import React from "react";
 import moment from "moment";
 
-import { useSelector } from "react-redux";
-import { get } from "lodash";
-
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -26,31 +23,12 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import RefreshIcon from "@material-ui/icons/Refresh";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
+import { useSelector } from "react-redux";
+
+import { get } from "lodash";
+
 import { useTableStyles, useToolbarStyles, useHeaderStyles } from "./ContainerTable.styles";
 import { IRootState } from "../../types/redux/reducerStates.types";
-
-type ContainerTableProps = {
-  columns: Array<any>,
-  title: string,
-  data: any,
-  dense: string,
-  actions: any,
-  onRefetch: Function | null //Null to allow the use in RessourceUsage.page.tsx
-}
-
-type ContainerTableHeaderProps = {
-  columns: Array<any>,
-  orderBy: string,
-  order: any,
-  onRequestSort: Function
-}
-
-type TableToolbarProps = {
-  title: string, 
-  onSearchChange: any, 
-  searchValue: string, 
-  onRefetch: any
-}
 
 // Return -1 if element b should be on the left of element a
 // Return +1 if element b should be on the right of element a
@@ -67,13 +45,13 @@ function descendingComparator(a: any, b: any, orderByProperty: any) {
 
 // Returns a callable function which takes the two elements to be compared
 // and returns either an ascending comparator or a descending comparator with the orderBy injected
-function getComparator(order: string, orderByProperty: any) {
+function getComparator(order: any, orderByProperty: any) {
   return order === "desc"
     ? (a: any, b: any) => descendingComparator(a, b, orderByProperty)
     : (a: any, b: any) => -descendingComparator(a, b, orderByProperty);
 }
 
-function stableSort(array: Array<any>, comparator: any) {
+function stableSort(array: any, comparator: any) {
   const arrayWithIndex = array.map((el: any, index: any) => [el, index]);
   arrayWithIndex.sort((a: any, b: any) => {
     const order = comparator(a[0], b[0]);
@@ -85,7 +63,7 @@ function stableSort(array: Array<any>, comparator: any) {
   return arrayWithIndex.map((el: any) => el[0]);
 }
 
-function ContainerTableHeader({ columns, orderBy, order, onRequestSort }: ContainerTableHeaderProps) {
+function ContainerTableHeader({ columns, orderBy, order, onRequestSort }: any) {
   const classes = useHeaderStyles();
 
   const createSortHandler = (property: any) => (event: any) => {
@@ -120,7 +98,7 @@ function ContainerTableHeader({ columns, orderBy, order, onRequestSort }: Contai
   );
 }
 
-function TableToolbar({ title, onSearchChange, searchValue, onRefetch }: TableToolbarProps) {
+function TableToolbar({ title, onSearchChange, searchValue, onRefetch }: any) {
   const classes = useToolbarStyles();
   return (
     <Toolbar className={classes.root}>
@@ -176,8 +154,7 @@ const StyledMenu = withStyles({
   />
 ));
 
-
-function ContainerTable({ columns, title, data, dense, actions, onRefetch }: ContainerTableProps) {
+function ContainerTable({ columns, title, data, dense, actions, onRefetch }: any) {
   const classes = useTableStyles();
   const [page, setPage] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);

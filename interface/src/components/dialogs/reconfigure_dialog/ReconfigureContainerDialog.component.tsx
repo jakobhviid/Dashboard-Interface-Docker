@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -12,14 +12,22 @@ import MemorySection from "./sections/MemorySection.component";
 import RestartPolicySection from "./sections/PolicySection.component";
 import CpuSection from "./sections/CPUSection.component";
 
+type ReconfigureDialogProps = {
+  open: boolean;
+  handleClose: any;
+  handleConfirmation: any;
+  dialogTitle: string;
+};
+
 function ReconfigureDialog({
   open,
   handleClose,
   handleConfirmation,
   dialogTitle,
-}) {
+}: ReconfigureDialogProps) {
   // TODO: change this when commando server has changed
-  const [values, setValues] = React.useState({
+  // Could type this, but becomes a bit messy. Might not be worth it.
+  const [values, setValues]: any = React.useState({
     blkio_weight: "",
     mem_limit: { value: "", byteVariant: "mb" },
     mem_reservation: { value: "", byteVariant: "mb" },
@@ -33,19 +41,19 @@ function ReconfigureDialog({
     cpuset_mems: "",
   });
 
-  function setblkio(event) {
+  function setblkio(event: ChangeEvent<any>) {
     if (event.target.value <= 1000)
       setValues({ ...values, blkio_weight: event.target.value });
   }
 
-  function setMemLimit(event) {
+  function setMemLimit(event: React.ChangeEvent<HTMLInputElement>) {
     setValues({
       ...values,
       mem_limit: { ...values.mem_limit, value: event.target.value },
     });
   }
 
-  function setMemReservation(event) {
+  function setMemReservation(event: ChangeEvent<HTMLInputElement>) {
     setValues({
       ...values,
       mem_reservation: {
@@ -55,28 +63,28 @@ function ReconfigureDialog({
     });
   }
 
-  function setMemSwapLimit(event) {
+  function setMemSwapLimit(event: ChangeEvent<HTMLInputElement>) {
     setValues({
       ...values,
       memswap_limit: { ...values.memswap_limit, value: event.target.value },
     });
   }
 
-  function setKernelMemoryLimit(event) {
+  function setKernelMemoryLimit(event: ChangeEvent<HTMLInputElement>) {
     setValues({
       ...values,
       kernel_memory: { ...values.kernel_memory, value: event.target.value },
     });
   }
 
-  function setRestartPolicy(event) {
+  function setRestartPolicy(event: ChangeEvent<HTMLInputElement>) {
     setValues({
       ...values,
       restart_policy: { ...values.restart_policy, name: event.target.value },
     });
   }
 
-  function setRestartRetryCount(event) {
+  function setRestartRetryCount(event: ChangeEvent<HTMLInputElement>) {
     setValues({
       ...values,
       restart_policy: {
@@ -87,7 +95,7 @@ function ReconfigureDialog({
   }
 
   function sendValues() {
-    const objectToSend = {};
+    const objectToSend: any = {};
     for (const key of Object.keys(values)) {
       if (
         values[key] !== "" &&
@@ -128,8 +136,12 @@ function ReconfigureDialog({
           <Grid container spacing={2}>
             <MemorySection
               memLimit={values.mem_limit}
-              memLimitOnChange={(event) => setMemLimit(event)}
-              memLimitByteVariantOnChange={(event) => {
+              memLimitOnChange={(event: ChangeEvent<any>) =>
+                setMemLimit(event)
+              }
+              memLimitByteVariantOnChange={(
+                event: ChangeEvent<any>
+              ) => {
                 setValues({
                   ...values,
                   mem_limit: {
@@ -139,8 +151,10 @@ function ReconfigureDialog({
                 });
               }}
               memReservation={values.mem_reservation}
-              memReservationOnChange={(event) => setMemReservation(event)}
-              memReservationByteVariantOnChange={(event) => {
+              memReservationOnChange={(event: ChangeEvent<any>) =>
+                setMemReservation(event)
+              }
+              memReservationByteVariantOnChange={(event: ChangeEvent<any>) => {
                 setValues({
                   ...values,
                   mem_reservation: {
@@ -150,8 +164,10 @@ function ReconfigureDialog({
                 });
               }}
               memswapLimit={values.memswap_limit}
-              memswapLimitOnChange={(event) => setMemSwapLimit(event)}
-              memswapLimitByteVariantOnChange={(event) => {
+              memswapLimitOnChange={(event: ChangeEvent<any>) =>
+                setMemSwapLimit(event)
+              }
+              memswapLimitByteVariantOnChange={(event: ChangeEvent<any>) => {
                 setValues({
                   ...values,
                   memswap_limit: {
@@ -161,8 +177,12 @@ function ReconfigureDialog({
                 });
               }}
               kernelMemoryLimit={values.kernel_memory}
-              kernelMemoryLimitOnChange={(event) => setKernelMemoryLimit(event)}
-              kernelMemoryLimitByteVariantOnChange={(event) => {
+              kernelMemoryLimitOnChange={(event: ChangeEvent<any>) =>
+                setKernelMemoryLimit(event)
+              }
+              kernelMemoryLimitByteVariantOnChange={(
+                event: ChangeEvent<any>
+              ) => {
                 setValues({
                   ...values,
                   kernel_memory: {
@@ -176,32 +196,33 @@ function ReconfigureDialog({
               restartValue={values.restart_policy}
               restartNameOnChange={setRestartPolicy}
               restartRetryCountOnChange={setRestartRetryCount}
+              headerInvisible={true}
             />
             <CpuSection
               cpuShares={values.cpu_shares}
-              cpuSharesOnChange={(event) => {
+              cpuSharesOnChange={(event: ChangeEvent<any>) => {
                 setValues({ ...values, cpu_shares: event.target.value });
               }}
               cpuPeriod={values.cpu_period}
-              cpuPeriodOnChange={(event) => {
+              cpuPeriodOnChange={(event: ChangeEvent<any>) => {
                 setValues({ ...values, cpu_period: event.target.value });
               }}
               cpuQuota={values.cpu_quota}
-              cpuQuotaOnChange={(event) => {
+              cpuQuotaOnChange={(event: ChangeEvent<any>) => {
                 setValues({ ...values, cpu_quota: event.target.value });
               }}
               cpusetCpus={values.cpuset_cpus}
-              cpusetCpusOnChange={(event) => {
+              cpusetCpusOnChange={(event: ChangeEvent<any>) => {
                 setValues({ ...values, cpuset_cpus: event.target.value });
               }}
               cpusetMems={values.cpuset_mems}
-              cpusetMemsOnChange={(event) => {
+              cpusetMemsOnChange={(event: ChangeEvent<any>) => {
                 setValues({ ...values, cpuset_mems: event.target.value });
               }}
             />
             <HarddiskSection
               blkioweightValue={values.blkio_weight}
-              blkioweightOnChange={(event) => setblkio(event)}
+              blkioweightOnChange={(event: ChangeEvent<any>) => setblkio(event)}
             />
           </Grid>
         </form>
