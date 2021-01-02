@@ -91,11 +91,16 @@ namespace SocketServer.Hubs.DockerUpdatersHub
                 Action = ContainerActionType.REFETCH_STATS
             });
         }
-
         public async void InspectContainerRequest(string serverRequestTopic, string containerId)
         {
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new InspectContainerParameters {ContainerId = containerId});
+        }
+
+        public async void LogContainerRequest(string serverRequestTopic, string containerId)
+        {
+            await KafkaHelpers.SendMessageAsync(serverRequestTopic,
+                new LogContainerParameters {ContainerId = containerId});
         }
     }
 }

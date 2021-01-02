@@ -15,7 +15,8 @@ namespace SocketServer.ContainerModels.ContainerRequests
         UPDATE_CONFIGURATION,
         REFETCH_OVERVIEW,
         REFETCH_STATS,
-        INSPECT
+        INSPECT,
+        LOG
     }
     public struct ContainerRequest
     {
