@@ -20,6 +20,7 @@ using SocketServer.Data.Models;
 using SocketServer.Data.Repositories;
 using SocketServer.DTOs.OutputDTOs;
 using SocketServer.Hubs.DockerUpdatersHub;
+using SocketServer.Services;
 
 namespace SocketServer
 {
@@ -168,6 +169,9 @@ namespace SocketServer
 
             // users are identified by their email
             services.AddSingleton<IUserIdProvider, EmailBasedUserIdProvider>();
+            
+            services.AddScoped<IMonitorOverviewService, MonitorOverviewService>();
+            services.AddScoped<IMonitorStatsService, MonitorStatsService>();
         }
 
         public async void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)

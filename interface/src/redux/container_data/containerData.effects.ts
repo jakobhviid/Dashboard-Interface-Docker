@@ -11,11 +11,11 @@ import {
 } from "../../util/socketEvents";
 import { calculateAppropiateByteType } from "../../util/helpers";
 import { collectionSuccessOverview, ressourceCollectionSuccess, containerLoadFinished } from "./containerData.actions";
-import { checkContainerOverviewData, checkContainerStats } from "../monitoring_events/monitoringEvents.actions";
 import { Dispatch } from "redux";
 import { IAPIOverviewData, IAPIStatsData } from "../../types/api_response/container.types";
 import { HubConnection } from "@microsoft/signalr";
 import {startInspectDataListening} from "../inspect_container/inspectContainer.effects";
+import {startMonitorNotificationListening} from "../monitor_notification/monitorNotification.effects";
 
 export const dataCollectionStart = () => {
   return (dispatch: any, getState: any) => {
@@ -25,6 +25,7 @@ export const dataCollectionStart = () => {
       dispatch(startCollectingRessources());
       dispatch(startListeningForCommandResponses());
       dispatch(startInspectDataListening());
+      dispatch(startMonitorNotificationListening());
     });
   };
 };
@@ -35,7 +36,6 @@ export const startCollectingOverview = () => {
     socketConnection.on(OVERVIEWDATA_FUNCTION, (data: string) => {
       const overviewData: IAPIOverviewData = JSON.parse(data);
 
-      dispatch(checkContainerOverviewData(overviewData.containers, overviewData.servername));
       for (const container of overviewData.containers) {
         const creationTimeDate = new Date(container["creationTime"]);
         container.creationTime = moment(creationTimeDate).locale("da").format("ll");
@@ -63,7 +63,6 @@ export const startCollectingRessources = () => {
       if (statsData.containers == null) {
         throw new Error("Containers not present");
       }
-      dispatch(checkContainerStats(statsData.containers, statsData.servername));
       for (const container of statsData.containers) {
         const netIO =
           calculateAppropiateByteType(container.netInputBytes) + " / " + calculateAppropiateByteType(container.netOutputBytes);
