@@ -68,6 +68,18 @@ export const useTableStyles = makeStyles(theme => ({
     position: "absolute",
     top: 20,
     width: 1
+  },
+  tablePagination: {
+    position: "relative",
+    width: "100%"
+  },
+  tableFooter: {
+    display: "flex",
+    alignItems: "center",
+    paddingLeft: theme.spacing(2)
+  },
+  tableFooterTitle: {
+    flex: "1 1 50%"
   }
 }));
 

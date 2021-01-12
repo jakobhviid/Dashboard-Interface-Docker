@@ -28,6 +28,7 @@ const containerDataReducer = (state = INITIAL_STATE, action: ReducerAction) => {
       return produce(state, (nextState) => {
         nextState.overviewData[action.payload.servername] = {
           containers: action.payload.containers,
+          timestamp: action.payload.timestamp
         };
         if (action.payload.commandRequestTopic && action.payload.commandResponseTopic) {
           nextState.overviewData[action.payload.servername]["commandRequestTopic"] = action.payload.commandRequestTopic;

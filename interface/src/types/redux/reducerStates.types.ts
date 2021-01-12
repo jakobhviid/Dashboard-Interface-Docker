@@ -21,9 +21,16 @@ export interface IContainerDataState {
       containers: IContainerData[];
       commandRequestTopic?: string;
       commandResponseTopic?: string;
+      timestamp: string;
     };
   };
-  statsData: any;
+  statsData: {
+    [key: string]: {
+      containers: IContainerData[];
+      commandRequestTopic?: string;
+      commandResponseTopic?: string;
+    };
+  };
   loadingContainers: any;
 }
 
