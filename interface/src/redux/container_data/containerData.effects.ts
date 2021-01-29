@@ -14,8 +14,9 @@ import { collectionSuccessOverview, ressourceCollectionSuccess, containerLoadFin
 import { checkContainerOverviewData, checkContainerStats } from "../monitoring_events/monitoringEvents.actions";
 import { Dispatch } from "redux";
 import { IAPIOverviewData, IAPIStatsData } from "../../types/api_response/container.types";
-import { HubConnection } from "@microsoft/signalr";
+import {HttpError, HubConnection} from "@microsoft/signalr";
 import {startInspectDataListening} from "../inspect_container/inspectContainer.effects";
+import {removeJwt} from "../user/user.actions";
 
 export const dataCollectionStart = () => {
   return (dispatch: any, getState: any) => {
@@ -25,6 +26,20 @@ export const dataCollectionStart = () => {
       dispatch(startCollectingRessources());
       dispatch(startListeningForCommandResponses());
       dispatch(startInspectDataListening());
+    }).catch((e: HttpError) => {
+      if(e.statusCode == 401) {
+        dispatch(removeJwt());
+        dispatch(
+            enqueueSnackbar({
+              message: "Invalid or old login token, please login again",
+              options: {
+                key: new Date().getTime() + Math.random(),
+                variant: "error",
+                persist: false,
+              },
+            })
+        );
+      }
     });
   };
 };
