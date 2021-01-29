@@ -101,7 +101,8 @@ namespace SocketServer.Controllers
 
         private bool ValidAPIKey(string apiKey)
         {
-            return apiKey.Equals(Environment.GetEnvironmentVariable("DASHBOARDI_API_KEY"));
+            var providedApiKey = Environment.GetEnvironmentVariable("DASHBOARDI_API_KEY");
+            return apiKey.Equals(providedApiKey);
         }
     }
 }
