@@ -47,7 +47,8 @@ namespace SocketServer.BackgroundWorkers
 
             using (var c = new ConsumerBuilder<Ignore, string>(consumerConfig).Build())
             {
-                c.Subscribe(new List<string> { KafkaHelpers.OverviewTopic, KafkaHelpers.StatsTopic });
+                c.Subscribe(new List<string>
+                    {KafkaHelpers.OverviewTopic, KafkaHelpers.StatsTopic, KafkaHelpers.InspectTopic});
 
                 _logger.LogInformation("Listening for updates");
                 while (!stoppingToken.IsCancellationRequested)
@@ -68,8 +69,14 @@ namespace SocketServer.BackgroundWorkers
                             // await SaveRessourceUsageRecordInDb(consumeResult.Message.Value);
                             KafkaHelpers.LatestStatsInfo = consumeResult.Message.Value;
                             break;
+                        case KafkaHelpers.InspectTopic:
+                            var inspectData = JsonConvert.DeserializeObject<InspectData>(consumeResult.Message.Value);
+                            await _updatersHub.Clients.All.SendInspectResponse(
+                                JsonConvert.SerializeObject(inspectData));
+                            break;
                     }
                 }
+
                 c.Close();
             }
         }
