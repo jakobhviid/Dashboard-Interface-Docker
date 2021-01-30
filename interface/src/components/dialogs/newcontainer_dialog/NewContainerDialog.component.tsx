@@ -49,13 +49,9 @@ function NewContainerDialog({
     volumesFrom: [],
     networkMode: "",
   });
-  const [selectedServer, setSelectedServer] = React.useState<string>(
-    servers[0].url
-  );
+  const [selectedServer, setSelectedServer] = React.useState<string>(servers[0].url);
   const [selectedTemplate, setSelectedTemplate] = React.useState<string>("");
-  const socketConnection: HubConnection | undefined = useSelector(
-    (store: IRootState) => store.containerData.socketConnection
-  );
+  const socketConnection: HubConnection | undefined = useSelector((store: IRootState) => store.containerData.socketConnection);
   const dispatch = useDispatch();
 
   function handleConfirmation() {
@@ -83,11 +79,7 @@ function NewContainerDialog({
     );
     console.log(JSON.stringify(valuesToSend));
     if (socketConnection !== undefined)
-      socketConnection.invoke(
-        CREATE_NEW_CONTAINER_REQUEST,
-        selectedServer,
-        JSON.stringify(valuesToSend)
-      );
+      socketConnection.invoke(CREATE_NEW_CONTAINER_REQUEST, selectedServer, JSON.stringify(valuesToSend));
   }
 
   function handleAutoFillTemplate(templateName: string) {
@@ -106,9 +98,8 @@ function NewContainerDialog({
       });
       return;
     }
-    var name: any = Object.keys(templates).find(
-      (template) => template === templateName
-    );
+    var name: any = Object.keys(templates).find( (template) => template === templateName);
+
     const template: INewContainerValues = templates[name];
     setValues(template);
   }
@@ -128,11 +119,7 @@ function NewContainerDialog({
         <DialogContent>
           <form noValidate autoComplete="off">
             <Grid container spacing={2}>
-              <Grid
-                item
-                xs={12}
-                style={{ padding: "2px", paddingLeft: "12px" }}
-              >
+              <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>
                 <Typography variant="subtitle2">
                   Server to Start Container On
                 </Typography>
@@ -160,11 +147,7 @@ function NewContainerDialog({
                   ))}
                 </TextField>
               </Grid>
-              <Grid
-                item
-                xs={12}
-                style={{ padding: "2px", paddingLeft: "12px" }}
-              >
+              <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>
                 <Typography variant="subtitle2">
                   Choose a Template Here
                 </Typography>
@@ -175,15 +158,11 @@ function NewContainerDialog({
                   variant="outlined"
                   label="Autofill Template"
                   select
-                  SelectProps={{
-                    native: true,
-                  }}
+                  SelectProps={{native: true,}}
                   type="text"
                   fullWidth
                   value={selectedTemplate}
-                  onChange={(event: any) =>
-                    handleAutoFillTemplate(event.target.value)
-                  }
+                  onChange={(event: any) => handleAutoFillTemplate(event.target.value)}
                 >
                   <option key={"none"} value={""} />
                   {Object.keys(templates).map((templateName: string) => (
@@ -193,11 +172,7 @@ function NewContainerDialog({
                   ))}
                 </TextField>
               </Grid>
-              <Grid
-                item
-                xs={12}
-                style={{ padding: "2px", paddingLeft: "12px" }}
-              >
+              <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>
                 <Typography variant="subtitle2">Basics</Typography>
               </Grid>
               <Grid item xs={12}>
@@ -280,11 +255,7 @@ function NewContainerDialog({
               />
 
               <Grid container alignItems="center" justify="center">
-                <Grid
-                  item
-                  xs={10}
-                  style={{ padding: "2px", paddingLeft: "12px" }}
-                >
+                <Grid item xs={10} style={{ padding: "2px", paddingLeft: "12px" }}>
                   <Typography variant="subtitle2">Ports</Typography>
                 </Grid>
                 <Grid item xs={1}>
@@ -299,10 +270,7 @@ function NewContainerDialog({
                         });
                       }}
                     >
-                      <RemoveIcon
-                        color="primary"
-                        aria-label="delete port binding"
-                      />
+                      <RemoveIcon color="primary" aria-label="delete port binding"/>
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -310,12 +278,8 @@ function NewContainerDialog({
                   <Tooltip title="Add Port Binding">
                     <IconButton
                       onClick={() => {
-                        setValues({
-                          ...values,
-                          ports: [
-                            ...values.ports,
-                            { containerPort: "", hostPort: "" },
-                          ],
+                        setValues({...values,
+                          ports: [...values.ports, {containerPort: "", hostPort: "" },],
                         });
                       }}
                     >
@@ -336,14 +300,8 @@ function NewContainerDialog({
                       value={ports.hostPort}
                       onChange={(event) => {
                         const updatedPorts = [...values.ports];
-                        updatedPorts[index] = {
-                          ...updatedPorts[index],
-                          hostPort: event.target.value,
-                        };
-                        setValues({
-                          ...values,
-                          ports: updatedPorts,
-                        });
+                        updatedPorts[index] = {...updatedPorts[index], hostPort: event.target.value,};
+                        setValues({...values, ports: updatedPorts,});
                       }}
                       helperText="Port to Expose on Host"
                     />
@@ -357,14 +315,8 @@ function NewContainerDialog({
                       value={ports.containerPort}
                       onChange={(event) => {
                         const updatedPorts = [...values.ports];
-                        updatedPorts[index] = {
-                          ...updatedPorts[index],
-                          containerPort: event.target.value,
-                        };
-                        setValues({
-                          ...values,
-                          ports: updatedPorts,
-                        });
+                        updatedPorts[index] = {...updatedPorts[index], containerPort: event.target.value,};
+                        setValues({...values, ports: updatedPorts,});
                       }}
                       helperText="Port to Listen Inside Container"
                     />
@@ -373,11 +325,7 @@ function NewContainerDialog({
               ))}
 
               <Grid container alignItems="center" justify="center">
-                <Grid
-                  item
-                  xs={10}
-                  style={{ padding: "2px", paddingLeft: "12px" }}
-                >
+                <Grid item xs={10} style={{ padding: "2px", paddingLeft: "12px" }}>
                   <Typography variant="subtitle2">
                     Environment Variables
                   </Typography>
@@ -388,16 +336,10 @@ function NewContainerDialog({
                       onClick={() => {
                         const updatedEnvironment = [...values.environment];
                         updatedEnvironment.pop();
-                        setValues({
-                          ...values,
-                          environment: updatedEnvironment,
-                        });
+                        setValues({...values, environment: updatedEnvironment,});
                       }}
                     >
-                      <RemoveIcon
-                        color="primary"
-                        aria-label="delete environment variable"
-                      />
+                      <RemoveIcon color="primary" aria-label="delete environment variable"/>
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -405,19 +347,10 @@ function NewContainerDialog({
                   <Tooltip title="Add Environment Variable">
                     <IconButton
                       onClick={() => {
-                        setValues({
-                          ...values,
-                          environment: [
-                            ...values.environment,
-                            { key: "", value: "" },
-                          ],
-                        });
+                        setValues({...values, environment: [...values.environment,{ key: "", value: "" },],});
                       }}
                     >
-                      <AddIcon
-                        color="primary"
-                        aria-label="add environment variable"
-                      />
+                      <AddIcon color="primary" aria-label="add environment variable"/>
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -434,14 +367,8 @@ function NewContainerDialog({
                       value={environment.key}
                       onChange={(event) => {
                         const updatedEnvironment = [...values.environment];
-                        updatedEnvironment[index] = {
-                          ...updatedEnvironment[index],
-                          key: event.target.value,
-                        };
-                        setValues({
-                          ...values,
-                          environment: updatedEnvironment,
-                        });
+                        updatedEnvironment[index] = {...updatedEnvironment[index], key: event.target.value,};
+                        setValues({...values, environment: updatedEnvironment,});
                       }}
                     />
                   </Grid>
@@ -454,14 +381,8 @@ function NewContainerDialog({
                       value={environment.value}
                       onChange={(event) => {
                         const updatedEnvironment = [...values.environment];
-                        updatedEnvironment[index] = {
-                          ...updatedEnvironment[index],
-                          value: event.target.value,
-                        };
-                        setValues({
-                          ...values,
-                          environment: updatedEnvironment,
-                        });
+                        updatedEnvironment[index] = {...updatedEnvironment[index], value: event.target.value,};
+                        setValues({...values, environment: updatedEnvironment,});
                       }}
                     />
                   </Grid>
@@ -469,11 +390,7 @@ function NewContainerDialog({
               ))}
 
               <Grid container alignItems="center" justify="center">
-                <Grid
-                  item
-                  xs={10}
-                  style={{ padding: "2px", paddingLeft: "12px" }}
-                >
+                <Grid item xs={10} style={{ padding: "2px", paddingLeft: "12px" }}>
                   <Typography variant="subtitle2">Volumes</Typography>
                 </Grid>
                 <Grid item xs={1}>
@@ -482,10 +399,7 @@ function NewContainerDialog({
                       onClick={() => {
                         const updatedVolumes = [...values.volumes];
                         updatedVolumes.pop();
-                        setValues({
-                          ...values,
-                          volumes: updatedVolumes,
-                        });
+                        setValues({...values, volumes: updatedVolumes,});
                       }}
                     >
                       <RemoveIcon color="primary" aria-label="delete volume" />
@@ -496,12 +410,8 @@ function NewContainerDialog({
                   <Tooltip title="Add Volume Declaration">
                     <IconButton
                       onClick={() => {
-                        setValues({
-                          ...values,
-                          volumes: [
-                            ...values.volumes,
-                            { hostPath: "", containerPath: "" },
-                          ],
+                        setValues({...values, volumes: [...values.volumes,
+                          { hostPath: "", containerPath: "" },],
                         });
                       }}
                     >
@@ -522,14 +432,8 @@ function NewContainerDialog({
                       value={volume.hostPath}
                       onChange={(event) => {
                         const updatedVolumes = [...values.volumes];
-                        updatedVolumes[index] = {
-                          ...updatedVolumes[index],
-                          hostPath: event.target.value,
-                        };
-                        setValues({
-                          ...values,
-                          volumes: updatedVolumes,
-                        });
+                        updatedVolumes[index] = {...updatedVolumes[index], hostPath: event.target.value,};
+                        setValues({...values, volumes: updatedVolumes,});
                       }}
                     />
                   </Grid>
@@ -542,14 +446,8 @@ function NewContainerDialog({
                       value={volume.containerPath}
                       onChange={(event) => {
                         const updatedVolumes = [...values.volumes];
-                        updatedVolumes[index] = {
-                          ...updatedVolumes[index],
-                          containerPath: event.target.value,
-                        };
-                        setValues({
-                          ...values,
-                          volumes: updatedVolumes,
-                        });
+                        updatedVolumes[index] = {...updatedVolumes[index], containerPath: event.target.value,};
+                        setValues({...values, volumes: updatedVolumes,});
                       }}
                     />
                   </Grid>
