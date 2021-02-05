@@ -1,7 +1,22 @@
-import React from "react";
+import React, { KeyboardEvent, ChangeEvent } from "react";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
+
+type MemorySectionProps = {
+  memLimit: { [value: string]: number };
+  memLimitOnChange: (event: ChangeEvent<any>) => void;
+  memLimitByteVariantOnChange: (event: ChangeEvent<any>) => void;
+  memReservation: { [value: string]: number };
+  memReservationOnChange: (event: ChangeEvent<any>) => void;
+  memReservationByteVariantOnChange: (event: ChangeEvent<any>) => void;
+  memswapLimit: { [value: string]: number };
+  memswapLimitOnChange: (event: ChangeEvent<any>) => void;
+  memswapLimitByteVariantOnChange: (event: ChangeEvent<any>) => void;
+  kernelMemoryLimit: { [value: string]: number };
+  kernelMemoryLimitOnChange: (event: ChangeEvent<any>) => void;
+  kernelMemoryLimitByteVariantOnChange: (event: ChangeEvent<any>) => void;
+};
 
 function MemorySection({
   memLimit,
@@ -16,14 +31,14 @@ function MemorySection({
   kernelMemoryLimit,
   kernelMemoryLimitOnChange,
   kernelMemoryLimitByteVariantOnChange,
-}) {
+}: MemorySectionProps) {
   const options = [
     { value: "kb", representation: "Kilobytes" },
     { value: "mb", representation: "Megabytes" },
     { value: "gb", representation: "Gigabytes" },
   ];
 
-  function handleKeyPress(event) {
+  function handleKeyPress(event: KeyboardEvent) {
     // Test for comma and punctuation and for 'e' which for some reason goes through as a number?
     // Comma numpad, multiply, divide, minus, plus signs and a lot of other edge cases which html forms doesn't take proper care of
     const keysToCheck = [188, 190, 69, 110, 187, 106, 109, 107, 221, 189];
