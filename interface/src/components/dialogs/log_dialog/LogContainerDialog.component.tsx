@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../../../types/redux/reducerStates.types";
 
 function LogContainerDialog({
-  isOpen,
+  open,
   handleClose,
   handleRefresh,
   dialogTitle,
@@ -32,7 +32,7 @@ function LogContainerDialog({
       <Dialog
         maxWidth="lg"
         fullWidth={true}
-        open={isOpen}
+        open={open}
         onEntering={initLogData}
         onEnter={handleRefresh}
         onClose={handleClose}
