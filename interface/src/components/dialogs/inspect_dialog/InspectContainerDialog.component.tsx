@@ -10,6 +10,16 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import {useSelector} from "react-redux";
 import {IRootState} from "../../../types/redux/reducerStates.types";
 
+type InspectContainerDialogProps = {
+    open: boolean,
+    handleClose: () => void,
+    handleRefresh: any,
+    dialogTitle: string,
+    dialogText: string,
+    commandRequestTopic: string | undefined,
+    containerId : string | undefined
+}
+
 function InspectContainerDialog({
     open,
     handleClose,
@@ -18,7 +28,7 @@ function InspectContainerDialog({
     dialogText,
     commandRequestTopic,
     containerId
-}: any) {
+}: InspectContainerDialogProps) {
     const [inspectFieldValue, setInspectFieldValue] = React.useState("");
     const inspectData = useSelector((store: IRootState) => store.inspectData.inspectRawData);
 

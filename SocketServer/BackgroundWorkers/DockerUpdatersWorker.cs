@@ -47,8 +47,18 @@ namespace SocketServer.BackgroundWorkers
 
             using (var c = new ConsumerBuilder<Ignore, string>(consumerConfig).Build())
             {
-                c.Subscribe(new List<string>
-                    {KafkaHelpers.OverviewTopic, KafkaHelpers.StatsTopic, KafkaHelpers.InspectTopic, KafkaHelpers.LogTopic});
+                var logTopicPartition = new TopicPartition(KafkaHelpers.LogTopic, new Partition());
+                var overviewTopicPartition = new TopicPartition(KafkaHelpers.OverviewTopic, new Partition());
+                var statsTopicPartition = new TopicPartition(KafkaHelpers.StatsTopic, Partition.Any);
+                var inspectTopicPartition = new TopicPartition(KafkaHelpers.InspectTopic, Partition.Any);
+                
+                c.Assign(new List<TopicPartitionOffset>()
+                {
+                    new TopicPartitionOffset(logTopicPartition, c.QueryWatermarkOffsets(logTopicPartition, TimeSpan.FromSeconds(5)).High - 1)
+                    new TopicPartitionOffset(overviewTopicPartition, c.QueryWatermarkOffsets(overviewTopicPartition, TimeSpan.FromSeconds(5)).High - 1),
+                    new TopicPartitionOffset(statsTopicPartition, Offset.End),
+                    new TopicPartitionOffset(inspectTopicPartition, Offset.End)
+                });
 
                 _logger.LogInformation("Listening for updates");
                 while (!stoppingToken.IsCancellationRequested)

@@ -1,10 +1,18 @@
-import React from "react";
+import React, { KeyboardEvent, ChangeEvent } from "react";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 
-function HardiskSection({ blkioweightValue, blkioweightOnChange }) {
-  function handleKeyPress(event) {
+type HardiskSectionProps = {
+  blkioweightValue: { [value: string]: number };
+  blkioweightOnChange: (event: ChangeEvent<any>) => void;
+};
+
+function HardiskSection({
+  blkioweightValue,
+  blkioweightOnChange,
+}: HardiskSectionProps) {
+  function handleKeyPress(event: KeyboardEvent<any>) {
     // Test for comma and punctuation and for 'e' which for some reason goes through as a number?
     // Comma numpad, multiply, divide, minus, plus signs and a lot of other edge cases which html forms doesn't take proper care of
     const keysToCheck = [188, 190, 69, 110, 187, 106, 109, 107, 221, 189];

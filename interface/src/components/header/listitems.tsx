@@ -1,17 +1,18 @@
 import React from "react";
+import {SvgIconProps} from "@material-ui/core/SvgIcon"
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import DashboardIcon from "@material-ui/icons/Dashboard";
 import BarChartIcon from "@material-ui/icons/BarChart";
-import KerberosIcon from "@material-ui/icons/Pets"
+import KerberosIcon from "@material-ui/icons/Pets";
 import { Link as RouterLink } from "react-router-dom";
 
 import { OVERVIEW_URL, RESSOURCE_USAGE_URL, KERBEROS_URL } from "../../util/navigationEndpoints";
 
-function ListItemLink({ icon, text, link }) {
+function ListItemLink(icon : React.ReactElement<SvgIconProps> , text : string, link : string ) {
   const renderLink = React.useMemo(
-    () => React.forwardRef((linkProps, ref) => <RouterLink ref={ref} to={link} {...linkProps} />),
+    () => React.forwardRef((linkProps : any, ref : any) => <RouterLink ref={ref} to={link} {...linkProps} />),
     [link]
   );
 
@@ -23,10 +24,14 @@ function ListItemLink({ icon, text, link }) {
   );
 }
 
-export const overviewItems = (
-  <div>
-    <ListItemLink icon={<DashboardIcon />} text="Overview" link={OVERVIEW_URL} />
-    <ListItemLink icon={<BarChartIcon />} text="Container Stats" link={RESSOURCE_USAGE_URL} />
-    <ListItemLink icon={<KerberosIcon />} text="Kerberos" link={KERBEROS_URL} />
-  </div>
-);
+function overviewItems(){
+  return(
+    <div>
+    {ListItemLink(<DashboardIcon/>, "Overview", OVERVIEW_URL)}
+    {ListItemLink(<BarChartIcon/>, "Container Stats" , RESSOURCE_USAGE_URL)}
+    {ListItemLink(<KerberosIcon/>, "Kerberos", KERBEROS_URL)}
+    </div>
+  )
+}
+
+export default overviewItems

@@ -7,6 +7,6 @@ services:
       - "5432:5432"
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: Database_password1
-      POSTGRES_DB: test
+      POSTGRES_USER: interface
+      POSTGRES_PASSWORD: Interface_database_password1
+      POSTGRES_DB: interface_db

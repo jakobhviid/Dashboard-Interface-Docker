@@ -154,7 +154,7 @@ const StyledMenu = withStyles({
   />
 ));
 
-function ContainerTable({ columns, title, data, dense, actions, onRefetch }: any) {
+function ContainerTable({ columns, title, data, dense, actions, onRefetch, timestamp }: any) {
   const classes = useTableStyles();
   const [page, setPage] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -274,15 +274,20 @@ function ContainerTable({ columns, title, data, dense, actions, onRefetch }: any
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          component="div"
-          count={data.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
+        <div className={classes.tableFooter}>
+          <Typography className={classes.tableFooterTitle} variant="subtitle2" id="tableFooterTitle" component="div">
+            {timestamp}
+          </Typography>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            component="div"
+            count={data.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onChangePage={handleChangePage}
+            onChangeRowsPerPage={handleChangeRowsPerPage}
+          />
+        </div>
       </Paper>
       <StyledMenu id="actions-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
         {actions.map((action: any) => (

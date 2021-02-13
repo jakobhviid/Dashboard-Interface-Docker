@@ -4,19 +4,19 @@ import { useSnackbar } from "notistack";
 import { removeSnackbar } from "../../redux/notifier/notifier.actions";
 import { IRootState } from "../../types/redux/reducerStates.types";
 
-let displayed: any = [];
+let displayed: any[] = [];
 
 const Notifier = () => {
   const dispatch = useDispatch();
   const notifications = useSelector((store: IRootState) => store.notifications.activeNotifications || []);
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const storeDisplayed = (id: any) => {
+  const storeDisplayed = (id: number) => {
     displayed = [...displayed, id];
   };
 
-  const removeDisplayed = (id: any) => {
-    displayed = [...displayed.filter((key: any) => id !== key)];
+  const removeDisplayed = (id: string | number) => {
+    displayed = [...displayed.filter((key: string | number) => id !== key)];
   };
 
   React.useEffect(() => {

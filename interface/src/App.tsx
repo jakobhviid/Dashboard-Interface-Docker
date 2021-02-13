@@ -28,6 +28,7 @@ import { useTypedSelector, IRootState } from "./types/redux/reducerStates.types"
 import { loadAndTestJwtLocalStorage } from "./util/reduxHelpers";
 import { loginWithJwt } from "./redux/user/user.actions";
 import { hubConnectionInitialization, hubConnectionOff } from "./redux/container_data/containerData.actions";
+import Footer from "./components/footer/Footer.component";
 
 const Overview = lazy(() => import("./pages/overview_page/Overview.page"));
 const RessourceUsage = lazy(() => import("./pages/ressource_usage_page/RessourceUsage.page"));
@@ -105,7 +106,9 @@ function App() {
           </Switch>
         </div>
       </ThemeProvider>
+      <Footer/>
     </SnackbarProvider>
+    
   );
 }
 

@@ -8,6 +8,9 @@ import { Typography, Button } from "@material-ui/core";
 import { changeHeaderTitle } from "../../redux/ui/ui.actions";
 import ReconfigureContainerDialog from "../../components/dialogs/reconfigure_dialog/ReconfigureContainerDialog.component";
 import { IRootState } from "../../types/redux/reducerStates.types";
+import {containerLoadStart} from "../../redux/container_data/containerData.actions";
+import {REFETCH_STATS_DATA} from "../../util/socketEvents";
+import {HubConnection} from "@microsoft/signalr";
 
 const columns = {
   perServerView: [
@@ -36,6 +39,7 @@ function RessourceUsage() {
   const dispatch = useDispatch();
   const serverContainers = useSelector((store: IRootState) => store.containerData.statsData);
   const userJwt = useSelector((store: IRootState) => store.user.jwt);
+  const socketConnection: HubConnection | undefined = useSelector((store: IRootState) => store.containerData.socketConnection);
 
   React.useEffect(() => {
     dispatch(changeHeaderTitle("Container Ressource Usage"));
@@ -53,6 +57,23 @@ function RessourceUsage() {
 
   const handleReconfigure = (values: any) => {
     // dispatch(reconfigureContainer(selectedContainer, values)); TODO:
+  };
+
+  const refetchContainers = (servers: string[]) => {
+    if (!serverMode) {
+      for (const servername of Object.keys(serverContainers)) {
+        dispatch(containerLoadStart(serverContainers[servername].containers.map((container) => container.id)));
+        if (serverContainers[servername].commandRequestTopic && socketConnection !== undefined)
+          socketConnection.invoke(REFETCH_STATS_DATA, serverContainers[servername].commandRequestTopic);
+      }
+    } else {
+      servers.forEach((servername) => {
+        const containerIds = serverContainers[servername].containers.map((container) => container.id);
+        dispatch(containerLoadStart(containerIds));
+        if (serverContainers[servername].commandRequestTopic && socketConnection !== undefined)
+          socketConnection.invoke(REFETCH_STATS_DATA, serverContainers[servername].commandRequestTopic);
+      });
+    }
   };
 
   let containerView: any = null;
@@ -109,6 +130,7 @@ function RessourceUsage() {
               data={containerView[servername].containers}
               dense="small"
               actions={actions}
+              onRefetch={() => refetchContainers([servername])}
             />
           </div>
         ))
@@ -119,6 +141,7 @@ function RessourceUsage() {
           data={containerView}
           dense="small"
           actions={actions}
+          onRefetch={refetchContainers}
         />
       )}
       <ReconfigureContainerDialog
