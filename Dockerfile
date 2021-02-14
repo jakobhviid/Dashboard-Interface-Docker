@@ -49,7 +49,7 @@ FROM ubuntu:20.04
 LABEL Maintainer="Oliver Marco van Komen"
 
 RUN apt-get update && \
-    apt-get install -y wget curl && wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    apt-get install -y wget curl && wget --no-check-certificate https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
     dpkg --purge packages-microsoft-prod && dpkg -i packages-microsoft-prod.deb && \
     apt-get update && \
     apt-get install aspnetcore-runtime-3.1 -y && \
