@@ -54,7 +54,7 @@ namespace SocketServer.BackgroundWorkers
                 
                 c.Assign(new List<TopicPartitionOffset>()
                 {
-                    new TopicPartitionOffset(logTopicPartition, c.QueryWatermarkOffsets(logTopicPartition, TimeSpan.FromSeconds(5)).High - 1)
+                    new TopicPartitionOffset(logTopicPartition, c.QueryWatermarkOffsets(logTopicPartition, TimeSpan.FromSeconds(5)).High - 1),
                     new TopicPartitionOffset(overviewTopicPartition, c.QueryWatermarkOffsets(overviewTopicPartition, TimeSpan.FromSeconds(5)).High - 1),
                     new TopicPartitionOffset(statsTopicPartition, Offset.End),
                     new TopicPartitionOffset(inspectTopicPartition, Offset.End)

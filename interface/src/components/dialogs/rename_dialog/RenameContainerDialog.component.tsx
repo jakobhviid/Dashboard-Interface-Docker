@@ -11,10 +11,12 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 type RenameProps = {
   open: boolean;
   handleClose: any;
-  handleConfirmation: (newName : string) => any;
+  handleConfirmation: (newName : string, id: any, requst: any) => any;
   dialogTitle: string;
   dialogText: string;
   label: string;
+  containerId: any;
+  commandRequestTopic: any;
 };
 
 function RenameDialog({
