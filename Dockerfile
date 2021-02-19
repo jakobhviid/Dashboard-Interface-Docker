@@ -44,12 +44,15 @@ COPY ./interface/ /app/
 RUN npm run build
 
 # --- final stage ----
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+FROM ubuntu:20.04
 
 LABEL Maintainer="Oliver Marco van Komen"
 
 RUN apt-get update && \
-    apt-get install -y wget curl && \
+    apt-get install -y wget curl && wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    dpkg --purge packages-microsoft-prod && dpkg -i packages-microsoft-prod.deb && \
+    apt-get update && \
+    apt-get install aspnetcore-runtime-3.1 -y && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     apt-get install -y nodejs build-essential supervisor net-tools
 
