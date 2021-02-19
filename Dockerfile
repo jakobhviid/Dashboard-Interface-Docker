@@ -44,15 +44,19 @@ COPY ./interface/ /app/
 RUN npm run build
 
 # --- final stage ----
-FROM ubuntu:20.04
+#FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+FROM mcr.microsoft.com/dotnet/runtime:3.1
 
-LABEL Maintainer="Oliver Marco van Komen"
+# Install ASP.NET Core
+RUN aspnetcore_version=3.1.12 \
+    && curl -SL --output aspnetcore.tar.gz https://dotnetcli.azureedge.net/dotnet/aspnetcore/Runtime/$aspnetcore_version/aspnetcore-runtime-$aspnetcore_version-linux-x64.tar.gz \
+    && aspnetcore_sha512='e6d384a4c05bc6a693a85dc1da5f34e26449ad5d9414dee5f46a56805ac53eb304610be06d6a2a683f2d9e1447f316f47abea71fbfd6ee901dcc9da9d7c4e03b' \
+    && echo "$aspnetcore_sha512  aspnetcore.tar.gz" | sha512sum -c - \
+    && tar -ozxf aspnetcore.tar.gz -C /usr/share/dotnet ./shared/Microsoft.AspNetCore.App \
+    && rm aspnetcore.tar.gz
 
 RUN apt-get update && \
-    apt-get install -y wget curl && wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-    dpkg --purge packages-microsoft-prod && dpkg -i packages-microsoft-prod.deb && \
-    apt-get update && \
-    apt-get install aspnetcore-runtime-3.1 -y && \
+    apt-get install -y wget curl && \
     curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     apt-get install -y nodejs build-essential supervisor net-tools
 
