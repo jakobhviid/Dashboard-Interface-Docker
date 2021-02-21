@@ -48,8 +48,8 @@ namespace SocketServer.BackgroundWorkers
             using (var c = new ConsumerBuilder<Ignore, string>(consumerConfig).Build())
             {
                 var overviewTopicPartition = new TopicPartition(KafkaHelpers.OverviewTopic, new Partition());
-                var statsTopicPartition = new TopicPartition(KafkaHelpers.StatsTopic, Partition.Any);
-                var inspectTopicPartition = new TopicPartition(KafkaHelpers.InspectTopic, Partition.Any);
+                var statsTopicPartition = new TopicPartition(KafkaHelpers.StatsTopic, new Partition());
+                var inspectTopicPartition = new TopicPartition(KafkaHelpers.InspectTopic, new Partition());
                 
                 c.Assign(new List<TopicPartitionOffset>()
                 {

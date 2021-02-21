@@ -106,6 +106,8 @@ COPY ./.env ./
 
 RUN chmod +x ./env.sh
 
+# procps is required for the healthcheck script
+RUN apt-get update && apt-get install -y procps
 HEALTHCHECK --interval=60s --timeout=20s --start-period=25s --retries=3 CMD [ "healthcheck.sh" ]
 
 EXPOSE 80
