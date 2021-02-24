@@ -88,7 +88,7 @@ namespace SocketServer.Hubs.DockerUpdatersHub
         }
         public async void RefetchOverviewData(string serverRequestTopic)
         {
-            CheckKafkaConsumerAssignment(serverRequestTopic + "-adsadsa");
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic, new ContainerRequest
             {
                 Action = ContainerActionType.REFETCH_OVERVIEW
