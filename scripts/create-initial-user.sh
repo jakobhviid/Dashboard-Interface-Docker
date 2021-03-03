@@ -14,7 +14,7 @@ else
     
     counter=0
     while [ -z "$(netstat -tln | grep "$PORT")" ]; do # Listen on localhost open ports and greps PORT
-        if [ "$counter" -eq 15 ]; then                # 15 seconds have passed
+        if [ "$counter" -eq 45 ]; then                # 15 seconds have passed
             echo -e "\e[1;32mERROR - Creating initial user did not succeed. API did not start \e[0m"
             exit 1
         else
