@@ -1,7 +1,20 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
+
+type CpuSectionProps = {
+  cpuShares: number | string;
+  cpuSharesOnChange: (event: ChangeEvent<any>) => void;
+  cpuPeriod: number | string;
+  cpuPeriodOnChange: (event: ChangeEvent<any>) => void;
+  cpuQuota: number | string;
+  cpuQuotaOnChange: (event: ChangeEvent<any>) => void;
+  cpusetCpus: number | string;
+  cpusetCpusOnChange: (event: ChangeEvent<any>) => void;
+  cpusetMems: number | string;
+  cpusetMemsOnChange: (event: ChangeEvent<any>) => void;
+};
 
 function CpuSection({
   cpuShares,
@@ -14,7 +27,7 @@ function CpuSection({
   cpusetCpusOnChange,
   cpusetMems,
   cpusetMemsOnChange,
-}) {
+}: CpuSectionProps) {
   return (
     <React.Fragment>
       <Grid item xs={12} style={{ padding: "2px", paddingLeft: "12px" }}>

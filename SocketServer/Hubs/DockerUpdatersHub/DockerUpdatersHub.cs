@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using SocketServer.BackgroundWorkers;
 using SocketServer.ContainerModels.ContainerRequests;
 using SocketServer.Helpers;
 
@@ -30,26 +31,31 @@ namespace SocketServer.Hubs.DockerUpdatersHub
 
         public async void RenameContainer(string serverRequestTopic, string containerId, string newContainerName)
         {
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new RenameContainerParameter { ContainerId = containerId, NewName = newContainerName });
         }
         public async void StartContainer(string serverRequestTopic, string containerId)
         {
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new StartContainerParameters { ContainerId = containerId });
         }
         public async void StopContainer(string serverRequestTopic, string containerId)
         {
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new StopContainerParameters { ContainerId = containerId });
         }
         public async void RestartContainer(string serverRequestTopic, string containerId)
         {
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new RestartContainerParameters { ContainerId = containerId });
         }
         public async void RemoveContainer(string serverRequestTopic, string containerId, bool removeVolumes)
         {
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new RemoveContainerParameters { ContainerId = containerId, RemoveVolumes = removeVolumes });
         }
@@ -63,6 +69,8 @@ namespace SocketServer.Hubs.DockerUpdatersHub
                 
                 var parameters = JsonConvert.DeserializeObject<RunNewContainerParameters>(parametersSerialized);
                 parameters.Action = ContainerActionType.RUN_NEW;
+                
+                CheckKafkaConsumerAssignment(serverRequestTopic);
                 await KafkaHelpers.SendMessageAsync(serverRequestTopic, parameters);
             }
             catch (Newtonsoft.Json.JsonException ex)
@@ -74,11 +82,13 @@ namespace SocketServer.Hubs.DockerUpdatersHub
         }
         public async void UpdateContainerConfiguration(string serverRequestTopic, string containerId)
         {
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new UpdateConfigContainerParameters { ContainerId = containerId, }); // TODO:
         }
         public async void RefetchOverviewData(string serverRequestTopic)
         {
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic, new ContainerRequest
             {
                 Action = ContainerActionType.REFETCH_OVERVIEW
@@ -86,6 +96,7 @@ namespace SocketServer.Hubs.DockerUpdatersHub
         }
         public async void RefetchStatsData(string serverRequestTopic)
         {
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic, new ContainerRequest
             {
                 Action = ContainerActionType.REFETCH_STATS
@@ -94,8 +105,14 @@ namespace SocketServer.Hubs.DockerUpdatersHub
 
         public async void InspectContainerRequest(string serverRequestTopic, string containerId)
         {
+            CheckKafkaConsumerAssignment(serverRequestTopic);
             await KafkaHelpers.SendMessageAsync(serverRequestTopic,
                 new InspectContainerParameters {ContainerId = containerId});
+        }
+
+        private static void CheckKafkaConsumerAssignment(string serverRequestTopic)
+        {
+            CommandServerResponseWorker._instance.CheckAssignment(serverRequestTopic.Replace("requests", "responses"));
         }
     }
 }

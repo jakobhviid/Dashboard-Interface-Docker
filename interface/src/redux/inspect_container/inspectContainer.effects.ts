@@ -6,7 +6,7 @@ import {IInspectData} from "./inspectContainer.types";
 import {Dispatch} from "redux";
 
 export const startInspectDataListening = () => {
-    return (dispatch: any, getState: any) => {
+    return (dispatch: Dispatch, getState: any) => {
         const socketConnection: HubConnection = getState().containerData.socketConnection;
         socketConnection.on(INSPECT_CONTAINER_FUNCTION, (data: string) => {
             const apiInspectData: IAPIInspectData = JSON.parse(data);

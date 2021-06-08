@@ -1,19 +1,19 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
+import { IRootState } from "../../../types/redux/reducerStates.types";
 
 import MenuItem from "@material-ui/core/MenuItem";
-import Menu from "@material-ui/core/Menu";
+import Menu, {MenuProps} from "@material-ui/core/Menu";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import { withStyles } from "@material-ui/core/styles";
 import Divider from "@material-ui/core/Divider";
-import Collapse from "@material-ui/core/Collapse";
 
 import WarningIcon from "@material-ui/icons/Warning";
 import ClearAllIcon from "@material-ui/icons/ClearAll";
 import ErrorIcon from "@material-ui/icons/Error";
 import InfoIcon from "@material-ui/icons/Info";
-import { Typography, Grid, Button } from "@material-ui/core";
+import { Typography, Grid, Button, Fade } from "@material-ui/core";
 
 import { clearAllWarnings } from "../../../redux/monitor_notification/monitorNotification.actions";
 import useStyles from "./NotificationMenu.styles";
@@ -23,7 +23,7 @@ const StyledMenu = withStyles({
   paper: {
     border: "1px solid #d3d4d5",
   },
-})((props) => (
+})((props : MenuProps) => (
   <Menu
     style={{ marginRight: "8px" }}
     elevation={0}
@@ -40,10 +40,10 @@ const StyledMenu = withStyles({
   />
 ));
 
-function NotificationMenu({ anchorEl, handleClose }) {
+function NotificationMenu({ anchorEl, handleClose }: any) {
   const dispatch = useDispatch();
   const monitorEvents = useSelector(
-    (store) => store.monitoringEvents.activeWarnings
+    (store: IRootState) => store.monitoringEvents.activeWarnings
   );
   const classes = useStyles();
 
@@ -54,12 +54,8 @@ function NotificationMenu({ anchorEl, handleClose }) {
       keepMounted
       open={Boolean(anchorEl)}
       onClose={handleClose}
-      PaperProps={{
-        style: {
-          maxHeight: 500,
-        },
-      }}
-      TransitionComponent={Collapse}
+      PaperProps={{ style: { maxHeight: 500 } }}
+      TransitionComponent={Fade}
     >
       {monitorEvents
         .slice(0)
