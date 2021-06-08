@@ -15,11 +15,9 @@ import ErrorIcon from "@material-ui/icons/Error";
 import InfoIcon from "@material-ui/icons/Info";
 import { Typography, Grid, Button, Fade } from "@material-ui/core";
 
-import {
-  clearAllWarnings,
-  eventType,
-} from "../../../redux/monitoring_events/monitoringEvents.actions";
+import { clearAllWarnings } from "../../../redux/monitor_notification/monitorNotification.actions";
 import useStyles from "./NotificationMenu.styles";
+import {monitorNotificationType} from "../../../redux/monitor_notification/monitorNotification.types";
 
 const StyledMenu = withStyles({
   paper: {
@@ -65,15 +63,15 @@ function NotificationMenu({ anchorEl, handleClose }: any) {
         .map((event, index) => {
           let notificationIcon = null;
           switch (event.type) {
-            case eventType.ERROR:
+            case monitorNotificationType.ERROR:
               notificationIcon = <ErrorIcon color="error" />;
               break;
-            case eventType.WARNING:
+            case monitorNotificationType.WARNING:
               notificationIcon = (
                 <WarningIcon className={classes.warningIcon} />
               );
               break;
-            case eventType.INFO:
+            case monitorNotificationType.INFO:
               notificationIcon = <InfoIcon className={classes.infoIcon} />;
               break;
             default:
@@ -94,19 +92,19 @@ function NotificationMenu({ anchorEl, handleClose }: any) {
                         variant="body2"
                         style={{ paddingLeft: "16px" }}
                       >
-                        {moment(event.warningTime).fromNow()}
+                        {moment(event.timestamp, "hh:mm:ss DD/MM/YY").fromNow()}
                       </Typography>
                     </Grid>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="body1">
-                      <strong>Container Name:</strong> {event.name}
+                      <strong>Container Name:</strong> {event.containerName}
                     </Typography>
                     <Typography variant="body1">
-                      <strong>Container Id:</strong> {event.id}
+                      <strong>Container Id:</strong> {event.containerId}
                     </Typography>
                     <Typography variant="body1" gutterBottom>
-                      <strong>Server:</strong> {event.server}
+                      <strong>Server:</strong> {event.serverName}
                     </Typography>
                     {event.extraInfo ? (
                       <Typography variant="body2">{event.extraInfo}</Typography>

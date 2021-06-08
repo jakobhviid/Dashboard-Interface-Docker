@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 
 namespace SocketServer.Hubs.DockerUpdatersHub
@@ -10,5 +9,6 @@ namespace SocketServer.Hubs.DockerUpdatersHub
         Task SendStatsData(string update);
         Task SendCommandResponses(string commandResponse);
         Task SendInspectResponse(string inspectData);
+        Task SendNotification(string notificationInfo);
     }
 }

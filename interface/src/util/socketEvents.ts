@@ -14,3 +14,4 @@ export const REFETCH_OVERVIEW_DATA = "RefetchOverviewData";
 export const REFETCH_STATS_DATA = "RefetchStatsData";
 export const INSPECT_CONTAINER_FUNCTION = "SendInspectResponse";
 export const INSPECT_CONTAINER_REQUEST = "InspectContainerRequest";
+export const MONITOR_NOTIFICATION_FUNCTION = "SendNotification";

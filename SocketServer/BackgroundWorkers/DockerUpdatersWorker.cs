@@ -15,6 +15,7 @@ using SocketServer.Data.Models;
 using SocketServer.Data.Repositories;
 using SocketServer.Helpers;
 using SocketServer.Hubs.DockerUpdatersHub;
+using SocketServer.Services;
 
 namespace SocketServer.BackgroundWorkers
 {
@@ -66,13 +67,19 @@ namespace SocketServer.BackgroundWorkers
                     switch (consumeResult.Topic)
                     {
                         case KafkaHelpers.OverviewTopic:
-                            await _updatersHub.Clients.All.SendOverviewData(consumeResult.Message.Value);
+                            var sendOverviewData = _updatersHub.Clients.All.SendOverviewData(consumeResult.Message.Value);
+                            var overviewData = JsonConvert.DeserializeObject<OverViewData>(consumeResult.Message.Value);
+                            MonitorOverviewData(overviewData);
+                            await sendOverviewData;
                             // NOTE: The method checks on LatestOverviewInfo, so it's important this is called before LatestOverviewInfo is set after the record has been saved
                             // await SaveStatusRecordInDb(consumeResult.Message.Value);
                             KafkaHelpers.LatestOverviewInfo = consumeResult.Message.Value;
                             break;
                         case KafkaHelpers.StatsTopic:
-                            await _updatersHub.Clients.All.SendStatsData(consumeResult.Message.Value);
+                            var sendStatsData = _updatersHub.Clients.All.SendStatsData(consumeResult.Message.Value);
+                            var statsData = JsonConvert.DeserializeObject<StatsData>(consumeResult.Message.Value);
+                            MonitorStatsData(statsData);
+                            await sendStatsData;
                             // NOTE: The method checks on LatestOverviewInfo, so it's important this is called before LatestOverviewInfo is set after the record has been saved
                             // await SaveRessourceUsageRecordInDb(consumeResult.Message.Value);
                             KafkaHelpers.LatestStatsInfo = consumeResult.Message.Value;
@@ -87,6 +94,21 @@ namespace SocketServer.BackgroundWorkers
 
                 c.Close();
             }
+        }
+        
+        private void MonitorOverviewData(OverViewData overviewData)
+        {
+            // https://stackoverflow.com/questions/52020799/net-core-dependency-injection-to-hosted-service
+            using var scope = _services.CreateScope();
+            var monitorService = scope.ServiceProvider.GetService<IMonitorOverviewService>();
+            monitorService.CheckOverviewData(overviewData);
+        }
+
+        private void MonitorStatsData(StatsData statsData)
+        {
+            using var scope = _services.CreateScope();
+            var monitorService = scope.ServiceProvider.GetService<IMonitorStatsService>();
+            monitorService.CheckStatsData(statsData);
         }
 
         /*
